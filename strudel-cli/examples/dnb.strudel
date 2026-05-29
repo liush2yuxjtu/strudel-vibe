@@ -1,0 +1,4 @@
+setcps(0.75)
+s("bd ~ ~ bd ~ ~ bd ~, ~ ~ sd ~ ~ ~ sd ~, hh*16").gain(0.9)
+// ---
+note("e1 ~ ~ e1 g1 ~ a1 ~").s("square").gain(0.5)

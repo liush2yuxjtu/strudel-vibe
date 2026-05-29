@@ -1,0 +1,6 @@
+{
+  "name": "@kabelsalat/web",
+  "version": "0.4.1",
+  "type": "module",
+  "main": "index.mjs"
+}

@@ -1,0 +1,96 @@
+{
+  "url": "https://vibe-web-gray.vercel.app/",
+  "w": 1280,
+  "h": 720,
+  "videoT0": 1780015845390,
+  "audioStartWall": 1780015857409,
+  "offsetSec": 12.019,
+  "videoPath": "/Users/m1/projects/strudel-vibe/demo/out/page@ca1de7d7f6c06b1f53b4f3615068a3ac.webm",
+  "beats": [
+    {
+      "at": 0,
+      "kind": "boot",
+      "text": "navigating"
+    },
+    {
+      "at": 6918,
+      "kind": "prompt",
+      "text": "a thunderstorm made of 808 drums and a robot choir chanting in binary"
+    },
+    {
+      "at": 12025,
+      "kind": "compose",
+      "text": "MiniMax composing…"
+    },
+    {
+      "at": 31250,
+      "kind": "play",
+      "text": "pattern playing"
+    },
+    {
+      "at": 36825,
+      "kind": "prompt",
+      "text": "cyberpunk taiko drums drag-racing a glitchy acid bassline at 160bpm"
+    },
+    {
+      "at": 41631,
+      "kind": "compose",
+      "text": "MiniMax composing…"
+    },
+    {
+      "at": 41633,
+      "kind": "play",
+      "text": "pattern playing"
+    },
+    {
+      "at": 47172,
+      "kind": "prompt",
+      "text": "lofi rain where every raindrop is a tiny dubstep wobble"
+    },
+    {
+      "at": 51047,
+      "kind": "compose",
+      "text": "MiniMax composing…"
+    },
+    {
+      "at": 51050,
+      "kind": "play",
+      "text": "pattern playing"
+    },
+    {
+      "at": 56590,
+      "kind": "prompt",
+      "text": "a disco ball shattering into free jazz, then techno picks up the pieces"
+    },
+    {
+      "at": 61330,
+      "kind": "compose",
+      "text": "MiniMax composing…"
+    },
+    {
+      "at": 61332,
+      "kind": "play",
+      "text": "pattern playing"
+    },
+    {
+      "at": 66820,
+      "kind": "chip",
+      "text": "四拍鼓加八分hihat"
+    },
+    {
+      "at": 70935,
+      "kind": "handcode",
+      "text": "user rewrites the pattern by hand"
+    },
+    {
+      "at": 71883,
+      "kind": "finale",
+      "text": "hand-built banger drops"
+    },
+    {
+      "at": 82937,
+      "kind": "end",
+      "text": "done"
+    }
+  ]
+}

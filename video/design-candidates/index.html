@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vibe-music · 视频设计候选 (9)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Righteous&family=Space+Grotesk:wght@400;500;700&family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Noto+Sans+SC:wght@400;500;700;900&family=Syne:wght@600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#0a0a0f;color:#e8e6f0;font-family:'Poppins','Noto Sans SC',system-ui,sans-serif}
+  header{padding:40px 32px 8px;text-align:center}
+  header h1{margin:0;font-size:30px;font-weight:800;letter-spacing:-.01em}
+  header p{margin:10px 0 0;color:#9b97b8;font-size:15px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;padding:28px 32px 80px;max-width:1320px;margin:0 auto}
+  @media(max-width:1100px){.grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+  .card{margin:0;background:#101019;border:1px solid #21212e;border-radius:18px;padding:16px;transition:transform .2s,border-color .2s}
+  .card:hover{transform:translateY(-4px);border-color:#3a3a52}
+  .meta{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .num{width:30px;height:30px;border-radius:8px;background:#EC4899;color:#fff;display:grid;place-items:center;font-weight:800;font-size:16px}
+  .nm{font-weight:700;font-size:18px}
+  .why{color:#9b97b8;font-size:13px;line-height:1.5;min-height:56px;margin-bottom:12px}
+  /* phone stage: render 1080x1920 frame scaled to fit card width */
+  .stage{width:100%;aspect-ratio:1080/1920;border-radius:14px;overflow:hidden;position:relative;background:#000}
+  .frame{position:absolute;top:0;left:0;width:1080px;height:1920px;transform-origin:top left}
+  
+    .cand1{background:radial-gradient(900px 760px at 80% 12%, rgba(236,72,153,.30), transparent 60%),radial-gradient(820px 720px at 18% 86%, rgba(37,99,235,.26), transparent 58%), #0B0B12;color:#F4F2FB;font-family:'Noto Sans SC',sans-serif;}
+    .cand1 .hd{font-family:'Noto Sans SC',sans-serif;font-weight:700;font-size:30px;color:#F4F2FB;opacity:.92;text-align:center;padding:30px 40px 0}
+    .cand1 .chip{display:inline-block;font-family:'Poppins',sans-serif;font-weight:700;font-size:24px;letter-spacing:.06em;
+        color:#EC4899;background:rgba(236,72,153,.12);border:1px solid #EC489955;padding:8px 20px;border-radius:999px;margin:26px 0 0 48px}
+    .cand1 .prompt{font-family:'Noto Sans SC',sans-serif;font-weight:800;font-size:74px;line-height:1.16;color:#F4F2FB;
+        padding:16px 48px 0;text-shadow:0 0 22px rgba(236,72,153,.35)}
+    .cand1 .cur{color:#EC4899}
+    .cand1 .tag{font-family:'Noto Sans SC',sans-serif;font-size:30px;color:#A7A3C4;padding:18px 48px 0}
+    .cand1 .device{margin:34px 38px 0;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,.08);
+        box-shadow:0 40px 100px -30px rgba(236,72,153,.5);background:#0E0E16}
+    .cand1 .device .bar{height:48px;display:flex;align-items:center;gap:9px;padding:0 18px;background:rgba(0,0,0,.25);
+        border-bottom:1px solid rgba(255,255,255,.08);font-family:'DM Mono',monospace;font-size:15px;color:#A7A3C4}
+    .cand1 .device .d{width:12px;height:12px;border-radius:50%}
+    .cand1 .device .url{margin-left:12px;flex:1;max-width:520px;color:#A7A3C4;opacity:.9}
+    .cand1 .device .live{margin-left:auto;color:#ff5d9e;font-weight:700;font-size:14px}
+    .cand1 .device img{display:block;width:100%;height:auto}
+    .cand1 .np{font-family:'Noto Sans SC',sans-serif;font-size:25px;color:#EC4899;letter-spacing:.04em;padding:34px 48px 14px}
+    .cand1 .spectrum{display:flex;align-items:center;gap:5px;height:150px;margin:0 48px}
+    .cand1 .cta{margin:40px auto 0;width:max-content;font-family:'DM Mono',monospace;font-weight:700;font-size:40px;
+        color:#04120c;background:#EC4899;padding:20px 38px;border-radius:16px;box-shadow:0 0 40px #EC489980}
+    .cand1 .ft{text-align:center;font-family:'Noto Sans SC',sans-serif;font-size:22px;color:#A7A3C4;padding:32px 40px 0}
+    
+    .cand2{background:linear-gradient(135deg,#0a1f3c,#3b0a5e 45%,#0a3d4d);color:#FFFFFF;font-family:'Noto Sans SC',sans-serif;}
+    .cand2 .hd{font-family:'Noto Sans SC',sans-serif;font-weight:700;font-size:30px;color:#FFFFFF;opacity:.92;text-align:center;padding:30px 40px 0}
+    .cand2 .chip{display:inline-block;font-family:'Poppins',sans-serif;font-weight:700;font-size:24px;letter-spacing:.06em;
+        color:#7af0c0;background:rgba(255,255,255,.14);border:1px solid #7af0c055;padding:8px 20px;border-radius:999px;margin:26px 0 0 48px}
+    .cand2 .prompt{font-family:'Noto Sans SC',sans-serif;font-weight:800;font-size:74px;line-height:1.16;color:#FFFFFF;
+        padding:16px 48px 0;text-shadow:0 2px 20px rgba(0,0,0,.5)}
+    .cand2 .cur{color:#7af0c0}
+    .cand2 .tag{font-family:'Noto Sans SC',sans-serif;font-size:30px;color:#C7D2FE;padding:18px 48px 0}
+    .cand2 .device{margin:34px 38px 0;border-radius:28px;overflow:hidden;border:1px solid rgba(255,255,255,.22);
+        box-shadow:0 30px 90px -20px rgba(0,0,0,.6);background:rgba(255,255,255,.08)}
+    .cand2 .device .bar{height:48px;display:flex;align-items:center;gap:9px;padding:0 18px;background:rgba(0,0,0,.25);
+        border-bottom:1px solid rgba(255,255,255,.22);font-family:'DM Mono',monospace;font-size:15px;color:#C7D2FE}
+    .cand2 .device .d{width:12px;height:12px;border-radius:50%}
+    .cand2 .device .url{margin-left:12px;flex:1;max-width:520px;color:#C7D2FE;opacity:.9}
+    .cand2 .device .live{margin-left:auto;color:#ff5d9e;font-weight:700;font-size:14px}
+    .cand2 .device img{display:block;width:100%;height:auto}
+    .cand2 .np{font-family:'Noto Sans SC',sans-serif;font-size:25px;color:#7af0c0;letter-spacing:.04em;padding:34px 48px 14px}
+    .cand2 .spectrum{display:flex;align-items:center;gap:5px;height:150px;margin:0 48px}
+    .cand2 .cta{margin:40px auto 0;width:max-content;font-family:'DM Mono',monospace;font-weight:700;font-size:40px;
+        color:#04120c;background:#7af0c0;padding:20px 38px;border-radius:16px;box-shadow:0 0 40px #7af0c080}
+    .cand2 .ft{text-align:center;font-family:'Noto Sans SC',sans-serif;font-size:22px;color:#C7D2FE;padding:32px 40px 0}
+    .cand2 .device,.cand2 .cta{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}.cand2 .chip{backdrop-filter:blur(10px)}.cand2 .cta{color:#08210f}
+    .cand3{background:linear-gradient(180deg,#2b1055 0%,#7b2d8e 45%,#ff6ab3 100%);color:#FFF7FB;font-family:'Noto Sans SC',sans-serif;}
+    .cand3 .hd{font-family:'Noto Sans SC',sans-serif;font-weight:700;font-size:30px;color:#FFF7FB;opacity:.92;text-align:center;padding:30px 40px 0}
+    .cand3 .chip{display:inline-block;font-family:'Righteous',cursive;font-weight:700;font-size:24px;letter-spacing:.06em;
+        color:#01CDFE;background:rgba(1,205,254,.16);border:1px solid #01CDFE55;padding:8px 20px;border-radius:999px;margin:26px 0 0 48px}
+    .cand3 .prompt{font-family:'Noto Sans SC',sans-serif;font-weight:800;font-size:74px;line-height:1.16;color:#FFF7FB;
+        padding:16px 48px 0;text-shadow:0 0 18px #ff71ce, 0 0 4px #01CDFE}
+    .cand3 .cur{color:#01CDFE}
+    .cand3 .tag{font-family:'Noto Sans SC',sans-serif;font-size:30px;color:#ffd9ef;padding:18px 48px 0}
+    .cand3 .device{margin:34px 38px 0;border-radius:16px;overflow:hidden;border:1px solid rgba(1,205,254,.45);
+        box-shadow:0 0 60px rgba(255,113,206,.45);background:rgba(20,6,40,.55)}
+    .cand3 .device .bar{height:48px;display:flex;align-items:center;gap:9px;padding:0 18px;background:rgba(0,0,0,.25);
+        border-bottom:1px solid rgba(1,205,254,.45);font-family:'DM Mono',monospace;font-size:15px;color:#ffd9ef}
+    .cand3 .device .d{width:12px;height:12px;border-radius:50%}
+    .cand3 .device .url{margin-left:12px;flex:1;max-width:520px;color:#ffd9ef;opacity:.9}
+    .cand3 .device .live{margin-left:auto;color:#ff5d9e;font-weight:700;font-size:14px}
+    .cand3 .device img{display:block;width:100%;height:auto}
+    .cand3 .np{font-family:'Noto Sans SC',sans-serif;font-size:25px;color:#01CDFE;letter-spacing:.04em;padding:34px 48px 14px}
+    .cand3 .spectrum{display:flex;align-items:center;gap:5px;height:150px;margin:0 48px}
+    .cand3 .cta{margin:40px auto 0;width:max-content;font-family:'DM Mono',monospace;font-weight:700;font-size:40px;
+        color:#04120c;background:#01CDFE;padding:20px 38px;border-radius:16px;box-shadow:0 0 40px #01CDFE80}
+    .cand3 .ft{text-align:center;font-family:'Noto Sans SC',sans-serif;font-size:22px;color:#ffd9ef;padding:32px 40px 0}
+    .cand3 .deco-grid{position:absolute;inset:55% 0 0 0;background-image:linear-gradient(#01CDFE55 1px,transparent 1px),linear-gradient(90deg,#01CDFE55 1px,transparent 1px);background-size:60px 60px;transform:perspective(400px) rotateX(60deg);transform-origin:bottom;opacity:.5}}.cand3{position:relative;overflow:hidden}.cand3 .cta{color:#0a0420}
+    .cand4{background:linear-gradient(135deg,#ff9ad5,#9ad6ff 50%,#c6a8ff);color:#1a0b2e;font-family:'Noto Sans SC',sans-serif;}
+    .cand4 .hd{font-family:'Noto Sans SC',sans-serif;font-weight:700;font-size:30px;color:#1a0b2e;opacity:.92;text-align:center;padding:30px 40px 0}
+    .cand4 .chip{display:inline-block;font-family:'Righteous',cursive;font-weight:700;font-size:24px;letter-spacing:.06em;
+        color:#FF69B4;background:rgba(255,255,255,.7);border:1px solid #FF69B455;padding:8px 20px;border-radius:999px;margin:26px 0 0 48px}
+    .cand4 .prompt{font-family:'Noto Sans SC',sans-serif;font-weight:800;font-size:74px;line-height:1.16;color:#1a0b2e;
+        padding:16px 48px 0;text-shadow:0 2px 0 #fff, 0 4px 16px rgba(120,80,200,.4)}
+    .cand4 .cur{color:#FF69B4}
+    .cand4 .tag{font-family:'Noto Sans SC',sans-serif;font-size:30px;color:#5b3a7a;padding:18px 48px 0}
+    .cand4 .device{margin:34px 38px 0;border-radius:30px;overflow:hidden;border:1px solid rgba(255,255,255,.9);
+        box-shadow:0 18px 50px rgba(120,80,200,.4);background:rgba(255,255,255,.55)}
+    .cand4 .device .bar{height:48px;display:flex;align-items:center;gap:9px;padding:0 18px;background:rgba(0,0,0,.25);
+        border-bottom:1px solid rgba(255,255,255,.9);font-family:'DM Mono',monospace;font-size:15px;color:#5b3a7a}
+    .cand4 .device .d{width:12px;height:12px;border-radius:50%}
+    .cand4 .device .url{margin-left:12px;flex:1;max-width:520px;color:#5b3a7a;opacity:.9}
+    .cand4 .device .live{margin-left:auto;color:#ff5d9e;font-weight:700;font-size:14px}
+    .cand4 .device img{display:block;width:100%;height:auto}
+    .cand4 .np{font-family:'Noto Sans SC',sans-serif;font-size:25px;color:#FF69B4;letter-spacing:.04em;padding:34px 48px 14px}
+    .cand4 .spectrum{display:flex;align-items:center;gap:5px;height:150px;margin:0 48px}
+    .cand4 .cta{margin:40px auto 0;width:max-content;font-family:'DM Mono',monospace;font-weight:700;font-size:40px;
+        color:#04120c;background:#FF69B4;padding:20px 38px;border-radius:16px;box-shadow:0 0 40px #FF69B480}
+    .cand4 .ft{text-align:center;font-family:'Noto Sans SC',sans-serif;font-size:22px;color:#5b3a7a;padding:32px 40px 0}
+    .cand4 .spk{position:absolute;color:#fff;text-shadow:0 0 10px #FF69B4;opacity:.9}.cand4{position:relative;overflow:hidden}.cand4 .chip,.cand4 .device{box-shadow:0 18px 50px rgba(120,80,200,.4)}.cand4 .cta{background:linear-gradient(90deg,#FF69B4,#00C2FF);color:#fff}
+    .cand5{background:#09090B;color:#FAFAFA;font-family:'Noto Sans SC',sans-serif;}
+    .cand5 .hd{font-family:'Noto Sans SC',sans-serif;font-weight:700;font-size:30px;color:#FAFAFA;opacity:.92;text-align:center;padding:30px 40px 0}
+    .cand5 .chip{display:inline-block;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:24px;letter-spacing:.06em;
+        color:#DFE104;background:#DFE104;border:1px solid #DFE10455;padding:8px 20px;border-radius:999px;margin:26px 0 0 48px}
+    .cand5 .prompt{font-family:'Noto Sans SC',sans-serif;font-weight:800;font-size:74px;line-height:1.16;color:#FAFAFA;
+        padding:16px 48px 0;text-shadow:none}
+    .cand5 .cur{color:#DFE104}
+    .cand5 .tag{font-family:'Noto Sans SC',sans-serif;font-size:30px;color:#9b9ba3;padding:18px 48px 0}
+    .cand5 .device{margin:34px 38px 0;border-radius:0px;overflow:hidden;border:1px solid #3F3F46;
+        box-shadow:none;background:#0f0f12}
+    .cand5 .device .bar{height:48px;display:flex;align-items:center;gap:9px;padding:0 18px;background:rgba(0,0,0,.25);
+        border-bottom:1px solid #3F3F46;font-family:'DM Mono',monospace;font-size:15px;color:#9b9ba3}
+    .cand5 .device .d{width:12px;height:12px;border-radius:50%}
+    .cand5 .device .url{margin-left:12px;flex:1;max-width:520px;color:#9b9ba3;opacity:.9}
+    .cand5 .device .live{margin-left:auto;color:#ff5d9e;font-weight:700;font-size:14px}
+    .cand5 .device img{display:block;width:100%;height:auto}
+    .cand5 .np{font-family:'Noto Sans SC',sans-serif;font-size:25px;color:#DFE104;letter-spacing:.04em;padding:34px 48px 14px}
+    .cand5 .spectrum{display:flex;align-items:center;gap:5px;height:150px;margin:0 48px}
+    .cand5 .cta{margin:40px auto 0;width:max-content;font-family:'DM Mono',monospace;font-weight:700;font-size:40px;
+        color:#04120c;background:#DFE104;padding:20px 38px;border-radius:16px;box-shadow:0 0 40px #DFE10480}
+    .cand5 .ft{text-align:center;font-family:'Noto Sans SC',sans-serif;font-size:22px;color:#9b9ba3;padding:32px 40px 0}
+    .cand5 .mq{position:absolute;top:0;left:0;right:0;background:#DFE104;color:#000;font-family:'Space Grotesk';font-weight:700;font-size:22px;letter-spacing:1px;padding:8px 0;white-space:nowrap;overflow:hidden}}.cand5{position:relative;overflow:hidden}.cand5 .hd{padding-top:60px;text-transform:uppercase;letter-spacing:-1px;font-family:'Space Grotesk'}.cand5 .chip{border-radius:0;color:#000;background:#DFE104;border:none;text-transform:uppercase}.cand5 .prompt{text-transform:uppercase;letter-spacing:-1px;line-height:1.0;font-size:70px}.cand5 .device{border:2px solid #3F3F46;border-radius:0}.cand5 .cta{border-radius:0;background:#DFE104;box-shadow:6px 6px 0 #000}
+    .cand6{background:#FFFDF5;color:#111111;font-family:'Noto Sans SC',sans-serif;}
+    .cand6 .hd{font-family:'Noto Sans SC',sans-serif;font-weight:700;font-size:30px;color:#111111;opacity:.92;text-align:center;padding:30px 40px 0}
+    .cand6 .chip{display:inline-block;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:24px;letter-spacing:.06em;
+        color:#FF5247;background:#FFE14D;border:1px solid #FF524755;padding:8px 20px;border-radius:999px;margin:26px 0 0 48px}
+    .cand6 .prompt{font-family:'Noto Sans SC',sans-serif;font-weight:800;font-size:74px;line-height:1.16;color:#111111;
+        padding:16px 48px 0;text-shadow:none}
+    .cand6 .cur{color:#FF5247}
+    .cand6 .tag{font-family:'Noto Sans SC',sans-serif;font-size:30px;color:#555;padding:18px 48px 0}
+    .cand6 .device{margin:34px 38px 0;border-radius:18px;overflow:hidden;border:1px solid #111111;
+        box-shadow:8px 8px 0 #111;background:#FFFFFF}
+    .cand6 .device .bar{height:48px;display:flex;align-items:center;gap:9px;padding:0 18px;background:rgba(0,0,0,.25);
+        border-bottom:1px solid #111111;font-family:'DM Mono',monospace;font-size:15px;color:#555}
+    .cand6 .device .d{width:12px;height:12px;border-radius:50%}
+    .cand6 .device .url{margin-left:12px;flex:1;max-width:520px;color:#555;opacity:.9}
+    .cand6 .device .live{margin-left:auto;color:#ff5d9e;font-weight:700;font-size:14px}
+    .cand6 .device img{display:block;width:100%;height:auto}
+    .cand6 .np{font-family:'Noto Sans SC',sans-serif;font-size:25px;color:#FF5247;letter-spacing:.04em;padding:34px 48px 14px}
+    .cand6 .spectrum{display:flex;align-items:center;gap:5px;height:150px;margin:0 48px}
+    .cand6 .cta{margin:40px auto 0;width:max-content;font-family:'DM Mono',monospace;font-weight:700;font-size:40px;
+        color:#04120c;background:#FF5247;padding:20px 38px;border-radius:16px;box-shadow:0 0 40px #FF524780}
+    .cand6 .ft{text-align:center;font-family:'Noto Sans SC',sans-serif;font-size:22px;color:#555;padding:32px 40px 0}
+    .cand6 .chip{border:3px solid #111;box-shadow:4px 4px 0 #111;color:#111;font-weight:800}.cand6 .chip.rot{transform:rotate(-3deg)}.cand6 .promptbox{margin:18px 40px 0;background:#fff;border:4px solid #111;border-radius:16px;box-shadow:8px 8px 0 #111;padding:18px 22px;transform:rotate(-1deg)}.cand6 .promptbox .prompt{padding:0;text-shadow:none}.cand6 .device{border:4px solid #111;box-shadow:8px 8px 0 #111;border-radius:14px}.cand6 .device .bar{background:#111;color:#fff}.cand6 .cta{background:#FF5247;color:#fff;border:4px solid #111;box-shadow:8px 8px 0 #111;border-radius:14px}.cand6 .np{color:#7C5CFF;font-weight:700}.cand6 .spectrum div{box-shadow:none !important}
+    .cand7{background:#F6F1E7;color:#1c1a17;font-family:'Noto Sans SC',serif;}
+    .cand7 .hd{font-family:'Noto Sans SC',serif;font-weight:700;font-size:30px;color:#1c1a17;opacity:.92;text-align:center;padding:30px 40px 0}
+    .cand7 .chip{display:inline-block;font-family:'Playfair Display',serif;font-weight:700;font-size:24px;letter-spacing:.06em;
+        color:#b5462f;background:transparent;border:1px solid #b5462f55;padding:8px 20px;border-radius:999px;margin:26px 0 0 48px}
+    .cand7 .prompt{font-family:'Noto Sans SC',serif;font-weight:800;font-size:74px;line-height:1.16;color:#1c1a17;
+        padding:16px 48px 0;text-shadow:none}
+    .cand7 .cur{color:#b5462f}
+    .cand7 .tag{font-family:'Noto Sans SC',serif;font-size:30px;color:#7a736a;padding:18px 48px 0}
+    .cand7 .device{margin:34px 38px 0;border-radius:6px;overflow:hidden;border:1px solid rgba(28,26,23,.18);
+        box-shadow:0 24px 60px -28px rgba(0,0,0,.35);background:#fffdf9}
+    .cand7 .device .bar{height:48px;display:flex;align-items:center;gap:9px;padding:0 18px;background:rgba(0,0,0,.25);
+        border-bottom:1px solid rgba(28,26,23,.18);font-family:'DM Mono',monospace;font-size:15px;color:#7a736a}
+    .cand7 .device .d{width:12px;height:12px;border-radius:50%}
+    .cand7 .device .url{margin-left:12px;flex:1;max-width:520px;color:#7a736a;opacity:.9}
+    .cand7 .device .live{margin-left:auto;color:#ff5d9e;font-weight:700;font-size:14px}
+    .cand7 .device img{display:block;width:100%;height:auto}
+    .cand7 .np{font-family:'Noto Sans SC',serif;font-size:25px;color:#b5462f;letter-spacing:.04em;padding:34px 48px 14px}
+    .cand7 .spectrum{display:flex;align-items:center;gap:5px;height:150px;margin:0 48px}
+    .cand7 .cta{margin:40px auto 0;width:max-content;font-family:'DM Mono',monospace;font-weight:700;font-size:40px;
+        color:#04120c;background:#b5462f;padding:20px 38px;border-radius:16px;box-shadow:0 0 40px #b5462f80}
+    .cand7 .ft{text-align:center;font-family:'Noto Sans SC',serif;font-size:22px;color:#7a736a;padding:32px 40px 0}
+    .cand7 .byline{text-align:center;font-family:'DM Mono',monospace;font-size:20px;letter-spacing:.3em;color:#7a736a;padding-top:10px}.cand7 .rule{border:none;border-top:1px solid rgba(28,26,23,.18);margin:26px 48px}.cand7 .hd{font-style:italic;font-weight:600}.cand7 .prompt{font-family:'Playfair Display',serif;font-weight:800;font-size:80px}.cand7 .dc{float:left;font-size:120px;line-height:.8;color:#b5462f;margin-right:6px}.cand7 .figcap{text-align:center;font-family:'DM Mono',monospace;font-size:20px;color:#7a736a;padding:12px 48px 0}.cand7 .cta{background:#b5462f;color:#fff}.cand7 .np{color:#b5462f}
+    .cand8{background:radial-gradient(700px 600px at 50% 0%, #1b2440, #0c1020);color:#eef2ff;font-family:'Noto Sans SC',sans-serif;}
+    .cand8 .hd{font-family:'Noto Sans SC',sans-serif;font-weight:700;font-size:30px;color:#eef2ff;opacity:.92;text-align:center;padding:30px 40px 0}
+    .cand8 .chip{display:inline-block;font-family:'Syne',sans-serif;font-weight:700;font-size:24px;letter-spacing:.06em;
+        color:#5eead4;background:rgba(94,234,212,.14);border:1px solid #5eead455;padding:8px 20px;border-radius:999px;margin:26px 0 0 48px}
+    .cand8 .prompt{font-family:'Noto Sans SC',sans-serif;font-weight:800;font-size:74px;line-height:1.16;color:#eef2ff;
+        padding:16px 48px 0;text-shadow:none}
+    .cand8 .cur{color:#5eead4}
+    .cand8 .tag{font-family:'Noto Sans SC',sans-serif;font-size:30px;color:#93a0c8;padding:18px 48px 0}
+    .cand8 .device{margin:34px 38px 0;border-radius:26px;overflow:hidden;border:1px solid rgba(255,255,255,.07);
+        box-shadow:0 24px 60px -30px rgba(0,0,0,.7);background:#141a2e}
+    .cand8 .device .bar{height:48px;display:flex;align-items:center;gap:9px;padding:0 18px;background:rgba(0,0,0,.25);
+        border-bottom:1px solid rgba(255,255,255,.07);font-family:'DM Mono',monospace;font-size:15px;color:#93a0c8}
+    .cand8 .device .d{width:12px;height:12px;border-radius:50%}
+    .cand8 .device .url{margin-left:12px;flex:1;max-width:520px;color:#93a0c8;opacity:.9}
+    .cand8 .device .live{margin-left:auto;color:#ff5d9e;font-weight:700;font-size:14px}
+    .cand8 .device img{display:block;width:100%;height:auto}
+    .cand8 .np{font-family:'Noto Sans SC',sans-serif;font-size:25px;color:#5eead4;letter-spacing:.04em;padding:34px 48px 14px}
+    .cand8 .spectrum{display:flex;align-items:center;gap:5px;height:150px;margin:0 48px}
+    .cand8 .cta{margin:40px auto 0;width:max-content;font-family:'DM Mono',monospace;font-weight:700;font-size:40px;
+        color:#04120c;background:#5eead4;padding:20px 38px;border-radius:16px;box-shadow:0 0 40px #5eead480}
+    .cand8 .ft{text-align:center;font-family:'Noto Sans SC',sans-serif;font-size:22px;color:#93a0c8;padding:32px 40px 0}
+    .cand8 .bento{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:30px 38px 0}.cand8 .cell{background:#141a2e;border:1px solid rgba(255,255,255,.07);border-radius:26px;padding:22px}.cand8 .hd-cell{grid-column:1/3;font-size:30px;font-weight:700;text-align:center}.cand8 .kick-cell{display:flex;align-items:center;justify-content:center}.cand8 .prompt-cell{}.cand8 .prompt-cell .prompt{padding:0;font-size:40px;line-height:1.2}.cand8 .prompt-cell .tag{padding:10px 0 0;font-size:22px}.cand8 .dev-cell{grid-column:1/3;padding:0;border:none;background:none}.cand8 .dev-cell .device{margin:0}.cand8 .np-cell{grid-column:1/3}.cand8 .np-cell .np{padding:0 0 12px}.cand8 .np-cell .spectrum{margin:0;height:110px}.cand8 .cta-cell{grid-column:1/3;display:flex;justify-content:center}.cand8 .cta-cell .cta{margin:0}
+    .cand9{background:#06120c;color:#d6ffe6;font-family:'Noto Sans SC',monospace;}
+    .cand9 .hd{font-family:'Noto Sans SC',monospace;font-weight:700;font-size:30px;color:#d6ffe6;opacity:.92;text-align:center;padding:30px 40px 0}
+    .cand9 .chip{display:inline-block;font-family:'DM Mono',monospace;font-weight:700;font-size:24px;letter-spacing:.06em;
+        color:#36f08c;background:rgba(54,240,140,.12);border:1px solid #36f08c55;padding:8px 20px;border-radius:999px;margin:26px 0 0 48px}
+    .cand9 .prompt{font-family:'Noto Sans SC',monospace;font-weight:800;font-size:74px;line-height:1.16;color:#d6ffe6;
+        padding:16px 48px 0;text-shadow:0 0 12px rgba(54,240,140,.4)}
+    .cand9 .cur{color:#36f08c}
+    .cand9 .tag{font-family:'Noto Sans SC',monospace;font-size:30px;color:#5f8f74;padding:18px 48px 0}
+    .cand9 .device{margin:34px 38px 0;border-radius:8px;overflow:hidden;border:1px solid rgba(54,240,140,.25);
+        box-shadow:0 0 40px rgba(54,240,140,.25);background:#08160e}
+    .cand9 .device .bar{height:48px;display:flex;align-items:center;gap:9px;padding:0 18px;background:rgba(0,0,0,.25);
+        border-bottom:1px solid rgba(54,240,140,.25);font-family:'DM Mono',monospace;font-size:15px;color:#5f8f74}
+    .cand9 .device .d{width:12px;height:12px;border-radius:50%}
+    .cand9 .device .url{margin-left:12px;flex:1;max-width:520px;color:#5f8f74;opacity:.9}
+    .cand9 .device .live{margin-left:auto;color:#ff5d9e;font-weight:700;font-size:14px}
+    .cand9 .device img{display:block;width:100%;height:auto}
+    .cand9 .np{font-family:'Noto Sans SC',monospace;font-size:25px;color:#36f08c;letter-spacing:.04em;padding:34px 48px 14px}
+    .cand9 .spectrum{display:flex;align-items:center;gap:5px;height:150px;margin:0 48px}
+    .cand9 .cta{margin:40px auto 0;width:max-content;font-family:'DM Mono',monospace;font-weight:700;font-size:40px;
+        color:#04120c;background:#36f08c;padding:20px 38px;border-radius:16px;box-shadow:0 0 40px #36f08c80}
+    .cand9 .ft{text-align:center;font-family:'Noto Sans SC',monospace;font-size:22px;color:#5f8f74;padding:32px 40px 0}
+    .cand9 .scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(54,240,140,.06) 0 2px,transparent 2px 4px)}}.cand9{position:relative;overflow:hidden}
+</style></head>
+<body>
+  <header>
+    <h1>🎬 vibe-music · 视频设计候选（9 选 1）</h1>
+    <p>同一帧画面的 9 种视觉方向 · 竖屏 1080×1920 · 选好后我用 Remotion 把它做成真视频（含真实声音 + 频谱）。告诉我编号即可。</p>
+  </header>
+  <div class="grid">
+    
+      <figure class="card">
+        <div class="meta"><span class="num">1</span><span class="nm">Neon Noir</span></div>
+        <div class="why">OLED dark + pink/blue neon glow — the recommended system, refined. Premium, music-app native.</div>
+        <div class="stage">
+          <div class="frame cand1">
+            
+            
+        <div class="hd">🎧 打字就能做音乐的宝藏网站</div>
+        <div class="chip">第 3 句</div>
+        <div class="prompt">「再加点温暖的电钢琴和弦」<span class="cur">▌</span></div>
+        <div class="tag">一句一句加，越来越好听 ♪</div>
+        
+      <div class="device">
+        <div class="bar">
+          <span class="d" style="background:#ff5f57"></span>
+          <span class="d" style="background:#febc2e"></span>
+          <span class="d" style="background:#28c840"></span>
+          <div class="url">▲ vibe-web-gray.vercel.app</div>
+          <div class="live">● LIVE</div>
+        </div>
+        <img src="screen.png" alt="vibe-web 实时演奏中"/>
+      </div>
+        <div class="np">♪ 正在播放 · 浏览器实时生成</div><div class="spectrum"><div style="flex:1;height:16%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:15%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:28%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:16%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:30%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:27%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:37%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:21%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:38%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:25%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:28%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:45%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:67%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:34%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:40%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:65%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:86%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:67%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:58%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:98%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:36%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:84%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:48%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:38%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:35%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:43%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:66%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:33%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:49%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:49%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:36%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:40%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:21%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:22%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:34%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:25%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:20%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:24%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#EC4899,#2563EB);box-shadow:0 0 12px rgba(236,72,153,.6);align-self:center"></div></div>
+        <div class="cta">▶ vibe-web-gray.vercel.app</div>
+        <div class="ft">中文一句话 → MiniMax 写代码 → 浏览器出声</div>
+          </div>
+        </div>
+      </figure>
+      <figure class="card">
+        <div class="meta"><span class="num">2</span><span class="nm">Aurora Glass</span></div>
+        <div class="why">Glassmorphism: frosted panels over a living aurora. Dreamy, premium, very screenshot-able.</div>
+        <div class="stage">
+          <div class="frame cand2">
+            
+            
+        <div class="hd">🎧 打字就能做音乐的宝藏网站</div>
+        <div class="chip">第 3 句</div>
+        <div class="prompt">「再加点温暖的电钢琴和弦」<span class="cur">▌</span></div>
+        <div class="tag">一句一句加，越来越好听 ♪</div>
+        
+      <div class="device">
+        <div class="bar">
+          <span class="d" style="background:#ff5f57"></span>
+          <span class="d" style="background:#febc2e"></span>
+          <span class="d" style="background:#28c840"></span>
+          <div class="url">▲ vibe-web-gray.vercel.app</div>
+          <div class="live">● LIVE</div>
+        </div>
+        <img src="screen.png" alt="vibe-web 实时演奏中"/>
+      </div>
+        <div class="np">♪ 正在播放 · 浏览器实时生成</div><div class="spectrum"><div style="flex:1;height:16%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:15%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:28%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:16%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:30%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:27%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:37%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:21%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:38%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:25%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:28%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:45%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:67%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:34%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:40%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:65%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:86%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:67%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:58%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:98%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:36%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:84%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:48%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:38%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:35%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:43%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:66%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:33%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:49%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:49%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:36%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:40%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:21%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:22%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:34%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:25%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:20%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:24%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#7af0c0,#b07aff);box-shadow:0 0 14px rgba(122,240,192,.6);align-self:center"></div></div>
+        <div class="cta">▶ vibe-web-gray.vercel.app</div>
+        <div class="ft">中文一句话 → MiniMax 写代码 → 浏览器出声</div>
+          </div>
+        </div>
+      </figure>
+      <figure class="card">
+        <div class="meta"><span class="num">3</span><span class="nm">Vaporwave Sunset</span></div>
+        <div class="why">Retro-futurist sunset gradient + perspective grid + scanlines. Nostalgic, music/aesthetic crowd.</div>
+        <div class="stage">
+          <div class="frame cand3">
+            <div class="deco-grid"></div>
+            
+        <div class="hd">🎧 打字就能做音乐的宝藏网站</div>
+        <div class="chip">第 3 句</div>
+        <div class="prompt">「再加点温暖的电钢琴和弦」<span class="cur">▌</span></div>
+        <div class="tag">一句一句加，越来越好听 ♪</div>
+        
+      <div class="device">
+        <div class="bar">
+          <span class="d" style="background:#ff5f57"></span>
+          <span class="d" style="background:#febc2e"></span>
+          <span class="d" style="background:#28c840"></span>
+          <div class="url">▲ vibe-web-gray.vercel.app</div>
+          <div class="live">● LIVE</div>
+        </div>
+        <img src="screen.png" alt="vibe-web 实时演奏中"/>
+      </div>
+        <div class="np">♪ 正在播放 · 浏览器实时生成</div><div class="spectrum"><div style="flex:1;height:16%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:15%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:28%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:16%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:30%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:27%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:37%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:21%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:38%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:25%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:28%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:45%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:67%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:34%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:40%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:65%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:86%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:67%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:58%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:98%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:36%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:84%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:48%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:38%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:35%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:43%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:66%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:33%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:49%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:49%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:36%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:40%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:21%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:22%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:34%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:25%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:20%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:24%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#01CDFE,#FF71CE);box-shadow:0 0 14px #01CDFE;align-self:center"></div></div>
+        <div class="cta">▶ vibe-web-gray.vercel.app</div>
+        <div class="ft">中文一句话 → MiniMax 写代码 → 浏览器出声</div>
+          </div>
+        </div>
+      </figure>
+      <figure class="card">
+        <div class="meta"><span class="num">4</span><span class="nm">Y2K Chrome</span></div>
+        <div class="why">Bubblegum chrome, iridescent, sparkles, bubble shapes. Loud, playful, Gen-Z viral energy.</div>
+        <div class="stage">
+          <div class="frame cand4">
+            <div class="spk" style="left:12%;top:18%;font-size:34px">✦</div><div class="spk" style="left:86%;top:12%;font-size:26px">✦</div><div class="spk" style="left:78%;top:40%;font-size:40px">✦</div><div class="spk" style="left:8%;top:62%;font-size:28px">✦</div><div class="spk" style="left:90%;top:70%;font-size:30px">✦</div><div class="spk" style="left:20%;top:88%;font-size:34px">✦</div>
+            
+        <div class="hd">🎧 打字就能做音乐的宝藏网站</div>
+        <div class="chip">第 3 句</div>
+        <div class="prompt">「再加点温暖的电钢琴和弦」<span class="cur">▌</span></div>
+        <div class="tag">一句一句加，越来越好听 ♪</div>
+        
+      <div class="device">
+        <div class="bar">
+          <span class="d" style="background:#ff5f57"></span>
+          <span class="d" style="background:#febc2e"></span>
+          <span class="d" style="background:#28c840"></span>
+          <div class="url">▲ vibe-web-gray.vercel.app</div>
+          <div class="live">● LIVE</div>
+        </div>
+        <img src="screen.png" alt="vibe-web 实时演奏中"/>
+      </div>
+        <div class="np">♪ 正在播放 · 浏览器实时生成</div><div class="spectrum"><div style="flex:1;height:16%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:15%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:28%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:16%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:30%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:27%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:37%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:21%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:38%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:25%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:28%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:45%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:67%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:34%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:40%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:65%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:86%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:67%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:58%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:98%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:36%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:84%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:48%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:38%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:35%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:43%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:66%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:33%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:49%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:49%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:36%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:40%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:21%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:22%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:34%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:25%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:20%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:24%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#FF69B4,#00C2FF);box-shadow:0 0 10px rgba(255,105,180,.7);align-self:center"></div></div>
+        <div class="cta">▶ vibe-web-gray.vercel.app</div>
+        <div class="ft">中文一句话 → MiniMax 写代码 → 浏览器出声</div>
+          </div>
+        </div>
+      </figure>
+      <figure class="card">
+        <div class="meta"><span class="num">5</span><span class="nm">Kinetic Brutalism</span></div>
+        <div class="why">Acid-yellow on near-black, oversized uppercase Space Grotesk, marquee energy. Bold, stops the scroll.</div>
+        <div class="stage">
+          <div class="frame cand5">
+            <div class="mq">VIBE · MUSIC · 打字成曲 · VIBE · MUSIC · 打字成曲 ·</div>
+            
+        <div class="hd">打字就能做音乐的宝藏网站</div>
+        <div class="chip">第 3 句</div>
+        <div class="prompt">再加点温暖的电钢琴和弦</div>
+        <div class="tag">一句一句加，越来越好听 ♪</div>
+        
+      <div class="device">
+        <div class="bar">
+          <span class="d" style="background:#ff5f57"></span>
+          <span class="d" style="background:#febc2e"></span>
+          <span class="d" style="background:#28c840"></span>
+          <div class="url">▲ vibe-web-gray.vercel.app</div>
+          <div class="live">● LIVE</div>
+        </div>
+        <img src="screen.png" alt="vibe-web 实时演奏中"/>
+      </div>
+        <div class="np">♪ 正在播放 · 浏览器实时生成</div><div class="spectrum"><div style="flex:1;height:16%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:15%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:28%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:16%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:30%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:27%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:37%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:21%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:38%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:25%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:28%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:45%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:67%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:34%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:40%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:65%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:86%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:67%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:58%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:98%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:36%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:84%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:48%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:38%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:35%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:43%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:66%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:33%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:49%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:49%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:36%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:40%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:21%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:22%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:34%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:25%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:20%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:24%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#DFE104,#DFE104);box-shadow:none;align-self:center"></div></div>
+        <div class="cta">▶ vibe-web-gray.vercel.app</div>
+        <div class="ft">中文一句话 → MiniMax 写代码 → 浏览器出声</div>
+          </div>
+        </div>
+      </figure>
+      <figure class="card">
+        <div class="meta"><span class="num">6</span><span class="nm">Neo-Brutalist Pop</span></div>
+        <div class="why">Cream canvas, thick black borders, hard offset shadows, rotated sticker cards. THE 小红书 look.</div>
+        <div class="stage">
+          <div class="frame cand6">
+            
+            
+        <div class="hd">🎧 打字就能做音乐的宝藏网站</div>
+        <div class="chip rot">第 3 句</div>
+        <div class="promptbox"><div class="prompt">「再加点温暖的电钢琴和弦」</div></div>
+        <div class="tag">一句一句加，越来越好听 ♪</div>
+        
+      <div class="device">
+        <div class="bar">
+          <span class="d" style="background:#ff5f57"></span>
+          <span class="d" style="background:#febc2e"></span>
+          <span class="d" style="background:#28c840"></span>
+          <div class="url">▲ vibe-web-gray.vercel.app</div>
+          <div class="live">● LIVE</div>
+        </div>
+        <img src="screen.png" alt="vibe-web 实时演奏中"/>
+      </div>
+        <div class="np">♪ 正在播放 · 浏览器实时生成</div><div class="spectrum"><div style="flex:1;height:16%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:15%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:28%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:16%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:30%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:27%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:37%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:21%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:38%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:25%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:28%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:45%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:67%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:34%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:40%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:65%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:86%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:67%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:58%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:98%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:36%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:84%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:48%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:38%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:35%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:43%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:66%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:33%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:49%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:49%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:36%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:40%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:21%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:22%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:34%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:25%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:20%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:24%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#7C5CFF,#FF5247);box-shadow:none;align-self:center"></div></div>
+        <div class="cta">▶ vibe-web-gray.vercel.app</div>
+        <div class="ft">中文一句话 → MiniMax 写代码 → 浏览器出声</div>
+          </div>
+        </div>
+      </figure>
+      <figure class="card">
+        <div class="meta"><span class="num">7</span><span class="nm">Editorial Mag</span></div>
+        <div class="why">Cream + serif Playfair, drop cap, byline, hairline rules. Calm, premium, 'curated find' tone.</div>
+        <div class="stage">
+          <div class="frame cand7">
+            
+            
+        <div class="hd">打字就能做音乐的宝藏网站</div>
+        <div class="byline">VIBE-MUSIC · 实验</div>
+        <div class="prompt"><span class="dc">「</span>再加点温暖的电钢琴和弦」</div>
+        <div class="tag">一句一句加，越来越好听 ♪</div>
+        <hr class="rule"/>
+        
+      <div class="device">
+        <div class="bar">
+          <span class="d" style="background:#ff5f57"></span>
+          <span class="d" style="background:#febc2e"></span>
+          <span class="d" style="background:#28c840"></span>
+          <div class="url">▲ vibe-web-gray.vercel.app</div>
+          <div class="live">● LIVE</div>
+        </div>
+        <img src="screen.png" alt="vibe-web 实时演奏中"/>
+      </div>
+        <div class="figcap">实时画面 · 浏览器内 WebAudio 发声</div>
+        <div class="np">♪ 正在播放 · 浏览器实时生成</div><div class="spectrum"><div style="flex:1;height:16%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:15%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:28%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:16%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:30%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:27%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:37%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:21%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:38%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:25%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:28%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:45%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:67%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:34%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:40%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:65%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:86%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:67%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:58%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:98%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:36%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:84%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:48%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:38%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:35%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:43%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:66%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:33%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:49%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:49%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:36%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:40%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:21%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:22%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:34%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:25%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:20%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:24%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#b5462f,#caa15a);box-shadow:none;align-self:center"></div></div>
+        <div class="cta">▶ vibe-web-gray.vercel.app</div>
+        <div class="ft">中文一句话 → MiniMax 写代码 → 浏览器出声</div>
+          </div>
+        </div>
+      </figure>
+      <figure class="card">
+        <div class="meta"><span class="num">8</span><span class="nm">Bento Soft</span></div>
+        <div class="why">Modular rounded bento cards on deep slate. Modern SaaS/product clarity, organized & friendly.</div>
+        <div class="stage">
+          <div class="frame cand8">
+            
+            
+        <div class="bento">
+          <div class="cell hd-cell">🎧 打字就能做音乐的宝藏网站</div>
+          <div class="cell kick-cell"><span class="chip">第 3 句</span></div>
+          <div class="cell prompt-cell"><div class="prompt">「再加点温暖的电钢琴和弦」</div><div class="tag">一句一句加，越来越好听 ♪</div></div>
+          <div class="cell dev-cell">
+      <div class="device">
+        <div class="bar">
+          <span class="d" style="background:#ff5f57"></span>
+          <span class="d" style="background:#febc2e"></span>
+          <span class="d" style="background:#28c840"></span>
+          <div class="url">▲ vibe-web-gray.vercel.app</div>
+          <div class="live">● LIVE</div>
+        </div>
+        <img src="screen.png" alt="vibe-web 实时演奏中"/>
+      </div></div>
+          <div class="cell np-cell"><div class="np">♪ 正在播放 · 浏览器实时生成</div><div class="spectrum"><div style="flex:1;height:16%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:15%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:28%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:16%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:30%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:27%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:37%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:21%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:38%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:25%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:28%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:45%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:67%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:34%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:40%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:65%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:86%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:67%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:58%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:98%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:36%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:84%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:48%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:38%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:35%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:43%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:66%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:33%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:49%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:49%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:36%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:40%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:21%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:22%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:34%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:25%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:20%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:24%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#5eead4,#a78bfa);box-shadow:0 0 10px rgba(94,234,212,.5);align-self:center"></div></div></div>
+          <div class="cell cta-cell"><div class="cta">▶ vibe-web-gray.vercel.app</div></div>
+        </div>
+        <div class="ft">中文一句话 → MiniMax 写代码 → 浏览器出声</div>
+          </div>
+        </div>
+      </figure>
+      <figure class="card">
+        <div class="meta"><span class="num">9</span><span class="nm">Mono Terminal</span></div>
+        <div class="why">Code-native: monospace, terminal green, grid lines. Speaks to the 'it's real code' devs/makers.</div>
+        <div class="stage">
+          <div class="frame cand9">
+            <div class="scan"></div>
+            
+        <div class="hd">🎧 打字就能做音乐的宝藏网站</div>
+        <div class="chip">第 3 句</div>
+        <div class="prompt">「再加点温暖的电钢琴和弦」<span class="cur">▌</span></div>
+        <div class="tag">一句一句加，越来越好听 ♪</div>
+        
+      <div class="device">
+        <div class="bar">
+          <span class="d" style="background:#ff5f57"></span>
+          <span class="d" style="background:#febc2e"></span>
+          <span class="d" style="background:#28c840"></span>
+          <div class="url">▲ vibe-web-gray.vercel.app</div>
+          <div class="live">● LIVE</div>
+        </div>
+        <img src="screen.png" alt="vibe-web 实时演奏中"/>
+      </div>
+        <div class="np">♪ 正在播放 · 浏览器实时生成</div><div class="spectrum"><div style="flex:1;height:16%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:15%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:28%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:16%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:30%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:27%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:37%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:21%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:38%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:25%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:28%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:45%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:67%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:34%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:40%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:65%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:86%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:67%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:58%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:98%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:36%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:84%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:48%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:38%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:35%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:43%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:66%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:33%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:49%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:49%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:36%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:40%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:21%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:22%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:34%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:25%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:20%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:24%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div><div style="flex:1;height:19%;border-radius:99px;background:linear-gradient(180deg,#36f08c,#9af7c5);box-shadow:0 0 10px rgba(54,240,140,.6);align-self:center"></div></div>
+        <div class="cta">▶ vibe-web-gray.vercel.app</div>
+        <div class="ft">中文一句话 → MiniMax 写代码 → 浏览器出声</div>
+          </div>
+        </div>
+      </figure>
+  </div>
+  <script>
+    // scale each 1080x1920 frame to its card width
+    function fit(){
+      document.querySelectorAll('.stage').forEach(s=>{
+        const f=s.querySelector('.frame');
+        f.style.transform='scale('+(s.clientWidth/1080)+')';
+      });
+    }
+    window.addEventListener('resize',fit); window.addEventListener('load',fit); fit();
+  </script>
+</body></html>

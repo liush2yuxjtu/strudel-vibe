@@ -1,0 +1,91 @@
+{
+  "url": "https://vibe-web-gray.vercel.app/",
+  "w": 1280,
+  "h": 720,
+  "videoT0": 1780024901910,
+  "audioStartWall": 1780024913605,
+  "offsetSec": 11.695,
+  "videoPath": "/Users/m1/projects/strudel-vibe/demo/out/page@d9b89b044a2069d817e4510789b78c43.webm",
+  "beats": [
+    {
+      "at": 0,
+      "kind": "boot",
+      "text": "navigating"
+    },
+    {
+      "at": 7070,
+      "kind": "prompt",
+      "text": "来一段轻松的 lo-fi 鼓点"
+    },
+    {
+      "at": 11706,
+      "kind": "compose",
+      "text": "MiniMax composing…"
+    },
+    {
+      "at": 19114,
+      "kind": "play",
+      "text": "pattern playing"
+    },
+    {
+      "at": 28510,
+      "kind": "prompt",
+      "text": "加一条慵懒的贝斯线"
+    },
+    {
+      "at": 30635,
+      "kind": "compose",
+      "text": "MiniMax composing…"
+    },
+    {
+      "at": 30637,
+      "kind": "play",
+      "text": "pattern playing"
+    },
+    {
+      "at": 39994,
+      "kind": "prompt",
+      "text": "再加点温暖的电钢琴和弦"
+    },
+    {
+      "at": 42583,
+      "kind": "compose",
+      "text": "MiniMax composing…"
+    },
+    {
+      "at": 42586,
+      "kind": "play",
+      "text": "pattern playing"
+    },
+    {
+      "at": 51959,
+      "kind": "prompt",
+      "text": "整体更梦幻一点，加点混响"
+    },
+    {
+      "at": 54568,
+      "kind": "compose",
+      "text": "MiniMax composing…"
+    },
+    {
+      "at": 54571,
+      "kind": "play",
+      "text": "pattern playing"
+    },
+    {
+      "at": 64020,
+      "kind": "handcode",
+      "text": "你甚至能自己改代码"
+    },
+    {
+      "at": 65271,
+      "kind": "finale",
+      "text": "final track plays"
+    },
+    {
+      "at": 75507,
+      "kind": "end",
+      "text": "done"
+    }
+  ]
+}

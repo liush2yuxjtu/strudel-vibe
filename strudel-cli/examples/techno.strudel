@@ -1,0 +1,4 @@
+setcps(0.55)
+s("bd*4, ~ sd ~ sd, hh*8").gain(0.9)
+// ---
+note("c2 c2 eb2 g2").s("sawtooth").gain(0.6)

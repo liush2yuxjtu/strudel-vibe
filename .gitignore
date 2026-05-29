@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+**/node_modules/
+
+# vendored upstream Strudel monorepo (separate AGPL project with its own git
+# history; nothing here imports it directly — see https://strudel.cc)
+/strudel/
+
+# local agent / tooling state
+.claude/
+.gstack/
+
+# vercel
+.vercel/
+
+# build / framework caches
+.astro/
+dist/
+.next/
+
+# raw recordings & intermediate renders (regenerable — final videos are kept)
+demo/out/*.webm
+demo/out/shots/
+video/out/*-raw.mp4
+video/out/ViralCNVertical.mp4
+
+# os / editor
+.DS_Store
+*.log

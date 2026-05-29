@@ -1,0 +1,92 @@
+{
+  "url": "https://vibe-web-gray.vercel.app/",
+  "w": 1280,
+  "h": 720,
+  "beats": [
+    {
+      "at": 0,
+      "kind": "boot",
+      "text": "navigating"
+    },
+    {
+      "at": 6660,
+      "kind": "prompt",
+      "text": "a thunderstorm made of 808 drums and a robot choir chanting in binary"
+    },
+    {
+      "at": 11833,
+      "kind": "compose",
+      "text": "MiniMax composing…"
+    },
+    {
+      "at": 28959,
+      "kind": "play",
+      "text": "pattern playing"
+    },
+    {
+      "at": 34582,
+      "kind": "prompt",
+      "text": "cyberpunk taiko drums drag-racing a glitchy acid bassline at 160bpm"
+    },
+    {
+      "at": 39319,
+      "kind": "compose",
+      "text": "MiniMax composing…"
+    },
+    {
+      "at": 39321,
+      "kind": "play",
+      "text": "pattern playing"
+    },
+    {
+      "at": 44878,
+      "kind": "prompt",
+      "text": "lofi rain where every raindrop is a tiny dubstep wobble"
+    },
+    {
+      "at": 48945,
+      "kind": "compose",
+      "text": "MiniMax composing…"
+    },
+    {
+      "at": 48951,
+      "kind": "play",
+      "text": "pattern playing"
+    },
+    {
+      "at": 54508,
+      "kind": "prompt",
+      "text": "a disco ball shattering into free jazz, then techno picks up the pieces"
+    },
+    {
+      "at": 59552,
+      "kind": "compose",
+      "text": "MiniMax composing…"
+    },
+    {
+      "at": 59556,
+      "kind": "play",
+      "text": "pattern playing"
+    },
+    {
+      "at": 65052,
+      "kind": "chip",
+      "text": "drum and bass beat"
+    },
+    {
+      "at": 69204,
+      "kind": "handcode",
+      "text": "user rewrites the pattern by hand"
+    },
+    {
+      "at": 70221,
+      "kind": "finale",
+      "text": "hand-built banger drops"
+    },
+    {
+      "at": 76486,
+      "kind": "end",
+      "text": "done"
+    }
+  ]
+}

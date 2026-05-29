@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>vibe-music 手机版 · 抖音风录屏候选 (3)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800;900&family=Noto+Sans+SC:wght@400;500;700;900&family=ZCOOL+QingKe+HuangYou&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#000; --cyan:#25F4EE; --red:#FE2C55; --ink:#FFFFFF; --dim:#8A8A93;
+    --panel:#0d0d12; --line:#1c1c24;
+    --disp:'Unbounded',sans-serif; --poster:'ZCOOL QingKe HuangYou',sans-serif;
+    --cjk:'Noto Sans SC',system-ui,sans-serif; --mono:'DM Mono',ui-monospace,monospace;
+  }
+  body{background:#070708;color:var(--ink);font-family:var(--cjk);-webkit-font-smoothing:antialiased}
+  header.top{padding:38px 24px 6px;text-align:center}
+  header.top h1{font-family:var(--disp);font-size:26px;font-weight:800;letter-spacing:-.01em}
+  header.top h1 .cy{color:var(--cyan)} header.top h1 .rd{color:var(--red)}
+  header.top p{margin-top:10px;color:#9a9aa6;font-size:14px;line-height:1.6;max-width:760px;margin-inline:auto}
+  .rail{display:flex;gap:36px;justify-content:center;align-items:flex-start;flex-wrap:wrap;padding:30px 20px 90px}
+  .col{width:390px;max-width:92vw}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .label .n{width:28px;height:28px;border-radius:8px;background:var(--red);color:#fff;display:grid;place-items:center;font-weight:800;font-family:var(--disp)}
+  .label .nm{font-weight:700;font-size:18px}
+  .why{color:#9a9aa6;font-size:13px;line-height:1.55;min-height:54px;margin-bottom:14px}
+
+  /* ---- phone shell ---- */
+  .phone{position:relative;width:390px;height:844px;border-radius:54px;background:#000;
+    box-shadow:0 30px 80px -24px rgba(0,0,0,.85), inset 0 0 0 12px #161620, inset 0 0 0 13px #000;overflow:hidden}
+  .screen{position:absolute;inset:13px;border-radius:42px;overflow:hidden;background:var(--bg)}
+  .island{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:118px;height:34px;background:#000;border-radius:20px;z-index:60}
+  .statusbar{position:absolute;top:0;left:0;right:0;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:15px;font-weight:600;z-index:55;color:#fff}
+  .statusbar .r{display:flex;gap:7px;align-items:center;font-size:13px}
+  .homebar{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:140px;height:5px;border-radius:99px;background:#fff;opacity:.5;z-index:60}
+  .app{position:absolute;inset:0;display:flex;flex-direction:column;font-family:var(--cjk)}
+
+  /* Douyin chromatic glitch */
+  .glitch{text-shadow:-2px 0 var(--red), 2px 0 var(--cyan)}
+  @keyframes gl{0%,100%{text-shadow:-2px 0 var(--red),2px 0 var(--cyan)}50%{text-shadow:-3px 0 var(--red),3px 0 var(--cyan)}}
+  .glitch.anim{animation:gl 2.4s steps(2) infinite}
+  @media(prefers-reduced-motion:reduce){.glitch.anim{animation:none}}
+
+  /* EQ */
+  .eq{display:flex;align-items:flex-end;gap:3px;height:100%}
+  .eq i{flex:1;display:block;border-radius:3px;height:12%;background:linear-gradient(180deg,var(--cyan),var(--red))}
+
+  /* brand lockup */
+  .brand{font-family:var(--disp);font-weight:800;font-size:18px;letter-spacing:-.02em}
+  .brand .v{color:var(--cyan)} .brand .m{color:var(--red)}
+
+  /* code fold (shared) */
+  .fold{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0a0a0f}
+  .fold .hd{display:flex;align-items:center;gap:8px;padding:11px 13px;font-family:var(--mono);font-size:12.5px;color:var(--cyan);cursor:default}
+  .fold .hd .chev{margin-left:auto;transition:transform .35s;color:var(--dim)}
+  .fold.open .hd .chev{transform:rotate(180deg)}
+  .fold .hd .peek{color:var(--dim);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+  .fold .body{max-height:0;overflow:hidden;transition:max-height .42s cubic-bezier(.16,1,.3,1)}
+  .fold.open .body{max-height:220px}
+  .fold .body pre{padding:0 14px 14px;font-family:var(--mono);font-size:12px;line-height:1.6;color:#a7f3d0;white-space:pre-wrap}
+
+  .send{flex:0 0 auto;display:grid;place-items:center;font-weight:800;color:#000}
+  .inbar{display:flex;align-items:center;gap:10px}
+  .ph .cur{color:var(--cyan)}
+
+  /* ===================== D1 — 抖音信息流 Feed ===================== */
+  .D1 .app{background:var(--bg)}
+  .D1 .topbar{padding:62px 18px 12px;display:flex;align-items:center;gap:12px}
+  .D1 .tabs{display:flex;gap:16px;font-weight:700;font-size:16px;color:var(--dim)}
+  .D1 .tabs .on{color:#fff;position:relative}
+  .D1 .tabs .on::after{content:"";position:absolute;left:0;right:0;bottom:-7px;height:3px;border-radius:9px;background:var(--red)}
+  .D1 .nowpill{margin-left:auto;display:flex;align-items:center;gap:7px;font-size:11px;color:var(--cyan);border:1px solid rgba(37,244,238,.4);padding:6px 11px;border-radius:999px}
+  .D1 .nowpill .eq{width:18px;height:13px;gap:2px}
+  .D1 .feed{flex:1;overflow:hidden;padding:8px 16px 6px;display:flex;flex-direction:column;gap:16px}
+  .D1 .card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:16px;flex:0 0 auto}
+  .D1 .card .meta{display:flex;align-items:center;gap:9px;font-size:11px;color:var(--dim);font-family:var(--mono)}
+  .D1 .card .meta .dot{width:7px;height:7px;border-radius:50%;background:var(--red)}
+  .D1 .card .title{font-family:var(--cjk);font-weight:900;font-size:24px;line-height:1.25;margin:10px 0 12px}
+  .D1 .card .wave{height:54px;margin-bottom:12px}
+  .D1 .composing{display:flex;align-items:center;gap:8px;color:var(--cyan);font-family:var(--mono);font-size:13px;padding:6px 2px}
+  .D1 .composing .sp{display:flex;gap:5px}.D1 .composing .sp i{width:7px;height:7px;border-radius:50%;background:var(--cyan);animation:bl 1s infinite}
+  @keyframes bl{0%,80%,100%{opacity:.25}40%{opacity:1}}
+  .D1 .composing .sp i:nth-child(2){animation-delay:.15s}.D1 .composing .sp i:nth-child(3){animation-delay:.3s}
+  .D1 .dock{padding:10px 14px 32px;background:linear-gradient(0deg,#000 60%,transparent)}
+  .D1 .chips{display:flex;gap:8px;overflow:hidden;margin-bottom:10px}
+  .D1 .chips span{flex:0 0 auto;font-size:13px;color:#d7d7e0;background:#121219;border:1px solid var(--line);padding:7px 13px;border-radius:999px}
+  .D1 .inbar{background:#101017;border:1px solid var(--line);border-radius:999px;padding:7px 8px 7px 18px}
+  .D1 .inbar .ph{flex:1;font-size:16px;color:#d7d7e0;min-height:22px}
+  .D1 .inbar .send{width:44px;height:44px;border-radius:50%;background:var(--cyan);font-size:18px}
+
+  /* ===================== D2 — 播放器 + 历史 Player ===================== */
+  .D2 .app{background:radial-gradient(120% 70% at 50% 0%, #14141c, #050507)}
+  .D2 .promptbar{position:absolute;left:16px;right:16px;top:62px;display:flex;align-items:center;gap:10px;z-index:9;
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:10px 10px 10px 18px;backdrop-filter:blur(12px)}
+  .D2 .promptbar .ph{flex:1;font-size:15px;color:#fff;min-height:20px}
+  .D2 .promptbar .send{width:40px;height:40px;border-radius:50%;background:var(--cyan);font-size:17px}
+  .D2 .ring{position:absolute;top:230px;left:50%;transform:translate(-50%,-50%);width:250px;height:250px;border-radius:50%;
+    background:conic-gradient(from 0deg,var(--cyan),var(--red),var(--cyan));filter:blur(2px);animation:spin 12s linear infinite;
+    box-shadow:0 0 80px rgba(37,244,238,.35),0 0 120px rgba(254,44,85,.3)}
+  @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+  .D2 .ringcore{position:absolute;top:230px;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;border-radius:50%;
+    background:#050507;display:grid;place-items:center;z-index:2;border:1px solid rgba(255,255,255,.08)}
+  .D2 .ringcore .eq{width:118px;height:66px;gap:4px}
+  .D2 .nowlab{position:absolute;top:382px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--cyan);z-index:3}
+  .D2 .title{position:absolute;top:404px;left:0;right:0;text-align:center;padding:0 28px;font-family:var(--cjk);font-weight:900;font-size:26px;line-height:1.25;min-height:66px;z-index:3}
+  .D2 .composing-b{position:absolute;top:404px;left:0;right:0;text-align:center;color:var(--cyan);font-family:var(--mono);font-size:14px;z-index:4}
+  .D2 .transport{position:absolute;top:498px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:30px;z-index:3}
+  .D2 .transport .ic{color:#cfcfe0;font-size:20px}
+  .D2 .transport .pp{width:64px;height:64px;border-radius:50%;background:#fff;color:#000;display:grid;place-items:center;font-size:24px}
+  .D2 .hist{position:absolute;top:586px;left:0;right:0;padding:0 16px;z-index:3}
+  .D2 .hist .h{font-size:11px;color:var(--dim);font-family:var(--mono);margin-bottom:8px}
+  .D2 .histrow{display:flex;gap:10px;overflow:hidden}
+  .D2 .histrow .hc{flex:0 0 auto;max-width:200px;background:#101017;border:1px solid var(--line);border-radius:12px;padding:9px 13px;font-size:13px;color:#d7d7e0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .D2 .histrow .hc.cur{border-color:var(--cyan);color:#fff}
+  .D2 .sheet{position:absolute;left:0;right:0;bottom:0;background:rgba(8,8,12,.9);backdrop-filter:blur(16px);border-top:1px solid var(--line);
+    border-radius:22px 22px 0 0;padding:12px 16px 30px;z-index:6}
+  .D2 .sheet .grip{width:40px;height:5px;border-radius:99px;background:rgba(255,255,255,.25);margin:0 auto 10px}
+  .D2 .sheet .fold{border:none;background:none}
+  .D2 .sheet .fold .hd{padding:6px 2px}
+
+  /* ===================== D3 — 大字海报 Bold poster ===================== */
+  .D3 .app{background:var(--bg)}
+  .D3 .scanbg{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(37,244,238,.05) 0 2px,transparent 2px 4px);opacity:.5}
+  .D3 .wrap{position:absolute;inset:0;display:flex;flex-direction:column;padding:64px 22px 28px;z-index:3}
+  .D3 .hd{display:flex;align-items:center;gap:8px}
+  .D3 .hd .live{margin-left:auto;font-size:11px;color:var(--red);border:1px solid rgba(254,44,85,.45);padding:5px 10px;border-radius:999px}
+  .D3 .ticker{margin-top:18px;overflow:hidden;white-space:nowrap;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:8px 0}
+  .D3 .ticker .run{display:inline-block;color:var(--dim);font-family:var(--mono);font-size:12px;letter-spacing:.04em}
+  .D3 .ticker .run b{color:var(--cyan);font-weight:500}
+  .D3 .kick{margin-top:24px;font-family:var(--mono);font-size:13px;letter-spacing:.2em;color:var(--red)}
+  .D3 .hero{margin-top:8px;font-family:var(--poster);font-weight:400;font-size:50px;line-height:1.06;letter-spacing:.01em;min-height:170px}
+  .D3 .vizband{height:74px;margin:6px 0 12px}
+  .D3 .vizband .eq i{border-radius:0}
+  .D3 .composing-c{color:var(--cyan);font-family:var(--mono);font-size:14px;margin:8px 0}
+  .D3 .spacer{flex:1}
+  .D3 .inbar{background:#0e0e14;border:1px solid var(--line);border-radius:16px;padding:10px 10px 10px 16px;margin-top:12px}
+  .D3 .inbar .ph{flex:1;font-size:16px;color:#d7d7e0;min-height:22px}
+  .D3 .inbar .send{padding:0 20px;height:46px;border-radius:12px;background:var(--cyan);font-size:15px}
+</style>
+</head>
+<body>
+  <header class="top">
+    <h1>📱 vibe-music · <span class="cy">抖音风</span> 录屏候选（<span class="rd">3 选 1</span>）</h1>
+    <p>融合：#2/#3 的文本输入框 · 代码默认<b>折叠</b>（点开才展开，不再满屏代码）· #1 的滚动信息流 · 抖音黑底 + 青 #25F4EE / 红 #FE2C55 撞色。纯 HTML + mock，循环演示。选编号即可。</p>
+  </header>
+
+  <div class="rail">
+    <!-- D1 -->
+    <div class="col">
+      <div class="label"><span class="n">1</span><span class="nm">抖音信息流 Feed</span></div>
+      <div class="why">竖向滚动的「作品流」：每条 = 大标题 + 波形 + 折叠代码条（点 ⌄ 才展开）。新作品自动追加并滚动，底部输入框。最像抖音、最适合连刷。</div>
+      <div class="phone D1">
+        <div class="island"></div>
+        <div class="screen">
+          <div class="statusbar"><span>9:41</span><span class="r">📶 􀙇 100%</span></div>
+          <div class="app">
+            <div class="topbar">
+              <div class="tabs"><span class="on">实时生成</span><span>我的</span></div>
+              <div class="nowpill" data-show="playing">LIVE <span class="eq"></span></div>
+            </div>
+            <div class="feed" data-feed></div>
+            <div class="dock">
+              <div class="chips"><span># lo-fi 鼓点</span><span># 慵懒贝斯</span><span># 电钢琴</span><span># 梦幻混响</span></div>
+              <div class="inbar"><div class="ph" data-input></div><div class="send">↑</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="homebar"></div>
+      </div>
+    </div>
+
+    <!-- D2 -->
+    <div class="col">
+      <div class="label"><span class="n">2</span><span class="nm">播放器 + 历史 Player</span></div>
+      <div class="why">一进来就是会转的「声音封面」+ 大播放键，描述框浮顶部。下面是横滑的历史记录，代码收进底部抽屉里折叠（点开看几行）。最高级、最沉浸。</div>
+      <div class="phone D2">
+        <div class="island"></div>
+        <div class="screen">
+          <div class="statusbar"><span>9:41</span><span class="r">📶 􀙇 100%</span></div>
+          <div class="app">
+            <div class="promptbar"><div class="ph" data-input></div><div class="send">↑</div></div>
+            <div class="ring"></div>
+            <div class="ringcore"><div class="eq"></div></div>
+            <div class="nowlab">NOW PLAYING</div>
+            <div class="title glitch" data-hero></div>
+            <div class="composing-b" data-show="composing">作曲中…</div>
+            <div class="transport"><span class="ic">⏮</span><div class="pp" data-pp>❚❚</div><span class="ic">⏭</span></div>
+            <div class="hist"><div class="h">历史</div><div class="histrow" data-hist></div></div>
+            <div class="sheet">
+              <div class="grip"></div>
+              <div class="fold" data-fold>
+                <div class="hd">&lt;/&gt; Strudel 代码 <span class="peek" data-peek></span><span class="chev">⌄</span></div>
+                <div class="body"><pre data-code></pre></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="homebar"></div>
+      </div>
+    </div>
+
+    <!-- D3 -->
+    <div class="col">
+      <div class="label"><span class="n">3</span><span class="nm">大字海报 Bold</span></div>
+      <div class="why">抖音海报感：超大中文标题 + 青红错位故障效果，顶部滚动弹幕显示历史指令，频谱带 + 一行折叠代码（点开展开）。截一帧就是封面，信息层级最猛。</div>
+      <div class="phone D3">
+        <div class="island"></div>
+        <div class="screen">
+          <div class="statusbar"><span>9:41</span><span class="r">📶 􀙇 100%</span></div>
+          <div class="app">
+            <div class="scanbg"></div>
+            <div class="wrap">
+              <div class="hd"><span class="brand"><span class="v">vibe</span><span class="m">music</span></span><span class="live" data-show="playing">● LIVE</span></div>
+              <div class="ticker"><span class="run" data-ticker></span></div>
+              <div class="kick">你说，它来写</div>
+              <div class="hero glitch anim" data-hero></div>
+              <div class="composing-c" data-show="composing">作曲中…</div>
+              <div class="vizband"><div class="eq"></div></div>
+              <div class="fold" data-fold>
+                <div class="hd">&lt;/&gt; 代码 <span class="peek" data-peek></span><span class="chev">⌄</span></div>
+                <div class="body"><pre data-code></pre></div>
+              </div>
+              <div class="spacer"></div>
+              <div class="inbar"><div class="ph" data-input></div><div class="send">发送</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="homebar"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const STEPS = [
+  { p:'来一段轻松的 lo-fi 鼓点',
+    c:'s("bd ~ ~ bd, hh*8")\n  .bank("RolandTR909").gain(.8)' },
+  { p:'加一条慵懒的贝斯线',
+    c:'stack(\n  s("bd ~ ~ bd, hh*8"),\n  note("c2 ~ eb2 g2").s("sawtooth").lpf(600)\n)' },
+  { p:'再加点温暖的电钢琴和弦',
+    c:'stack(\n  s("bd ~ ~ bd, hh*8"),\n  note("c2 ~ eb2 g2").s("saw").lpf(600),\n  note("<Cm9 Fm9>").s("piano").room(.4)\n)' },
+  { p:'整体更梦幻一点，加点混响',
+    c:'stack( /* ... */ )\n  .room(.7).delay(.25)\n  .gain(.9) // ✨' },
+];
+const cur='<span class="cur">▌</span>';
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const $=(s,r=document)=>r.querySelector(s);
+const peekOf=code=>code.split('\n').find(l=>l.trim())||'';
+
+// EQ fill + animate
+function fillEq(el,n){el.innerHTML='';for(let i=0;i<n;i++)el.appendChild(document.createElement('i'));}
+document.querySelectorAll('.D2 .ringcore .eq').forEach(e=>fillEq(e,24));
+document.querySelectorAll('.D3 .vizband .eq').forEach(e=>fillEq(e,40));
+document.querySelectorAll('.D1 .nowpill .eq').forEach(e=>fillEq(e,4));
+let playing=false;
+(function loop(){
+  const t=performance.now()/1000;
+  document.querySelectorAll('.eq').forEach(eq=>{
+    const live = playing || eq.closest('[data-feed]');
+    for(let i=0;i<eq.children.length;i++){
+      const h = live ? Math.min(100, 10+(Math.sin(t*6+i*0.6)*0.5+0.5)*72+Math.random()*14) : 10;
+      eq.children[i].style.height=h+'%';
+    }
+  });
+  requestAnimationFrame(loop);
+})();
+
+function typeInto(setter,text,ms){return new Promise(res=>{const n=text.length,s=performance.now();
+  (function st(){const k=Math.min(1,(performance.now()-s)/ms);setter(text.slice(0,Math.floor(k*n)),k<1);
+   if(k<1)requestAnimationFrame(st);else{setter(text,false);res();}})();});}
+
+function setInputs(txt,typing){document.querySelectorAll('[data-input]').forEach(el=>el.innerHTML=txt+(typing?cur:''));}
+function showFlag(name,on){document.querySelectorAll('[data-show="'+name+'"]').forEach(e=>e.style.visibility=on?'visible':'hidden');}
+
+// ---- D1 feed ----
+const d1feed=$('.D1 [data-feed]');
+function d1Composing(on){let c=$('.composing',d1feed);
+  if(on&&!c){c=document.createElement('div');c.className='composing';c.innerHTML='作曲中 <span class="sp"><i></i><i></i><i></i></span>';d1feed.appendChild(c);d1feed.scrollTop=1e9;}
+  else if(!on&&c)c.remove();}
+function d1Card(step){
+  const card=document.createElement('div');card.className='card';
+  card.innerHTML='<div class="meta"><span class="dot"></span>实时生成 · 正在播放</div>'
+    +'<div class="title">'+step.p+'</div>'
+    +'<div class="wave"><div class="eq"></div></div>'
+    +'<div class="fold"><div class="hd">&lt;/&gt; Strudel 代码 <span class="peek"></span><span class="chev">⌄</span></div><div class="body"><pre></pre></div></div>';
+  d1feed.appendChild(card);fillEq($('.eq',card),26);d1feed.scrollTop=1e9;
+  return {fold:$('.fold',card),peek:$('.peek',card),pre:$('pre',card)};
+}
+function d1Trim(){while(d1feed.children.length>3)d1feed.removeChild(d1feed.firstChild);}
+
+// ---- D2 ----
+const d2hist=$('.D2 [data-hist]');
+function d2Hist(p){d2hist.querySelectorAll('.hc').forEach(e=>e.classList.remove('cur'));
+  const c=document.createElement('div');c.className='hc cur';c.textContent=p;d2hist.insertBefore(c,d2hist.firstChild);
+  while(d2hist.children.length>4)d2hist.removeChild(d2hist.lastChild);}
+
+// ---- D3 ticker ----
+const d3ticker=$('.D3 [data-ticker]');let d3log=[];
+function d3Tick(p){d3log.unshift(p);d3log=d3log.slice(0,6);
+  d3ticker.innerHTML=d3log.map(x=>'<b>›</b> '+x+' &nbsp;&nbsp;').join('');}
+
+// generic fold open/close + code set (D2,D3 single fold; D1 per card)
+function setFold(foldEl,peekEl,preEl,code,open){
+  preEl.textContent=code; if(peekEl)peekEl.textContent=open?'':peekOf(code);
+  foldEl.classList.toggle('open',open);
+}
+
+async function run(){
+  const D2={fold:$('.D2 [data-fold]'),peek:$('.D2 [data-peek]'),pre:$('.D2 [data-code]'),hero:$('.D2 [data-hero]')};
+  const D3={fold:$('.D3 [data-fold]'),peek:$('.D3 [data-peek]'),pre:$('.D3 [data-code]'),hero:$('.D3 [data-hero]')};
+  while(true){
+    for(const step of STEPS){
+      // 1 type
+      d1Composing(false);showFlag('composing',false);
+      await typeInto(setInputs,step.p,1300);
+      await sleep(300);
+      // 2 send -> composing; heroes/history update
+      setInputs('',false);
+      d1Composing(true);
+      showFlag('composing',true);
+      D2.hero.textContent='「'+step.p+'」'; D3.hero.textContent=step.p;
+      d2Hist(step.p); d3Tick(step.p);
+      await sleep(950);
+      // 3 result: append card, set code (collapsed), playing on
+      d1Composing(false);
+      playing=true; showFlag('composing',false); showFlag('playing',true);
+      const c1=d1Card(step);
+      setFold(c1.fold,c1.peek,c1.pre,step.c,false);
+      setFold(D2.fold,D2.peek,D2.pre,step.c,false);
+      setFold(D3.fold,D3.peek,D3.pre,step.c,false);
+      d1Trim();
+      await sleep(900);
+      // 4 demonstrate the FOLD: open briefly, then collapse
+      c1.fold.classList.add('open'); c1.peek.textContent='';
+      D2.fold.classList.add('open'); D2.peek.textContent='';
+      D3.fold.classList.add('open'); D3.peek.textContent='';
+      await sleep(1700);
+      c1.fold.classList.remove('open'); c1.peek.textContent=peekOf(step.c);
+      D2.fold.classList.remove('open'); D2.peek.textContent=peekOf(step.c);
+      D3.fold.classList.remove('open'); D3.peek.textContent=peekOf(step.c);
+      await sleep(1300);
+    }
+  }
+}
+run();
+</script>
+</body>
+</html>
