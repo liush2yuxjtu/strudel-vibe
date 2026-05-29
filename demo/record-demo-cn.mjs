@@ -27,7 +27,9 @@ const SHOTS_DIR = join(OUT_DIR, 'shots');
 mkdirSync(SHOTS_DIR, { recursive: true });
 
 const URL = 'https://vibe-web-gray.vercel.app/';
-const W = 1280, H = 720;
+// Portrait, phone-native capture so the app text is legible when the cut plays
+// on a phone in RedNote. We force vibe-web into a single big-font column.
+const W = 900, H = 1600;
 
 // Calm, natural Chinese prompts — a real user building one chill track step by
 // step (vibe-web passes `current` code, so each line layers onto the last).
@@ -141,6 +143,41 @@ const AUDIO_TAP_INIT = `
 })();
 `;
 
+// Phone-legibility overrides: force a single column, blow up the fonts, and hide
+// the chips/log so the prompt + generated code + visualizer all fit big in a tall
+// portrait frame. Injected as a <style> so it wins over the site's CSS.
+const MOBILE_CSS = `
+(() => {
+  const css = \`
+    header{padding:18px 26px 6px !important}
+    .logo{font-size:40px !important}
+    .tag{font-size:19px !important}
+    .wrap{grid-template-columns:1fr !important; max-width:none !important; padding:16px 24px 24px !important; gap:18px !important}
+    .panel{padding:22px !important; border-radius:20px !important}
+    .panel h2{font-size:18px !important; margin-bottom:14px !important; letter-spacing:.14em !important}
+    .promptbox{gap:14px !important}
+    .promptbox input, #intent{font-size:30px !important; padding:22px 22px !important}
+    .promptbox button, .row button{font-size:26px !important; padding:18px 26px !important; border-radius:14px !important}
+    .state{font-size:24px !important; margin:16px 0 !important}
+    .chips{display:none !important}
+    .log{display:none !important}
+    .viz{height:230px !important}
+    .vlabel{font-size:28px !important; gap:14px !important}
+    .spin{width:22px !important; height:22px !important}
+    .code{font-size:30px !important; min-height:360px !important; line-height:1.5 !important; padding:20px !important}
+    .prog{height:6px !important; margin-top:14px !important}
+    footer{font-size:18px !important; padding:10px 24px 22px !important}
+  \`;
+  const apply = () => {
+    if (document.getElementById('__mobile_css')) return;
+    const s = document.createElement('style');
+    s.id = '__mobile_css'; s.textContent = css;
+    (document.head || document.documentElement).appendChild(s);
+  };
+  if (document.head) apply(); else document.addEventListener('DOMContentLoaded', apply);
+})();
+`;
+
 const CURSOR_INIT = `
 (() => {
   const dot = document.createElement('div');
@@ -208,10 +245,11 @@ async function main() {
   });
   const context = await browser.newContext({
     viewport: { width: W, height: H },
-    deviceScaleFactor: 1,
+    deviceScaleFactor: 2, // crisp text at phone scale
     recordVideo: { dir: OUT_DIR, size: { width: W, height: H } },
   });
   await context.addInitScript(AUDIO_TAP_INIT);
+  await context.addInitScript(MOBILE_CSS);
   await context.addInitScript(CURSOR_INIT);
 
   let audioStartWall = null;

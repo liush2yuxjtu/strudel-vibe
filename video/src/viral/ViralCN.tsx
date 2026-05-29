@@ -46,56 +46,56 @@ export const ViralCN: React.FC = () => {
   const section = SECTIONS[idx];
   const accent = ACCENT_HEX[section.accent];
   const localFrame = frame - Math.round(section.start * fps);
-  const cardW = width - 76;
+
+  // Portrait, phone-native layout: the real app capture (900x1600 ≈ 0.5625)
+  // fills most of the frame so its big-font UI is legible on a phone. A compact
+  // caption sits above it; the audio-reactive spectrum + CTA sit below.
+  const PHONE_W = 720;
+  const PHONE_X = Math.round((width - PHONE_W) / 2);
+  const BAR_H = 40;
+  const VID_H = Math.round(PHONE_W / 0.5625); // 1280
+  const PHONE_TOP = 300;
+  const phoneBottom = PHONE_TOP + BAR_H + VID_H; // 1620
 
   return (
     <AbsoluteFill style={{ backgroundColor: COLORS.bg, overflow: "hidden" }}>
       <Bg frame={frame} fps={fps} width={width} height={height} bass={bass} accent={accent} />
 
       {/* header pill */}
-      <div style={{ position: "absolute", top: 58, left: 0, width, display: "flex", justifyContent: "center" }}>
+      <div style={{ position: "absolute", top: 30, left: 0, width, display: "flex", justifyContent: "center" }}>
         <div
           style={{
             display: "inline-flex", alignItems: "center", gap: 12, fontFamily: CJK, fontSize: 30, fontWeight: 600, color: COLORS.ink,
-            background: "rgba(10,10,18,.55)", border: "1px solid #2a2740", padding: "12px 24px", borderRadius: 999, backdropFilter: "blur(6px)",
+            background: "rgba(10,10,18,.55)", border: "1px solid #2a2740", padding: "12px 26px", borderRadius: 999, backdropFilter: "blur(6px)",
           }}
         >
           {STRINGS.header}
         </div>
       </div>
 
-      {/* caption block */}
-      <div key={idx} style={{ position: "absolute", top: 158, left: 48, width: width - 96 }}>
-        <Kicker label={section.kicker} accent={accent} localFrame={localFrame} />
-        <div style={{ marginTop: 22 }}>
-          <TypedPrompt text={section.prompt} localFrame={localFrame} accent={accent} fontSize={66} maxWidth={width - 96} />
+      {/* compact caption block */}
+      <div key={idx} style={{ position: "absolute", top: 104, left: 48, width: width - 96 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+          <Kicker label={section.kicker} accent={accent} localFrame={localFrame} />
+          <Tag text={section.tag} localFrame={localFrame} size={26} inline />
         </div>
-        <Tag text={section.tag} localFrame={localFrame} size={30} />
-      </div>
-
-      {/* device card */}
-      <div style={{ position: "absolute", top: 626, left: 38, width: cardW }}>
-        <DeviceCard frame={frame} fps={fps} w={cardW} bass={bass} accent={accent} />
-      </div>
-
-      {/* now playing + spectrum */}
-      <div style={{ position: "absolute", top: 1316, left: 48, width: width - 96 }}>
-        <div style={{ fontFamily: CJK, fontSize: 24, color: accent, letterSpacing: "0.06em", marginBottom: 14 }}>
-          ♪ {STRINGS.nowPlaying}
+        <div style={{ marginTop: 12 }}>
+          <TypedPrompt text={section.prompt} localFrame={localFrame} accent={accent} fontSize={50} maxWidth={width - 96} />
         </div>
-        <Spectrum frequencies={frequencies} accent={accent} width={width - 96} height={150} />
       </div>
 
-      {/* CTA */}
-      <div style={{ position: "absolute", top: 1604, left: 0, width, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+      {/* device card — large portrait phone */}
+      <div style={{ position: "absolute", top: PHONE_TOP, left: PHONE_X, width: PHONE_W }}>
+        <DeviceCard w={PHONE_W} barH={BAR_H} vidH={VID_H} bass={bass} accent={accent} frame={frame} fps={fps} />
+      </div>
+
+      {/* spectrum + CTA below the phone */}
+      <div style={{ position: "absolute", top: phoneBottom + 18, left: 48, width: width - 96 }}>
+        <Spectrum frequencies={frequencies} accent={accent} width={width - 96} height={84} />
+      </div>
+      <div style={{ position: "absolute", top: phoneBottom + 124, left: 0, width, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
         <CTA frame={frame} />
-        <div style={{ fontFamily: CJK, fontSize: 26, color: COLORS.dim }}>{STRINGS.ctaNote}</div>
-      </div>
-
-      {/* footer */}
-      <div style={{ position: "absolute", bottom: 64, left: 0, width, display: "flex", justifyContent: "center", gap: 14, alignItems: "center" }}>
-        <Brand size={28} />
-        <span style={{ fontFamily: CJK, fontSize: 22, color: "#7a7790" }}>· {STRINGS.footer}</span>
+        <div style={{ fontFamily: CJK, fontSize: 24, color: COLORS.dim }}>{STRINGS.ctaNote}</div>
       </div>
 
       <Audio src={staticFile(AUDIO_SRC)} />
@@ -129,44 +129,44 @@ const Bg: React.FC<{ frame: number; fps: number; width: number; height: number; 
 };
 
 // ---------------------------------------------------------------- device card
-const DeviceCard: React.FC<{ frame: number; fps: number; w: number; bass: number; accent: string }> = ({
-  frame, fps, w, bass, accent,
+const DeviceCard: React.FC<{ frame: number; fps: number; w: number; barH: number; vidH: number; bass: number; accent: string }> = ({
+  frame, fps, w, barH, vidH, bass, accent,
 }) => {
   const intro = spring({ frame, fps, config: { damping: 200, mass: 0.7 } });
-  const scale = interpolate(intro, [0, 1], [0.94, 1]);
+  const scale = interpolate(intro, [0, 1], [0.96, 1]);
   const opacity = interpolate(frame, [0, 8], [0, 1], CLAMP);
-  const vh = Math.round((w * 720) / 1280);
-  const glow = 24 + bass * 70;
+  const glow = 24 + bass * 80;
   return (
     <div
       style={{
-        width: w, transform: `scale(${scale})`, opacity, borderRadius: 20, overflow: "hidden",
+        width: w, transform: `scale(${scale})`, opacity, borderRadius: 26, overflow: "hidden",
         border: `1px solid ${accent}55`,
-        boxShadow: `0 40px 120px -30px ${accent}55, 0 0 ${glow}px ${Math.round(glow * 0.4)}px ${accent}40, 0 0 0 1px rgba(255,255,255,.03)`,
+        boxShadow: `0 40px 130px -28px ${accent}66, 0 0 ${glow}px ${Math.round(glow * 0.4)}px ${accent}45, 0 0 0 1px rgba(255,255,255,.03)`,
         background: "#0b0b12",
       }}
     >
       <div
         style={{
-          height: 44, display: "flex", alignItems: "center", gap: 9, padding: "0 16px",
+          height: barH, display: "flex", alignItems: "center", gap: 9, padding: "0 16px",
           background: "linear-gradient(180deg,#15131f,#0e0d16)", borderBottom: "1px solid #221f31", fontFamily: MONO,
         }}
       >
         <Dot c="#ff5f57" /><Dot c="#febc2e" /><Dot c="#28c840" />
         <div
           style={{
-            marginLeft: 12, flex: 1, maxWidth: 460, height: 26, borderRadius: 999, background: "#0a0a12",
-            border: "1px solid #262338", display: "flex", alignItems: "center", padding: "0 14px", fontSize: 14, color: "#9b97b8",
+            marginLeft: 12, flex: 1, height: 28, borderRadius: 999, background: "#0a0a12",
+            border: "1px solid #262338", display: "flex", alignItems: "center", padding: "0 14px", fontSize: 15, color: "#9b97b8",
+            overflow: "hidden", whiteSpace: "nowrap",
           }}
         >
           <span style={{ color: COLORS.neon, marginRight: 8 }}>▲</span>vibe-web-gray.vercel.app
         </div>
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8, color: COLORS.hot, fontSize: 13, fontWeight: 700 }}>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8, color: COLORS.hot, fontSize: 15, fontWeight: 700 }}>
           <RecDot /> LIVE
         </div>
       </div>
-      <div style={{ position: "relative", width: w, height: vh }}>
-        <OffthreadVideo src={staticFile(VIDEO_SRC)} muted style={{ width: w, height: vh, objectFit: "cover", display: "block" }} />
+      <div style={{ position: "relative", width: w, height: vidH }}>
+        <OffthreadVideo src={staticFile(VIDEO_SRC)} muted style={{ width: w, height: vidH, objectFit: "cover", objectPosition: "top center", display: "block" }} />
       </div>
     </div>
   );
@@ -251,11 +251,11 @@ const Kicker: React.FC<{ label: string; accent: string; localFrame: number }> = 
   );
 };
 
-const Tag: React.FC<{ text: string; localFrame: number; size: number }> = ({ text, localFrame, size }) => {
+const Tag: React.FC<{ text: string; localFrame: number; size: number; inline?: boolean }> = ({ text, localFrame, size, inline }) => {
   const op = interpolate(localFrame, [12, 24], [0, 1], CLAMP);
   const y = interpolate(localFrame, [12, 26], [16, 0], CLAMP);
   return (
-    <div style={{ opacity: op, transform: `translateY(${y}px)`, fontFamily: CJK, fontSize: size, color: COLORS.dim, marginTop: size * 0.8 }}>
+    <div style={{ opacity: op, transform: `translateY(${y}px)`, fontFamily: CJK, fontSize: size, color: COLORS.dim, marginTop: inline ? 0 : size * 0.8 }}>
       {text}
     </div>
   );
