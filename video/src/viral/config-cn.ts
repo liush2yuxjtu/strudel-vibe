@@ -3,7 +3,7 @@
 // hits at frame 0. Section starts = real pattern-change times in the clip.
 
 export const FPS = 30;
-export const DURATION_FRAMES = Math.floor(54.47 * FPS); // 1634
+export const DURATION_FRAMES = 1704; // 56.82s @ 30fps (auto)
 
 export const VIDEO_SRC = "viral-cn.mp4";
 export const AUDIO_SRC = "viral-cn-audio.wav";
@@ -34,11 +34,11 @@ export type Section = {
 };
 
 export const SECTIONS: Section[] = [
-  { start: 0.0, accent: "neon", kicker: "第 1 句", prompt: "来一段轻松的 lo-fi 鼓点", tag: "我就随手打了一句中文 ↑" },
-  { start: 10.11, accent: "purple", kicker: "第 2 句", prompt: "加一条慵懒的贝斯线", tag: "它真听懂了，还会一层层叠 🎹" },
-  { start: 22.06, accent: "hot", kicker: "第 3 句", prompt: "再加点温暖的电钢琴和弦", tag: "一句一句加，越来越好听" },
-  { start: 34.04, accent: "neon", kicker: "第 4 句", prompt: "整体更梦幻一点，加点混响", tag: "氛围感直接拉满 ✨" },
-  { start: 44.74, accent: "purple", kicker: "彩蛋", prompt: "你甚至能自己改代码——是真的 Strudel", tag: "周末在浏览器里就能玩 🎧" },
+  { start: 0, accent: "neon", kicker: "第 1 句", prompt: "来一段轻松的 lo-fi 鼓点", tag: "我就随手打了一句中文 ↑" },
+  { start: 11.53, accent: "purple", kicker: "第 2 句", prompt: "加一条慵懒的贝斯线", tag: "它真听懂了，还会一层层叠 🎹" },
+  { start: 23.81, accent: "hot", kicker: "第 3 句", prompt: "再加点温暖的电钢琴和弦", tag: "一句一句加，越来越好听" },
+  { start: 36.06, accent: "neon", kicker: "第 4 句", prompt: "整体更梦幻一点，加点混响", tag: "氛围感直接拉满 ✨" },
+  { start: 46.79, accent: "purple", kicker: "彩蛋", prompt: "你甚至能自己改代码——是真的 Strudel", tag: "周末在浏览器里就能玩 🎧" },
 ];
 
 export const ACCENT_HEX: Record<Accent, string> = {

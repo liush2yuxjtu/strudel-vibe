@@ -37,8 +37,11 @@ const PROMPTS = [
   '再加点温暖的电钢琴和弦',
   '整体更梦幻一点，加点混响',
 ];
+// NOTE: no .bank("RolandTR909") — that bank isn't in vibe-web's /samples kit, so
+// it would silence the kick/clap. The default kit (bd/cp/hh) is loaded, so plain
+// names give a full-sounding finale.
 const FINALE_CODE =
-  'stack(\n  s("bd*4, ~ cp").bank("RolandTR909"),\n  s("hh*16").gain(saw.range(.2,.9)),\n  note("c2 eb2 g2 bb2").s("sawtooth").lpf(sine.range(300,2200).slow(4)).room(.5)\n).fast(1.5)';
+  'stack(\n  s("bd*4, ~ cp"),\n  s("hh*16").gain(saw.range(.2,.9)),\n  note("c2 eb2 g2 bb2").s("sawtooth").lpf(sine.range(300,2200).slow(4)).room(.5)\n).fast(1.5)';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

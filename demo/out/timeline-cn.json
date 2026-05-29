@@ -2,10 +2,10 @@
   "url": "https://vibe-web-gray.vercel.app/",
   "w": 1280,
   "h": 720,
-  "videoT0": 1780024901910,
-  "audioStartWall": 1780024913605,
-  "offsetSec": 11.695,
-  "videoPath": "/Users/m1/projects/strudel-vibe/demo/out/page@d9b89b044a2069d817e4510789b78c43.webm",
+  "videoT0": 1780039389987,
+  "audioStartWall": 1780039399358,
+  "offsetSec": 9.371,
+  "videoPath": "/Users/m1/projects/strudel-vibe/demo/out/page@8527731956229be0fc545e5b2788340c.webm",
   "beats": [
     {
       "at": 0,
@@ -13,77 +13,77 @@
       "text": "navigating"
     },
     {
-      "at": 7070,
+      "at": 6062,
       "kind": "prompt",
       "text": "来一段轻松的 lo-fi 鼓点"
     },
     {
-      "at": 11706,
+      "at": 9377,
       "kind": "compose",
       "text": "MiniMax composing…"
     },
     {
-      "at": 19114,
+      "at": 14992,
       "kind": "play",
       "text": "pattern playing"
     },
     {
-      "at": 28510,
+      "at": 24470,
       "kind": "prompt",
       "text": "加一条慵懒的贝斯线"
     },
     {
-      "at": 30635,
+      "at": 26770,
       "kind": "compose",
       "text": "MiniMax composing…"
     },
     {
-      "at": 30637,
+      "at": 26808,
       "kind": "play",
       "text": "pattern playing"
     },
     {
-      "at": 39994,
+      "at": 36508,
       "kind": "prompt",
       "text": "再加点温暖的电钢琴和弦"
     },
     {
-      "at": 42583,
+      "at": 39081,
       "kind": "compose",
       "text": "MiniMax composing…"
     },
     {
-      "at": 42586,
+      "at": 39088,
       "kind": "play",
       "text": "pattern playing"
     },
     {
-      "at": 51959,
+      "at": 48531,
       "kind": "prompt",
       "text": "整体更梦幻一点，加点混响"
     },
     {
-      "at": 54568,
+      "at": 51336,
       "kind": "compose",
       "text": "MiniMax composing…"
     },
     {
-      "at": 54571,
+      "at": 51340,
       "kind": "play",
       "text": "pattern playing"
     },
     {
-      "at": 64020,
+      "at": 60808,
       "kind": "handcode",
       "text": "你甚至能自己改代码"
     },
     {
-      "at": 65271,
+      "at": 62069,
       "kind": "finale",
       "text": "final track plays"
     },
     {
-      "at": 75507,
+      "at": 72295,
       "kind": "end",
       "text": "done"
     }
