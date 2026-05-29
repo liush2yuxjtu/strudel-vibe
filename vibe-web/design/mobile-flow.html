@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>vibe·music — 移动端流程脚本板 / sequencer rack</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎛️</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700;800&family=Major+Mono+Display&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* palette descended from the real app (index.html) — neon on near-black */
+    --bg:#07070b; --bg2:#0b0b12; --panel:#0f0f18; --panel2:#13131f;
+    --ink:#ECEAF6; --dim:#8b88a3; --faint:#56536b;
+    --mint:#7af0c0; --violet:#b07aff; --pink:#ff5d9e; --amber:#ffcf6b;
+    --line:#211f30; --line2:#2c2940;
+    --display:"Chakra Petch",system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+    --phone-w:308px; --phone-h:646px;
+    --glow-mint:0 0 24px rgba(122,240,192,.45);
+    --glow-violet:0 0 24px rgba(176,122,255,.40);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  html,body{margin:0;min-height:100%}
+  body{
+    font-family:var(--mono); color:var(--ink); background:var(--bg);
+    -webkit-font-smoothing:antialiased; overflow-x:hidden; position:relative;
+    background-image:
+      radial-gradient(900px 560px at 88% -8%, rgba(176,122,255,.20), transparent 60%),
+      radial-gradient(820px 560px at -6% 108%, rgba(122,240,192,.16), transparent 55%),
+      radial-gradient(circle at center, rgba(255,255,255,.028) 1px, transparent 1.4px);
+    background-size:auto,auto,22px 22px;
+    background-attachment:fixed;
+  }
+  /* film grain */
+  body::after{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.05; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  /* vignette */
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    box-shadow:inset 0 0 240px 40px rgba(0,0,0,.7)}
+
+  a{color:var(--mint);text-decoration:none}
+
+  /* ============ HUD header ============ */
+  .hud{position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between;
+    gap:18px; flex-wrap:wrap; padding:26px 34px 0}
+  .wordmark{font-family:"Major Mono Display",var(--mono); font-size:30px; line-height:1; letter-spacing:-1px}
+  .wordmark .a{color:var(--mint)} .wordmark .b{color:var(--violet)} .wordmark .dot{color:var(--pink)}
+  .transport{display:flex; align-items:center; gap:14px; font-family:var(--display); font-weight:600;
+    font-size:11px; letter-spacing:.16em; color:var(--dim); text-transform:uppercase}
+  .transport .seg{display:flex;align-items:center;gap:7px; padding:7px 12px; border:1px solid var(--line2);
+    border-radius:8px; background:rgba(255,255,255,.02)}
+  .rec{width:8px;height:8px;border-radius:50%;background:var(--pink);box-shadow:0 0 10px var(--pink);animation:beat 1s steps(1) infinite}
+  @keyframes beat{50%{opacity:.25}}
+  .eq{display:flex; align-items:flex-end; gap:2px; height:14px}
+  .eq i{width:3px;background:var(--mint);border-radius:2px;animation:eqp 900ms ease-in-out infinite}
+  .eq i:nth-child(2){animation-delay:.15s;background:var(--violet)}
+  .eq i:nth-child(3){animation-delay:.3s}
+  .eq i:nth-child(4){animation-delay:.45s;background:var(--violet)}
+  @keyframes eqp{0%,100%{height:3px}50%{height:14px}}
+
+  /* ============ title block ============ */
+  .titleblk{position:relative; z-index:2; padding:30px 34px 6px; max-width:1100px}
+  .kicker{font-family:var(--display); font-weight:600; letter-spacing:.42em; text-transform:uppercase;
+    font-size:11px; color:var(--mint); margin:0 0 14px; display:flex; align-items:center; gap:12px}
+  .kicker::before{content:"";width:34px;height:1px;background:linear-gradient(90deg,var(--mint),transparent)}
+  h1{font-family:var(--display); font-weight:700; font-size:clamp(30px,6vw,56px); line-height:.98;
+    margin:0; letter-spacing:-1px}
+  h1 .o{color:transparent;-webkit-text-stroke:1.4px var(--violet);text-stroke:1.4px var(--violet)}
+  .lede{margin:18px 0 0; max-width:680px; font-size:13.5px; line-height:1.75; color:var(--dim)}
+  .lede b{color:var(--ink); font-weight:500}
+  .lede .hl{color:var(--mint)}
+
+  .scrollhint{display:flex;align-items:center;gap:10px;margin:22px 34px 0; color:var(--faint);
+    font-family:var(--display); font-size:11px; letter-spacing:.2em; text-transform:uppercase}
+  .scrollhint .ln{flex:0 0 60px;height:1px;background:linear-gradient(90deg,var(--line2),transparent)}
+
+  /* ============ the rack (filmstrip) ============ */
+  .rack{position:relative; z-index:2; padding:18px 34px 56px; overflow-x:auto; overflow-y:hidden;
+    scroll-snap-type:x proximity}
+  .rack::-webkit-scrollbar{height:8px}
+  .rack::-webkit-scrollbar-track{background:transparent}
+  .rack::-webkit-scrollbar-thumb{background:var(--line2);border-radius:99px}
+  .strip{position:relative; display:flex; gap:30px; width:max-content; padding-top:8px}
+  /* patch cable threading the rack */
+  .strip::before{content:""; position:absolute; left:24px; right:24px; top:64px; height:2px; z-index:0;
+    background:repeating-linear-gradient(90deg,var(--line2) 0 10px,transparent 10px 20px);
+    mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);}
+  .strip::after{content:""; position:absolute; left:24px; top:60px; width:10px; height:10px; border-radius:50%; z-index:1;
+    background:var(--mint); box-shadow:var(--glow-mint); animation:travel 8.4s linear infinite}
+  @keyframes travel{from{transform:translateX(0)}to{transform:translateX(calc(6 * (var(--phone-w) + 30px) - 30px))}}
+
+  .frame{position:relative; flex:0 0 auto; width:var(--phone-w); scroll-snap-align:center;
+    transition:transform .5s cubic-bezier(.2,.8,.2,1), filter .5s}
+  /* ghost numeral */
+  .ghost{position:absolute; top:-6px; right:-6px; font-family:var(--display); font-weight:700;
+    font-size:120px; line-height:1; color:transparent; -webkit-text-stroke:1px var(--line2);
+    z-index:0; pointer-events:none; opacity:.7}
+
+  /* step header above each phone */
+  .step{position:relative; z-index:2; display:flex; align-items:center; gap:10px; margin:0 4px 14px; height:34px}
+  .led{width:13px;height:13px;border-radius:50%;border:1px solid var(--line2);background:#0c0c14;flex:0 0 auto;
+    transition:.4s}
+  .step .idx{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.1em;color:var(--dim)}
+  .step .nm{font-family:var(--display);font-weight:600;font-size:12.5px;letter-spacing:.04em;color:var(--ink)}
+  .step .tag{margin-left:auto;font-family:var(--display);font-weight:600;font-size:9.5px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--mint);opacity:0;transition:.4s}
+  .desc{margin:0 4px 16px; font-size:11.5px; line-height:1.6; color:var(--dim); min-height:38px}
+
+  /* active step (playhead landed) */
+  .frame.on{transform:translateY(-8px)}
+  .frame.on .led{background:var(--mint);border-color:var(--mint);box-shadow:var(--glow-mint)}
+  .frame.on .idx{color:var(--mint)}
+  .frame.on .tag{opacity:1}
+  .frame.on .phone{border-color:#3a3658; box-shadow:0 30px 70px -28px #000, 0 0 0 1px rgba(122,240,192,.18), var(--glow-violet)}
+  .frame.on .ghost{-webkit-text-stroke-color:rgba(176,122,255,.5)}
+  .frame:not(.on){filter:saturate(.85) brightness(.92)}
+
+  /* phone bezel */
+  .phone{position:relative; z-index:2; width:var(--phone-w); height:var(--phone-h);
+    background:linear-gradient(160deg,#16162200,#0a0a10); border:1.5px solid var(--line2); border-radius:42px;
+    padding:9px; box-shadow:0 26px 60px -30px #000, inset 0 1px 0 rgba(255,255,255,.05);
+    transition:.5s}
+  .island{position:absolute; top:16px; left:50%; transform:translateX(-50%); width:84px; height:22px;
+    background:#000; border-radius:99px; z-index:6}
+  .screen{position:relative; width:100%; height:100%; border-radius:34px; overflow:hidden; display:flex; flex-direction:column;
+    background:
+      radial-gradient(360px 220px at 84% -6%, rgba(176,122,255,.14), transparent 58%),
+      radial-gradient(300px 220px at -8% 108%, rgba(122,240,192,.12), transparent 55%),
+      var(--bg2);}
+  /* scanline sweep on active phone */
+  .frame.on .screen::after{content:"";position:absolute;inset:0;z-index:7;pointer-events:none;
+    background:linear-gradient(180deg,transparent,rgba(122,240,192,.07) 50%,transparent);
+    height:40%;animation:scan 2.6s linear infinite}
+  @keyframes scan{from{transform:translateY(-120%)}to{transform:translateY(320%)}}
+
+  .statusbar{display:flex;justify-content:space-between;align-items:center;padding:13px 22px 2px;
+    font-family:var(--display);font-weight:600;font-size:11px;color:var(--ink)}
+  .statusbar .r{display:flex;gap:6px;align-items:center;color:var(--dim);font-size:10px}
+
+  .appbar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 12px}
+  .appbar .l{font-family:"Major Mono Display",var(--mono);font-size:15px;letter-spacing:-.5px}
+  .appbar .l .a{color:var(--mint)} .appbar .l .b{color:var(--violet)}
+  .appbar .chipx{font-family:var(--display);font-weight:600;font-size:9px;letter-spacing:.12em;color:var(--dim);
+    border:1px solid var(--line2);border-radius:99px;padding:4px 9px}
+
+  .body{flex:1;min-height:0;padding:6px 16px 16px;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+
+  /* ---- prompt input ---- */
+  .promptbox{display:flex;gap:8px}
+  .field{flex:1;min-width:0;background:#0a0a11;border:1.5px solid var(--line2);border-radius:14px;
+    padding:0 13px;height:50px;display:flex;align-items:center;font-size:13px;color:var(--ink);
+    overflow:hidden;white-space:nowrap}
+  .field.ph{color:var(--faint)}
+  .field.live{border-color:var(--mint);box-shadow:0 0 0 3px rgba(122,240,192,.10)}
+  .caret{display:inline-block;width:2px;height:16px;background:var(--mint);margin-left:2px;
+    animation:blink 1.05s steps(1) infinite;flex:0 0 auto}
+  @keyframes blink{50%{opacity:0}}
+  .go{flex:0 0 auto;display:flex;align-items:center;gap:5px;padding:0 15px;height:50px;border-radius:14px;
+    font-family:var(--display);font-weight:700;font-size:13px;background:#15141f;color:var(--ink);
+    border:1.5px solid var(--line2)}
+  .go.hot{background:var(--mint);color:#04130d;border-color:var(--mint);box-shadow:var(--glow-mint);
+    animation:pump 1.7s ease-in-out infinite}
+  @keyframes pump{0%,100%{box-shadow:0 0 0 0 rgba(122,240,192,0)}50%{box-shadow:0 0 22px 2px rgba(122,240,192,.5)}}
+
+  /* ---- chips ---- */
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{font-size:11px;color:var(--dim);background:rgba(255,255,255,.025);border:1px solid var(--line2);
+    border-radius:99px;padding:7px 11px;white-space:nowrap}
+  .chip.sel{color:#04130d;background:var(--mint);border-color:var(--mint);font-weight:700}
+
+  .note{font-size:11.5px;line-height:1.55;color:var(--dim)}
+  .note b{color:var(--mint);font-weight:700}
+
+  /* ---- transport buttons ---- */
+  .tbar{display:flex;gap:8px;margin-top:auto}
+  .key{flex:1;text-align:center;font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.04em;
+    border-radius:14px;border:1.5px solid var(--line2);background:#13131f;color:var(--ink);padding:14px 0}
+  .key.pri{background:var(--mint);color:#04130d;border-color:var(--mint)}
+  .key.pri.glow{box-shadow:var(--glow-mint);animation:pump 1.7s ease-in-out infinite}
+  .key.gho{background:transparent;color:var(--pink);border-color:#3a2230}
+  .key.sm{flex:0 0 54px}
+  .key.mut{opacity:.5}
+
+  /* ---- visualizer ---- */
+  .viz{height:92px;display:flex;align-items:flex-end;gap:3px;padding:10px 10px 8px;border-radius:16px;
+    background:linear-gradient(180deg,#0a0a11,#08080d);border:1.5px solid var(--line2);overflow:hidden;position:relative}
+  .viz::after{content:"";position:absolute;left:10px;right:10px;bottom:8px;height:1px;background:rgba(122,240,192,.25)}
+  .viz i{flex:1;border-radius:3px 3px 0 0;height:8%;
+    background:linear-gradient(180deg,var(--mint),var(--violet));transition:height .085s ease}
+
+  /* ---- now-playing badge ---- */
+  .badge{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;font-family:var(--display);
+    font-weight:700;font-size:11.5px;letter-spacing:.06em;color:var(--mint);padding:7px 13px;border-radius:99px;
+    background:rgba(122,240,192,.10);border:1px solid rgba(122,240,192,.4)}
+  .badge .pip{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:var(--glow-mint);animation:beat 1s steps(1) infinite}
+
+  /* ---- code block ---- */
+  .code{flex:1;min-height:0;position:relative;background:#0a0a11;border:1.5px solid var(--line2);border-radius:16px;
+    padding:13px 13px 13px 38px;font-size:11.5px;line-height:1.62;color:var(--mint);overflow:hidden;white-space:pre-wrap;
+    counter-reset:ln}
+  .code.edit{border-color:var(--violet);box-shadow:0 0 0 3px rgba(176,122,255,.10)}
+  .code::before{content:"";position:absolute;left:0;top:0;bottom:0;width:26px;background:rgba(255,255,255,.02);
+    border-right:1px solid var(--line)}
+  .code .ln{position:relative;display:block;counter-increment:ln}
+  .code .ln::before{content:counter(ln,decimal-leading-zero);position:absolute;left:-30px;width:22px;text-align:right;
+    color:var(--faint);font-size:10px}
+  .fn{color:var(--violet)} .str{color:var(--mint)} .num{color:var(--pink)} .pun{color:var(--dim)} .cm{color:var(--faint)}
+  .blk{display:inline-block;width:7px;height:14px;background:var(--violet);vertical-align:-2px;animation:blink 1.05s steps(1) infinite}
+  .reveal .ln{opacity:0;animation:rise .5s ease forwards}
+  @keyframes rise{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+  /* ---- composing card ---- */
+  .compose{display:flex;align-items:center;gap:14px;background:linear-gradient(180deg,#0c0c15,#0a0a11);
+    border:1.5px solid var(--line2);border-radius:16px;padding:16px}
+  .speq{display:flex;align-items:flex-end;gap:3px;height:26px}
+  .speq i{width:4px;border-radius:2px;background:linear-gradient(180deg,var(--mint),var(--violet));animation:eqp 1s ease-in-out infinite}
+  .speq i:nth-child(2){animation-delay:.12s}.speq i:nth-child(3){animation-delay:.24s}
+  .speq i:nth-child(4){animation-delay:.36s}.speq i:nth-child(5){animation-delay:.48s}
+  .compose .txt{font-size:12.5px;color:var(--ink)}
+  .compose .txt small{display:block;color:var(--dim);font-size:10.5px;margin-top:3px;font-family:var(--display);letter-spacing:.1em}
+
+  /* ---- log ---- */
+  .log{font-size:11px;line-height:1.75;background:#0a0a11;border:1px solid var(--line2);border-radius:14px;padding:11px 13px;color:var(--dim)}
+  .log .u{color:var(--violet)} .log .c{color:var(--mint)}
+
+  /* ---- toast ---- */
+  .toast{align-self:center;font-family:var(--display);font-weight:700;font-size:11px;letter-spacing:.06em;
+    color:#04130d;background:var(--mint);border-radius:99px;padding:7px 16px;box-shadow:var(--glow-mint)}
+
+  /* ---- share row ---- */
+  .share{display:flex;gap:8px}
+  .share .s{flex:1;text-align:center;font-size:11.5px;border:1.5px solid var(--line2);border-radius:14px;
+    padding:12px 4px;color:var(--dim);background:rgba(255,255,255,.02)}
+  .share .s b{display:block;color:var(--ink);font-size:15px;margin-bottom:3px}
+
+  footer{position:relative;z-index:2;padding:8px 34px 44px;color:var(--faint);font-size:11.5px;line-height:1.8;
+    border-top:1px solid var(--line);margin:0 34px}
+  footer .pill{font-family:var(--display);font-weight:600;color:var(--dim);border:1px solid var(--line2);border-radius:99px;padding:2px 9px;font-size:10px;letter-spacing:.08em}
+
+  @media(max-width:560px){
+    .hud,.titleblk,.scrollhint,.rack{padding-left:20px;padding-right:20px}
+    footer{margin:0 20px}
+  }
+</style>
+</head>
+<body>
+
+  <header class="hud">
+    <div class="wordmark"><span class="a">vibe</span><span class="dot">·</span><span class="b">music</span></div>
+    <div class="transport">
+      <span class="seg"><span class="rec"></span>nl → strudel</span>
+      <span class="seg">124&nbsp;bpm</span>
+      <span class="seg">live<span class="eq"><i></i><i></i><i></i><i></i></span></span>
+    </div>
+  </header>
+
+  <section class="titleblk">
+    <p class="kicker">mobile flow · sequencer rack</p>
+    <h1>移动端流程<span class="o">脚本板</span></h1>
+    <p class="lede">
+      把整段使用流程的 <b>6 个关键界面</b>排成一条序列轨——一个 <span class="hl">播放头</span>从左扫到右，
+      落到哪一屏，哪一屏就被点亮，像在「演奏」整个流程。每屏都<b>实时自驱动</b>：打字、作曲均衡器、可视化跳动、代码逐行浮现、编辑光标都在动，
+      画的是<b>收紧后的单列移动布局</b>，可直接当重设计底板逐屏改。
+    </p>
+  </section>
+
+  <div class="scrollhint"><span class="ln"></span>左右滑动 · 6 STEPS<span class="ln"></span></div>
+
+  <div class="rack"><div class="strip" id="strip"></div></div>
+
+  <footer>
+    流程链路：空状态 → 一句话输入 → MiniMax 作曲 → 浏览器实时演奏(WebAudio) → 手动改代码热替换 → 停止/分享<br>
+    引擎 <a href="https://strudel.cc" target="_blank">Strudel</a> · NL→code by <span class="pill">MiniMax-M2.7</span> · 终端孪生 <span class="pill">/vibe-music</span> · 配色继承自真实 app
+  </footer>
+
+<script>
+  // ---------- code sample (shared by screens 4–6) ----------
+  const L = (s)=>`<span class="ln">${s}</span>`;
+  const CODE = [
+    L(`<span class="fn">stack</span><span class="pun">(</span>`),
+    L(`  <span class="fn">s</span><span class="pun">(</span><span class="str">"bd*4, ~ hh ~ hh"</span><span class="pun">)</span><span class="pun">,</span>`),
+    L(`  <span class="fn">note</span><span class="pun">(</span><span class="str">"c2 eb2 g2 c3"</span><span class="pun">)</span>`),
+    L(`    <span class="pun">.</span><span class="fn">s</span><span class="pun">(</span><span class="str">"sawtooth"</span><span class="pun">)</span>`),
+    L(`    <span class="pun">.</span><span class="fn">lpf</span><span class="pun">(</span><span class="num">600</span><span class="pun">)</span><span class="pun">.</span><span class="fn">gain</span><span class="pun">(</span><span class="num">.7</span><span class="pun">)</span>`),
+    L(`<span class="pun">)</span><span class="pun">.</span><span class="fn">slow</span><span class="pun">(</span><span class="num">2</span><span class="pun">)</span>`),
+  ].join("");
+  const CODE_EDIT = CODE
+    .replace(`<span class="num">.7</span>`, `<span class="num">.5</span><span class="blk"></span>`);
+  const vbars = (n=22)=>{let s='';for(let i=0;i<n;i++)s+='<i></i>';return `<div class="viz">${s}</div>`;};
+
+  const STATUS = `<div class="statusbar"><span>9:41</span><span class="r">5G ▮▮▮ 100%</span></div>`;
+  const APPBAR = `<div class="appbar"><div class="l"><span class="a">vibe</span><span class="b">music</span></div><span class="chipx">MINIMAX-M2.7</span></div>`;
+
+  const SCREENS = [
+    { idx:"01", nm:"空状态 · 起步", desc:"引擎未启动；提示框等待输入，示例 chip 引导第一句。",
+      body:`
+        <div class="promptbox">
+          <div class="field ph">说出你想要的声音…<span class="caret"></span></div>
+          <div class="go">vibe ⏎</div>
+        </div>
+        <div class="chips"><span class="chip">四拍鼓 + 八分 hihat</span><span class="chip">小调贝斯线</span><span class="chip">drum & bass</span><span class="chip">空灵 pad</span></div>
+        <div class="note">点一个示例或直接输入，首次会请求音频权限并加载鼓采样…</div>
+        <div class="tbar"><div class="key pri mut">▶ 播放</div><div class="key sm">🎲</div></div>` },
+
+    { idx:"02", nm:"输入提示词", desc:"敲入一句中文/英文；vibe 键点亮，回车即作曲。文字常驻、循环变形。",
+      body:`
+        <div class="promptbox">
+          <div class="field live"><span id="typed">四拍鼓加八分hihat</span><span class="caret"></span></div>
+          <div class="go hot">vibe ⏎</div>
+        </div>
+        <div class="chips"><span class="chip sel">四拍鼓加八分hihat</span><span class="chip">techno + acid</span><span class="chip">jazzy chords</span></div>
+        <div class="note">按 <b>vibe ⏎</b> 让 MiniMax 把这句话写成 Strudel 代码</div>
+        <div class="tbar"><div class="key pri mut">▶ 播放</div><div class="key sm">🎲</div></div>` },
+
+    { idx:"03", nm:"MiniMax 作曲中", desc:"提交后短暂等待；均衡器与日志显示作曲进度。",
+      body:`
+        <div class="promptbox">
+          <div class="field ph" style="opacity:.6">四拍鼓加八分hihat</div>
+          <div class="go">vibe ⏎</div>
+        </div>
+        <div class="compose">
+          <div class="speq"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="txt">正在作曲…<small>MINIMAX IS COMPOSING</small></div>
+        </div>
+        <div class="log"><span class="u">› 四拍鼓加八分hihat</span></div>
+        <div class="note" style="margin-top:auto">引擎就绪 ✦ 几秒内出代码并自动开声</div>` },
+
+    { idx:"04", nm:"生成 + 实时演奏", desc:"代码逐行浮现、自动开声；可视化随声音实时跳动。",
+      body:`
+        ${vbars()}
+        <span class="badge"><span class="pip"></span>♪ 正在演奏</span>
+        <div class="code reveal" id="reveal">${CODE}</div>
+        <div class="tbar"><div class="key pri">▶</div><div class="key gho">⏹</div><div class="key">↻ 再 vibe</div></div>` },
+
+    { idx:"05", nm:"手动编辑微调", desc:"直接改代码(gain .7→.5)，按「应用编辑」热替换，声音不断。",
+      body:`
+        ${vbars()}
+        <div class="code edit">${CODE_EDIT}</div>
+        <div class="toast">已应用 ✓ 声音已更新</div>
+        <div class="tbar"><div class="key pri glow">应用编辑 ↵</div><div class="key gho">⏹</div></div>` },
+
+    { idx:"06", nm:"停止 / 分享", desc:"hush 停声；复制代码、分享链接或跳终端孪生 /vibe-music。",
+      body:`
+        ${vbars()}
+        <div class="note"><b>⏹ 已停止</b> · 这段 pattern 已保留在代码框</div>
+        <div class="share"><div class="s"><b>⧉</b>复制代码</div><div class="s"><b>↗</b>分享链接</div></div>
+        <div class="log"><span class="u">› 四拍鼓加八分hihat</span><br><span class="c">stack(s("bd*4..."))…</span></div>
+        <div class="tbar"><div class="key pri">🎲 再来一段</div><div class="key">⌨ /vibe-music</div></div>` },
+  ];
+
+  // ---------- render ----------
+  const strip = document.getElementById('strip');
+  SCREENS.forEach((s,i)=>{
+    const f=document.createElement('div'); f.className='frame'; f.dataset.i=i;
+    f.innerHTML=`
+      <div class="ghost">${s.idx}</div>
+      <div class="step"><span class="led"></span><span class="idx">${s.idx}</span><span class="nm">${s.nm}</span><span class="tag">▶ on air</span></div>
+      <div class="desc">${s.desc}</div>
+      <div class="phone"><div class="island"></div>
+        <div class="screen">${STATUS}${APPBAR}<div class="body">${s.body}</div></div>
+      </div>`;
+    strip.appendChild(f);
+  });
+  const frames=[...document.querySelectorAll('.frame')];
+
+  // ---------- playhead: light one step at a time (the rack "plays") ----------
+  let cur=0;
+  function tickHead(){
+    frames.forEach((f,i)=>f.classList.toggle('on', i===cur));
+    cur=(cur+1)%frames.length;
+  }
+  tickHead(); setInterval(tickHead, 1400);
+
+  // ---------- visualizers (screens 4,5 = playing; 6 = idle breathing) ----------
+  const vizEls=[...document.querySelectorAll('.viz')]; // order: screen4, screen5, screen6
+  setInterval(()=>{
+    vizEls.forEach((v,idx)=>{
+      const playing = idx<2;
+      [...v.children].forEach(b=>{ b.style.height=(playing? 8+Math.random()*88 : 5+Math.random()*5)+'%'; });
+    });
+  },95);
+
+  // ---------- typewriter that is NEVER blank (left-to-right overwrite morph) ----------
+  const typed=document.getElementById('typed');
+  const PHRASES=["四拍鼓加八分hihat","a dreamy minor bassline","techno with acid bass","空灵的氛围 pad"];
+  let pI=0, cur2=PHRASES[0], tgt=PHRASES[0], k=PHRASES[0].length, hold=0;
+  function morph(){
+    if(!typed) return;
+    if(k<tgt.length){ k++; cur2=tgt.slice(0,k)+cur2.slice(k); }          // type/overwrite forward
+    else if(cur2.length>tgt.length){ cur2=cur2.slice(0,-1); }            // trim leftover tail
+    else { // settled & full
+      if(hold++>16){ hold=0; pI=(pI+1)%PHRASES.length; tgt=PHRASES[pI]; k=Math.min(2,tgt.length); }
+    }
+    typed.textContent=cur2;                                              // always non-empty
+  }
+  setInterval(morph,150);
+
+  // ---------- staggered code reveal loop (screen 4) ----------
+  const reveal=document.getElementById('reveal');
+  function runReveal(){
+    if(!reveal) return;
+    [...reveal.children].forEach((sp,i)=>{ sp.style.animation='none'; void sp.offsetWidth;
+      sp.style.animation='rise .5s ease forwards'; sp.style.animationDelay=(i*0.16)+'s'; });
+  }
+  runReveal(); setInterval(runReveal,6500);
+</script>
+</body>
+</html>

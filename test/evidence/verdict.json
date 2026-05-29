@@ -1,0 +1,95 @@
+{
+  "url": "https://vibe-web-gray.vercel.app/",
+  "all_pass": true,
+  "summary": {
+    "eval1_cli_compile": true,
+    "eval2_live_hotreload": true,
+    "eval3_translate": true,
+    "eval4_web_live": true,
+    "eval5_perceivable": true
+  },
+  "results": {
+    "eval1_cli_compile": {
+      "pass": true,
+      "evidence": {
+        "count": 4,
+        "events": [
+          {
+            "begin": 0,
+            "s": "bd"
+          },
+          {
+            "begin": 0.25,
+            "s": "bd"
+          },
+          {
+            "begin": 0.5,
+            "s": "bd"
+          },
+          {
+            "begin": 0.75,
+            "s": "bd"
+          }
+        ],
+        "raw": [
+          "0+0\t{\"s\":\"bd\"}",
+          "0+0.25\t{\"s\":\"bd\"}",
+          "0+0.5\t{\"s\":\"bd\"}",
+          "0+0.75\t{\"s\":\"bd\"}"
+        ]
+      }
+    },
+    "eval2_live_hotreload": {
+      "pass": true,
+      "evidence": {
+        "separators_make_blocks": 2,
+        "layers": 2,
+        "cycle_t1": 1,
+        "cycle_t2": 2,
+        "show": "s(\"bd*4\")\n\n// ---\nnote(\"c2 e2\").s(\"sawtooth\")"
+      }
+    },
+    "eval3_translate": {
+      "pass": true,
+      "evidence": {
+        "ok": true,
+        "code": "s(\"bd*4, hh*8\")",
+        "stderr": "cannot use window: not in browser?\n"
+      }
+    },
+    "eval4_web_live": {
+      "pass": true,
+      "evidence": {
+        "home_status": 200,
+        "api_status": 200,
+        "api_returned_code": true,
+        "api_code_sample": "stack(s(\"bd:0*4\"), s(\"~ sd:0 ~ sd:0\"), s(\"hh:1*8\"))",
+        "reached_playing": true,
+        "audio_state_when_playing": "running"
+      }
+    },
+    "eval5_perceivable": {
+      "pass": true,
+      "evidence": {
+        "feedback_latency_ms": 0.9,
+        "busy_samples": 17,
+        "busy_max_static_ms": 0,
+        "play_distinct_bar_frames": 6
+      }
+    },
+    "_browser_raw": {
+      "url": "https://vibe-web-gray.vercel.app/",
+      "home_status": 200,
+      "api_status": 200,
+      "api_returned_code": true,
+      "api_code_sample": "stack(s(\"bd:0*4\"), s(\"~ sd:0 ~ sd:0\"), s(\"hh:1*8\"))",
+      "feedback_latency_ms": 0.9,
+      "busy_samples": 17,
+      "busy_max_static_ms": 0,
+      "reached_playing": true,
+      "audio_state_when_playing": "running",
+      "play_distinct_bar_frames": 6,
+      "page_errors": []
+    }
+  }
+}

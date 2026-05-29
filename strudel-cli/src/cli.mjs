@@ -32,16 +32,18 @@ Live coding:
 Direct play / inspect:
   play [file]         Run the live player in the foreground (used inside tmux)
   eval "<code>" [n]   Evaluate code and print n cycles of events (no audio)
+  translate "<text>"  Natural-language → Strudel via MiniMax (needs MINIMAX_API_KEY)
 
-Flags: --no-audio (visual only), --file <path>
+Flags: --no-audio (visual only), --file <path>, --json (machine-readable translate output)
 `;
 
 function parseFlags(args) {
-  const flags = { audio: true, file: null };
+  const flags = { audio: true, file: null, json: false };
   const rest = [];
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
     if (a === '--no-audio') flags.audio = false;
+    else if (a === '--json') flags.json = true;
     else if (a === '--file') flags.file = args[++i];
     else rest.push(a);
   }
@@ -61,10 +63,12 @@ export async function main(argv) {
     case 'start': {
       ensureHome();
       const target = rest[1] ? resolve(rest[1]) : DEFAULT_LIVE;
-      initLive(target);
-      writeState({ file: target, session: tmux.SESSION, startedAt: Date.now() });
       if (!tmux.hasTmux()) { console.error('tmux not found. Run `strudel play` directly instead.'); process.exit(1); }
       if (tmux.sessionExists()) { console.log(`session '${tmux.SESSION}' already running. \`strudel attach\` to view.`); return; }
+      // A genuinely new default session starts from a clean buffer so it never
+      // resumes stale layers; an explicit file arg is preserved (loading a comp).
+      initLive(target, 'silence', { fresh: !rest[1] });
+      writeState({ file: target, session: tmux.SESSION, startedAt: Date.now() });
       const audioFlag = flags.audio ? '' : ' --no-audio';
       const playCmd = `node ${BIN} play --file ${target}${audioFlag}`;
       tmux.newSession(tmux.SESSION, playCmd);
@@ -140,6 +144,25 @@ export async function main(argv) {
         for (const h of haps) {
           console.log(`${c}+${Number(h.part.begin) - c}\t${JSON.stringify(h.value)}`);
         }
+      }
+      return;
+    }
+    case 'translate': {
+      const intent = rest[1];
+      if (!intent) { console.error('usage: strudel translate "<intent>" [--json]'); process.exit(1); }
+      const { translateValid } = await import('./translate.mjs');
+      const { compile } = await import('./engine.mjs');
+      // translateValid compile-checks the result (and self-repairs once on failure),
+      // proving eval-point #3: a single expression that compile() accepts.
+      const result = await translateValid(intent, '', compile);
+      if (flags.json) {
+        console.log(JSON.stringify(result));
+      } else if (result.ok) {
+        console.log(result.code);
+      } else {
+        console.error(`translate produced code that did not compile: ${result.error}`);
+        console.error(result.code);
+        process.exit(2);
       }
       return;
     }

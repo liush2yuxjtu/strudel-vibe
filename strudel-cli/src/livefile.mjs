@@ -26,9 +26,11 @@ export function liveFile() {
   return readState().file || DEFAULT_LIVE;
 }
 
-export function initLive(file = DEFAULT_LIVE, content = 'silence') {
+export function initLive(file = DEFAULT_LIVE, content = 'silence', { fresh = false } = {}) {
   ensureHome();
-  if (!existsSync(file)) writeFileSync(file, content + '\n');
+  // `fresh` starts a clean session (truncate to silence) so a new `start` never
+  // resumes a stale buffer; otherwise only create the file if it's missing.
+  if (fresh || !existsSync(file)) writeFileSync(file, content + '\n');
   return file;
 }
 

@@ -10,7 +10,7 @@ and your browser (or terminal) plays it immediately.
 
 | Folder | What it is |
 |--------|------------|
-| **`vibe-web/`** | Static page + Vercel serverless `/api/vibe`. Plays in the browser via [`@strudel/web`](https://www.npmjs.com/package/@strudel/web) (WebAudio). Live: **https://vibe-web-gray.vercel.app** |
+| **`vibe-web/`** | Static page + `/api/vibe`. Plays in the browser via [`@strudel/web`](https://www.npmjs.com/package/@strudel/web) (WebAudio). The engine (`vendor/`) and samples (`samples/`) are **vendored same-origin** — no unpkg / GitHub at runtime, so it works in mainland China once the page is reachable. Runs on Vercel (`vercel dev`) **or** as a zero-dependency Node server (`node server.mjs`) for an Aliyun/Tencent box. Live: **https://vibe-web-gray.vercel.app** · 国内部署见 [`vibe-web/DEPLOY-CN.md`](vibe-web/DEPLOY-CN.md) |
 | **`strudel-cli/`** | Terminal live-coding CLI: evaluates Strudel in plain Node, real-time software synth piped to `ffplay`, tmux live session (`append` / `set` / `hush` / `cps`). |
 | **`demo/`** | Playwright recorders that drive vibe-web and capture the **real WebAudio** output (the browser has no audio track + headless has no speakers, so the AudioContext is tapped and recorded). |
 | **`video/`** | [Remotion](https://www.remotion.dev/) project: viral / RedNote cuts of the demo with real captured audio + an audio-reactive spectrum. Plus `mobile-mock/` and `design-candidates/` — pure-HTML design explorations for the mobile app & video look. |
@@ -24,7 +24,9 @@ Needs a MiniMax key as an environment variable — **never commit it**:
 ```bash
 export MINIMAX_API_KEY=...        # required
 # optional: MINIMAX_BASE_URL, MINIMAX_MODEL
-cd vibe-web && vercel dev          # or deploy to Vercel
+cd vibe-web && vercel dev          # international: Vercel
+# or, mainland-China host (zero deps, serves static + /api/vibe):
+PORT=8080 node server.mjs          # see DEPLOY-CN.md for ICP + Aliyun/Tencent + HTTPS
 ```
 
 ### Terminal (strudel-cli)

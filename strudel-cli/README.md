@@ -36,6 +36,16 @@ A plain file (`~/.strudel-cli/live.strudel`) of Strudel expressions separated by
 `// ---` markers. Each block is one pattern; blocks are `stack()`ed so appends are
 additive. `setcps(n)` / `setcpm(n)` anywhere sets the tempo.
 
+## Natural language → Strudel (MiniMax)
+```bash
+export MINIMAX_API_KEY=sk-...
+strudel translate "四拍鼓加八分hihat"          # → s("bd*4, hh*8")
+strudel translate "a dreamy minor bassline" --json   # → {"code":"...","ok":true}
+```
+`translate` calls MiniMax's Anthropic-compatible endpoint, then compile-checks the
+result (self-repairing once on failure), so the printed expression is guaranteed
+to load. Pipe it straight into the live buffer: `strudel append "$(strudel translate '加重的 techno')"`.
+
 ## Other commands
 ```bash
 strudel play [file]        # run the player in the foreground (used inside tmux)
