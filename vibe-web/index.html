@@ -369,6 +369,40 @@
     *{transition:none !important}
   }
 
+
+  /* ——— idle auto-music toggle ——— */
+  .idle-opt{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin-top:2px; padding:10px 12px;
+    background:var(--recess); border:1px solid var(--line); border-radius:12px;
+  }
+  .idle-opt-copy{display:flex; flex-direction:column; gap:2px; min-width:0}
+  .idle-opt-title{font-size:13px; color:var(--ink); font-weight:500; line-height:1.35}
+  .idle-opt-hint{font-size:11.5px; color:var(--faint); line-height:1.35}
+  .switch{
+    position:relative; flex-shrink:0;
+    width:44px; height:26px; border-radius:999px;
+    border:1px solid var(--line2); background:#2A241F;
+    cursor:pointer; padding:0;
+    transition:background .18s, border-color .18s;
+  }
+  .switch:hover{border-color:var(--copper)}
+  .switch[aria-checked="true"]{
+    background:rgba(255,176,0,.22); border-color:rgba(255,176,0,.55);
+  }
+  .switch .knob{
+    position:absolute; top:3px; left:3px;
+    width:18px; height:18px; border-radius:50%;
+    background:var(--mute);
+    box-shadow:0 1px 3px rgba(0,0,0,.45);
+    transition:transform .18s cubic-bezier(.2,.8,.2,1), background .18s;
+    pointer-events:none;
+  }
+  .switch[aria-checked="true"] .knob{
+    transform:translateX(18px); background:var(--led);
+    box-shadow:0 0 8px rgba(255,176,0,.55);
+  }
+
   @media(max-width:520px){
     .promptbox{flex-direction:column}
     .pads{gap:8px; padding:10px}
@@ -410,6 +444,16 @@
             <button class="primary" id="play" type="button">播放</button>
             <button class="hot" id="stop" type="button">停止</button>
             <button id="surprise" type="button">随便来一段</button>
+          </div>
+          <div class="idle-opt" id="idleOpt">
+            <div class="idle-opt-copy">
+              <span class="idle-opt-title">90 秒没再按 · 自动来一段</span>
+              <span class="idle-opt-hint">空闲时随机 prompt 一点音乐 · 默认开</span>
+            </div>
+            <button type="button" class="switch" id="idleAutoToggle"
+              role="switch" aria-checked="true" aria-label="90秒无操作自动随机音乐" title="关闭后不再自动 prompt">
+              <span class="knob" aria-hidden="true"></span>
+            </button>
           </div>
           <div class="chips" id="chips"></div>
           <div class="log" id="log" aria-label="对话记录"></div>
@@ -705,7 +749,106 @@
     }catch(e){ setPhase('idle'); setState('请求失败：'+e.message); }
   }
 
-  window.__vibe = { phase:()=>phase, phaseSince:()=>phaseSince, audioState, started:()=>started, current:()=>current, repl:()=>repl, sync:'editPattern+onTrigger@deadline' };
+
+  // ——— 90s idle → auto random music (default ON, localStorage) ———
+  const IDLE_MS = 90_000;
+  const IDLE_LS_KEY = 'vibe-idle-auto-music';
+  const IDLE_PROMPTS = [
+    '赛博鼓点加霓虹 hihat',
+    'lo-fi 灰尘钢琴和软底鼓',
+    'ambient pulse · 慢速氛围 pad',
+    '酸味 techno 贝斯线',
+    '雨夜爵士刷片与拨弦',
+    'glitchy breakbeat 碎拍',
+    '暖胶碟 soul groove',
+    '太空琶音 cascade',
+    'minimal house 四四拍',
+    'dreamy minor bassline with soft hats',
+    'cyber drums, neon stabs, tight kick',
+    '空灵钟声加远处雷声感',
+  ];
+  function readIdlePref(){
+    try{
+      const v = localStorage.getItem(IDLE_LS_KEY);
+      if(v === null || v === undefined) return true; // default ON
+      return v === '1' || v === 'true';
+    }catch{ return true; }
+  }
+  function writeIdlePref(on){
+    try{ localStorage.setItem(IDLE_LS_KEY, on ? '1' : '0'); }catch{}
+  }
+  let idleAutoOn = readIdlePref();
+  let idleTimer = null;
+  let idleFiring = false;
+
+  function syncIdleToggleUi(){
+    const btn = $('idleAutoToggle');
+    if(!btn) return;
+    btn.setAttribute('aria-checked', idleAutoOn ? 'true' : 'false');
+  }
+  function clearIdleTimer(){
+    if(idleTimer){ clearTimeout(idleTimer); idleTimer = null; }
+  }
+  function armIdleTimer(){
+    clearIdleTimer();
+    if(!idleAutoOn) return;
+    if(typeof document !== 'undefined' && document.hidden) return;
+    idleTimer = setTimeout(onIdleAutoMusic, IDLE_MS);
+  }
+  function bumpIdle(reason){
+    // any meaningful interaction restarts the 90s clock
+    if(idleFiring) return;
+    armIdleTimer();
+  }
+  async function onIdleAutoMusic(){
+    idleTimer = null;
+    if(!idleAutoOn) return;
+    if(document.hidden) return;
+    if(phase === 'composing' || phase === 'loading'){ armIdleTimer(); return; }
+    if(idleFiring) return;
+    idleFiring = true;
+    try{
+      const pick = IDLE_PROMPTS[Math.floor(Math.random() * IDLE_PROMPTS.length)];
+      $('intent').value = pick;
+      setState('空闲 90 秒 · 自动来一段：<b>'+pick.replace(/</g,'&lt;')+'</b>');
+      await vibe();
+    } finally {
+      idleFiring = false;
+      armIdleTimer();
+    }
+  }
+
+  syncIdleToggleUi();
+  $('idleAutoToggle').onclick = ()=>{
+    idleAutoOn = !idleAutoOn;
+    writeIdlePref(idleAutoOn);
+    syncIdleToggleUi();
+    bumpIdle('toggle');
+    setState(idleAutoOn
+      ? '已开启：90 秒没再按会自动随机来一段'
+      : '已关闭自动随机音乐');
+  };
+
+  // Meaningful activity: typing, pads, transport, chips, code edit, send
+  $('intent').addEventListener('input', ()=>bumpIdle('type'));
+  $('intent').addEventListener('keydown', ()=>bumpIdle('key'));
+  $('code').addEventListener('input', ()=>bumpIdle('code'));
+  pads.forEach(p=>{
+    p.addEventListener('pointerdown', ()=>bumpIdle('pad'), {passive:true});
+    p.addEventListener('keydown', ()=>bumpIdle('pad-key'));
+  });
+  ['send','play','stop','surprise','apply'].forEach(id=>{
+    const el=$(id); if(el) el.addEventListener('click', ()=>bumpIdle(id), true);
+  });
+  chips.addEventListener('click', ()=>bumpIdle('chip'), true);
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.hidden) clearIdleTimer();
+    else bumpIdle('visible');
+  });
+  armIdleTimer();
+
+
+  window.__vibe = { phase:()=>phase, phaseSince:()=>phaseSince, audioState, started:()=>started, current:()=>current, repl:()=>repl, sync:'editPattern+onTrigger@deadline', idleAuto:()=>idleAutoOn, bumpIdle, armIdleTimer, IDLE_MS };
 
   $('send').onclick=vibe;
   $('intent').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); vibe(); }});
