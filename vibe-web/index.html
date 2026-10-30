@@ -402,7 +402,7 @@
 
       <div class="pad-layout pad-section">
         <div>
-          <p class="pad-label">胶垫 · 按下去会陷，作曲与演奏时会亮</p>
+          <p class="pad-label">胶垫 · 按下去会陷，演奏时跟鼓点一起亮</p>
           <div class="pads" id="pads" aria-hidden="true"></div>
         </div>
         <div class="side">
@@ -473,36 +473,105 @@
   });
   const pads=[...padsEl.querySelectorAll('.pad')];
 
-  // Classic 16-step drum map (row-major): BD/SD/HH accents feel like an MPC
-  // step 0..15 → which pads fire (index into PAD_LABELS)
-  const PLAY_STEPS = [
-    [0,2],       // 1: BD + HH
-    [2],         // e
-    [2,11],      // & HH + RS
-    [2],         // a
-    [1,2],       // 2: SD + HH
-    [2],
-    [0,2],       // & kick ghost
-    [2,3],       // a OH hint
-    [0,2],       // 3
-    [2],
-    [2,4],       // & clap ghost
-    [2],
-    [1,2],       // 4 SD
-    [2,7],       // e HT
-    [0,2,3],     // & BD + OH
-    [2],
-  ];
+  // Pad ↔ sound map (MPC-style labels). Real sync via Strudel editPattern+onTrigger
+  // (fires on each hap at audio deadline — not a fake independent blinker).
+  const SOUND_TO_PAD = {
+    bd:0, kick:0, bassdrum:0, 'bass-drum':0,
+    sd:1, sn:1, snare:1,
+    hh:2, hat:2, ch:2, hc:2, closedhat:2, 'closed-hat':2,
+    oh:3, openhat:3, 'open-hat':3, ohh:3,
+    cp:4, clap:4, handclap:4,
+    lt:5, lowtom:5, 'low-tom':5,
+    mt:6, midtom:6, 'mid-tom':6,
+    ht:7, hightom:7, 'high-tom':7, tom:7,
+    rm:8, rim:8, rimshot:8,
+    cb:9, cowbell:9,
+    cy:10, crash:10, ride:10, cymbal:10,
+    rs:11, stick:11,
+    t1:12, t2:13, t3:14, t4:15,
+    perc:8, click:11, blip:11, casio:9, techno:0, house:0, drum:0,
+    bass:12, arpy:13, jazz:14, metal:15, east:13, space:14, pad:15, insect:11, numbers:10,
+  };
+
+  function soundFromHap(hap){
+    const v = hap && hap.value;
+    if(v == null) return null;
+    if(typeof v === 'string') return v.toLowerCase().split(':')[0];
+    if(typeof v === 'object'){
+      const s = v.s ?? v.sound;
+      if(typeof s === 'string' && s) return s.toLowerCase().split(':')[0];
+      if(v.note != null || (v.n != null && v.s == null)) return '__note__';
+    }
+    return null;
+  }
+
+  function padIndexFor(sound, hap){
+    if(sound === '__note__'){
+      const v = hap.value || {};
+      let midi = v.note ?? v.n;
+      if(typeof midi === 'string'){
+        // crude note→midi: C4=60-ish; fall back to char codes
+        const m = midi.trim().match(/^([a-gA-G])([#b]?)(-?\d+)?/);
+        if(m){
+          const base = {c:0,d:2,e:4,f:5,g:7,a:9,b:11}[m[1].toLowerCase()] ?? 0;
+          const acc = m[2]==='#' ? 1 : m[2]==='b' ? -1 : 0;
+          const oct = m[3] != null ? parseInt(m[3],10) : 4;
+          midi = (oct+1)*12 + base + acc;
+        } else {
+          midi = midi.length;
+        }
+      }
+      if(typeof midi !== 'number' || !isFinite(midi)) midi = 0;
+      return 12 + ((Math.round(midi) % 4) + 4) % 4; // T1–T4
+    }
+    if(Object.prototype.hasOwnProperty.call(SOUND_TO_PAD, sound)) return SOUND_TO_PAD[sound];
+    // unknown bank → scatter across bottom row
+    let h = 0;
+    for(let i=0;i<sound.length;i++) h = (h*31 + sound.charCodeAt(i))|0;
+    return 12 + (Math.abs(h) % 4);
+  }
 
   function flashPad(el, ms){
+    if(!el) return;
     el.classList.add('hit','lit','press');
     clearTimeout(el._hitT);
+    clearTimeout(el._litT);
     el._hitT = setTimeout(()=>{
       el.classList.remove('hit','press');
-      if(phase!=='playing' && phase!=='composing' && phase!=='loading'){
-        el.classList.remove('lit');
-      }
     }, ms || 90);
+    el._litT = setTimeout(()=>{
+      // keep a short amber afterglow only while still playing
+      if(phase!=='playing') el.classList.remove('lit');
+      else el.classList.remove('lit');
+    }, (ms || 90) + 70);
+  }
+
+  function clearPads(){
+    pads.forEach(p=>{
+      clearTimeout(p._hitT); clearTimeout(p._litT);
+      p.classList.remove('hit','lit','press');
+    });
+  }
+
+  /** Called from Strudel hap onTrigger at the audio deadline (real groove). */
+  function onHapHit(hap, _time, _cps, deadline){
+    if(phase !== 'playing') return;
+    const sound = soundFromHap(hap);
+    if(!sound) return;
+    const idx = padIndexFor(sound, hap);
+    let delay = 0;
+    try{
+      const ac = (typeof getAudioContext==='function') ? getAudioContext() : null;
+      if(ac && typeof deadline === 'number'){
+        delay = Math.max(0, (deadline - ac.currentTime) * 1000);
+      }
+    }catch{}
+    // Cap lookahead flash scheduling; drop if wildly late
+    if(delay > 800) delay = 0;
+    setTimeout(()=>{
+      if(phase !== 'playing') return;
+      flashPad(pads[idx], sound==='hh' || sound==='hat' || sound==='ch' || sound==='hc' ? 70 : 110);
+    }, delay);
   }
 
   pads.forEach(p=>{
@@ -515,19 +584,11 @@
 
   let frame=0;
   let padTimer=null;
-  let step=0;
   function tickPads(){
     frame++;
     if(phase==='playing'){
-      // ~120 BPM sixteenth notes: interval ~110ms → advance step each tick
-      step = (step + 1) % 16;
-      const active = new Set(PLAY_STEPS[step]);
-      pads.forEach((p,i)=>{
-        const on = active.has(i);
-        p.classList.toggle('lit', on);
-        p.classList.toggle('hit', on);
-        p.classList.toggle('press', on);
-      });
+      // Real hits come from onHapHit — do not fake a 16-step blink here.
+      return;
     } else if(phase==='composing' || phase==='loading'){
       // travelling press across the grid — like scanning banks
       const head = Math.floor((frame * 0.55) % 16);
@@ -561,9 +622,11 @@
   }, 250);
 
   function setPhase(p){
+    const prev=phase;
     phase=p; phaseSince=performance.now();
-    if(p==='playing') step=15; // next tick → 0
     playing = (p==='playing');
+    if(p!=='playing' && prev==='playing') clearPads();
+    if(p==='playing' && prev!=='playing') clearPads();
     const busy = (p==='composing' || p==='loading');
     $('prog').classList.toggle('on', busy);
     const send=$('send');
@@ -590,12 +653,17 @@
   }
 
   let enginePromise=null;
+  let repl=null;
   function ensureStarted(){
-    if(started) return Promise.resolve();
+    if(started) return Promise.resolve(repl);
     if(enginePromise) return enginePromise;
     // Samples from THIS origin (/samples) — github raw is blocked in mainland China.
-    enginePromise = initStrudel({ prebake: () => samples('/samples/strudel.json') })
-      .then(()=>{ started=true; });
+    // editPattern wraps every evaluated pattern with onTrigger so pads flash on real haps
+    // (deadline-aligned to WebAudio). Second arg false = non-dominant (keep audio output).
+    enginePromise = initStrudel({
+      prebake: () => samples('/samples/strudel.json'),
+      editPattern: (pat) => pat.onTrigger(onHapHit, false),
+    }).then((r)=>{ repl=r; started=true; return r; });
     return enginePromise;
   }
 
@@ -637,13 +705,13 @@
     }catch(e){ setPhase('idle'); setState('请求失败：'+e.message); }
   }
 
-  window.__vibe = { phase:()=>phase, phaseSince:()=>phaseSince, audioState, started:()=>started, current:()=>current };
+  window.__vibe = { phase:()=>phase, phaseSince:()=>phaseSince, audioState, started:()=>started, current:()=>current, repl:()=>repl, sync:'editPattern+onTrigger@deadline' };
 
   $('send').onclick=vibe;
   $('intent').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); vibe(); }});
   $('play').onclick=()=>{ const c=$('code').value.trim()||current; if(c) playCode(c); };
   $('apply').onclick=()=>{ const c=$('code').value.trim(); if(c) playCode(c); };
-  $('stop').onclick=()=>{ try{ hush(); }catch{} setPhase('idle'); setState('已停止'); };
+  $('stop').onclick=()=>{ try{ hush(); }catch{} setPhase('idle'); clearPads(); setState('已停止'); };
   $('surprise').onclick=()=>{ $('intent').value = EXAMPLES[Math.floor(Math.random()*EXAMPLES.length)]; vibe(); };
 
   fetch('/api/vibe',{method:'POST',headers:{'content-type':'application/json'},body:'{}'})
