@@ -81,7 +81,7 @@
 <body>
   <header>
     <div class="logo"><b>vibe</b>-<i>music</i></div>
-    <div class="tag">用一句中文或英文，让 MiniMax 写 Strudel，浏览器实时演奏 · <span class="pill">MiniMax-M2.7</span></div>
+    <div class="tag">用一句中文或英文，让 DeepSeek 写 Strudel，浏览器实时演奏 · <span class="pill">deepseek-chat</span></div>
   </header>
 
   <div class="wrap">
@@ -114,14 +114,14 @@
   </div>
 
   <footer>
-    built with <a href="https://strudel.cc" target="_blank">Strudel</a> · NL→code by MiniMax ·
+    built with <a href="https://strudel.cc" target="_blank">Strudel</a> · NL→code by DeepSeek ·
     terminal twin: <span class="pill">/vibe-music</span> &nbsp;|&nbsp; <span id="status2"></span>
   </footer>
 
 <script>
   const $ = (id)=>document.getElementById(id);
   let started=false, playing=false, current='';
-  // phase: 'idle' | 'loading' (engine/samples) | 'composing' (MiniMax) | 'playing'
+  // phase: 'idle' | 'loading' (engine/samples) | 'composing' (DeepSeek) | 'playing'
   let phase='idle', phaseSince=performance.now();
   const EXAMPLES = [
     "四拍鼓加八分hihat","加一条小调贝斯线","鼓声小一点","更梦幻一点，加点混响",
@@ -138,7 +138,7 @@
 
   // One animation loop drives the equalizer for EVERY active phase — not just
   // playback. During composing/loading it shows a travelling sine "thinking"
-  // wave so the 3–5s MiniMax wait is never a dead screen (eval point #5).
+  // wave so the few seconds DeepSeek takes is never a dead screen (eval point #5).
   let frame=0;
   setInterval(()=>{
     frame++;
@@ -228,10 +228,10 @@
     if(!intent) return;
     // ---- INSTANT feedback (<100ms, fully synchronous, before any await) ----
     setPhase('composing');
-    setState('MiniMax 正在作曲<span class="dots"></span>（约 3–5 秒）');
+    setState('DeepSeek 正在作曲<span class="dots"></span>（约 3–5 秒）');
     $('vtext').textContent='正在作曲';
     logLine('<span class="u">› '+intent+'</span>');
-    // Load the audio engine IN PARALLEL with the MiniMax call so the first vibe
+    // Load the audio engine IN PARALLEL with the DeepSeek call so the first vibe
     // doesn't pay load-then-compose serially.
     ensureStarted();
     try{
