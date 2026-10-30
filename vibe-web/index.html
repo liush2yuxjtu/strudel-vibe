@@ -118,12 +118,21 @@
   .state .dots::after{content:''; animation:dots 1.1s steps(4,end) infinite}
   @keyframes dots{0%{content:''}25%{content:'·'}50%{content:'··'}75%{content:'···'}100%{content:''}}
 
-  /* ——— hero: 16 pads ——— */
+  /* ——— hero: 16 MPC-style rubber pads ——— */
   .pad-section{margin-top:18px}
   .pad-label{margin:0 0 10px; font-size:13px; color:var(--faint); font-weight:500}
   .pads{
-    display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;
+    display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;
     aspect-ratio:1 / 1; max-width:min(420px, 100%); margin:0 auto;
+    padding:14px;
+    background:
+      linear-gradient(180deg, #161310 0%, #0C0A09 100%);
+    border:1px solid #0A0908;
+    border-radius:16px;
+    box-shadow:
+      inset 0 2px 6px rgba(0,0,0,.55),
+      inset 0 -1px 0 rgba(255,255,255,.03),
+      0 1px 0 rgba(255,255,255,.04);
   }
   @media(min-width:720px){
     .pad-layout{display:grid; grid-template-columns:1fr minmax(280px, 380px); gap:22px; align-items:start}
@@ -131,45 +140,116 @@
   }
   .pad{
     position:relative;
-    border:1px solid var(--line2);
-    border-radius:var(--radius-pad);
+    border:none;
+    border-radius:12px;
+    /* rubber dome: warm gray top → darker edges */
     background:
-      linear-gradient(160deg, #2A2520 0%, #1A1714 100%);
+      radial-gradient(120% 90% at 35% 22%, rgba(255,255,255,.09) 0%, transparent 42%),
+      radial-gradient(80% 70% at 50% 55%, #2C2621 0%, #1A1613 62%, #12100E 100%);
     box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.06),
-      0 4px 0 #0A0908,
-      0 8px 16px rgba(0,0,0,.35);
-    color:var(--faint);
-    font-family:var(--mono); font-size:clamp(10px,2.4vw,12px); font-weight:500;
-    letter-spacing:.04em;
+      /* raised lip */
+      0 1px 0 rgba(255,255,255,.07),
+      0 5px 0 #070605,
+      0 8px 14px rgba(0,0,0,.45),
+      /* soft rubber inset rim */
+      inset 0 0 0 1px rgba(0,0,0,.55),
+      inset 0 2px 3px rgba(255,255,255,.05),
+      inset 0 -3px 5px rgba(0,0,0,.35);
+    color:rgba(138,129,120,.55);
+    font-family:var(--mono); font-size:clamp(10px,2.4vw,11px); font-weight:600;
+    letter-spacing:.06em;
     display:flex; align-items:flex-end; justify-content:flex-start;
-    padding:10px;
-    cursor:default; user-select:none;
-    transition:background .12s, color .12s, box-shadow .12s, border-color .12s, transform .12s;
+    padding:11px 10px;
+    cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent;
+    transition:
+      transform .08s cubic-bezier(.2,.8,.2,1),
+      box-shadow .08s cubic-bezier(.2,.8,.2,1),
+      color .15s, filter .12s;
+    will-change:transform;
+    touch-action:manipulation;
   }
+  /* LED diffuser — sits under translucent rubber feel */
   .pad::before{
-    content:""; position:absolute; top:10px; right:10px;
-    width:7px; height:7px; border-radius:50%;
-    background:var(--led-dim); border:1px solid rgba(255,176,0,.15);
-    transition:background .12s, box-shadow .12s;
+    content:""; position:absolute; top:11px; right:11px;
+    width:8px; height:8px; border-radius:50%;
+    background:rgba(255,176,0,.12);
+    box-shadow:
+      0 0 0 1px rgba(255,176,0,.08),
+      inset 0 1px 1px rgba(0,0,0,.4);
+    transition:background .1s, box-shadow .1s, transform .08s;
+    z-index:2;
+  }
+  /* light bleed through rubber when lit */
+  .pad::after{
+    content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:
+      radial-gradient(ellipse 70% 65% at 50% 42%, rgba(255,176,0,0) 0%, transparent 70%);
+    opacity:0;
+    transition:opacity .1s ease-out;
+    mix-blend-mode:screen;
+  }
+  .pad:hover{
+    filter:brightness(1.06);
+  }
+  .pad:active, .pad.press{
+    transform:translateY(4px) scale(.965);
+    box-shadow:
+      0 0 0 rgba(0,0,0,0),
+      0 1px 0 #070605,
+      0 2px 6px rgba(0,0,0,.4),
+      inset 0 0 0 1px rgba(0,0,0,.65),
+      inset 0 4px 10px rgba(0,0,0,.55),
+      inset 0 -1px 1px rgba(255,255,255,.03);
+  }
+  .pad:active::before, .pad.press::before{
+    transform:scale(.92);
   }
   .pad.lit{
-    background:linear-gradient(160deg, #3A2E18 0%, #2A2010 100%);
-    border-color:rgba(255,176,0,.45);
-    color:var(--led);
+    color:rgba(255,208,120,.9);
     box-shadow:
-      inset 0 1px 0 rgba(255,176,0,.15),
-      0 4px 0 #0A0908,
-      0 0 22px rgba(255,176,0,.18);
-    transform:translateY(1px);
+      0 1px 0 rgba(255,200,80,.12),
+      0 5px 0 #070605,
+      0 8px 14px rgba(0,0,0,.45),
+      0 0 18px rgba(255,176,0,.14),
+      inset 0 0 0 1px rgba(255,176,0,.22),
+      inset 0 2px 3px rgba(255,200,100,.08),
+      inset 0 -3px 5px rgba(0,0,0,.35);
   }
   .pad.lit::before{
     background:var(--led);
-    box-shadow:0 0 10px rgba(255,176,0,.8);
+    box-shadow:
+      0 0 6px rgba(255,176,0,.95),
+      0 0 14px rgba(255,176,0,.55),
+      inset 0 1px 1px rgba(255,255,255,.35);
   }
-  .pad.hit{
-    background:linear-gradient(160deg, #4A3818 0%, #3A2810 100%);
+  .pad.lit::after{
+    opacity:1;
+    background:
+      radial-gradient(ellipse 75% 70% at 55% 35%, rgba(255,176,0,.28) 0%, rgba(255,140,40,.08) 45%, transparent 72%);
+  }
+  .pad.hit, .pad.lit.hit{
+    transform:translateY(4px) scale(.96);
     color:var(--ink);
+    box-shadow:
+      0 0 0 rgba(0,0,0,0),
+      0 1px 0 #070605,
+      0 2px 8px rgba(255,176,0,.2),
+      0 0 28px rgba(255,176,0,.28),
+      inset 0 0 0 1px rgba(255,200,80,.45),
+      inset 0 5px 14px rgba(0,0,0,.5),
+      inset 0 0 24px rgba(255,176,0,.18);
+  }
+  .pad.hit::before{
+    background:#FFE08A;
+    box-shadow:
+      0 0 10px rgba(255,224,140,1),
+      0 0 22px rgba(255,176,0,.85),
+      inset 0 1px 1px rgba(255,255,255,.5);
+  }
+  .pad.hit::after{
+    opacity:1;
+    background:
+      radial-gradient(ellipse 85% 80% at 50% 40%, rgba(255,210,100,.5) 0%, rgba(255,140,40,.18) 40%, transparent 70%);
   }
 
   .side{display:flex; flex-direction:column; gap:14px; min-width:0}
@@ -199,6 +279,15 @@
     animation:spin .7s linear infinite;
   }
   @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* pads are not transport buttons — reassert rubber look if tagged as button */
+  button.pad, .pads .pad{
+    font-family:var(--mono); font-size:clamp(10px,2.4vw,11px); font-weight:600;
+    letter-spacing:.06em; text-align:left;
+  }
+  button.pad:hover{border-color:transparent; filter:brightness(1.06)}
+  button.pad:active{transform:translateY(4px) scale(.965)}
+  button.pad[disabled]{opacity:1; cursor:pointer}
 
   .chips{display:flex; gap:8px; flex-wrap:wrap}
   .chip{
@@ -282,8 +371,8 @@
 
   @media(max-width:520px){
     .promptbox{flex-direction:column}
-    .pads{gap:8px}
-    .pad{padding:8px; font-size:10px}
+    .pads{gap:8px; padding:10px}
+    .pad{padding:8px; font-size:10px; border-radius:10px}
   }
 </style>
 </head>
@@ -313,7 +402,7 @@
 
       <div class="pad-layout pad-section">
         <div>
-          <p class="pad-label">节奏垫 · 作曲和播放时会亮</p>
+          <p class="pad-label">胶垫 · 按下去会陷，作曲与演奏时会亮</p>
           <div class="pads" id="pads" aria-hidden="true"></div>
         </div>
         <div class="side">
@@ -373,41 +462,89 @@
     chips.appendChild(c);
   });
 
-  // Hero: 16 rubber pads (drum-machine vernacular)
+  // Hero: 16 MPC-style rubber pads
   const padsEl=$('pads');
   PAD_LABELS.forEach((lab,i)=>{
     const p=document.createElement('div');
     p.className='pad'; p.textContent=lab; p.dataset.i=String(i);
+    p.setAttribute('role','button'); p.tabIndex=0;
+    p.setAttribute('aria-label', '垫 '+lab);
     padsEl.appendChild(p);
   });
   const pads=[...padsEl.querySelectorAll('.pad')];
 
+  // Classic 16-step drum map (row-major): BD/SD/HH accents feel like an MPC
+  // step 0..15 → which pads fire (index into PAD_LABELS)
+  const PLAY_STEPS = [
+    [0,2],       // 1: BD + HH
+    [2],         // e
+    [2,11],      // & HH + RS
+    [2],         // a
+    [1,2],       // 2: SD + HH
+    [2],
+    [0,2],       // & kick ghost
+    [2,3],       // a OH hint
+    [0,2],       // 3
+    [2],
+    [2,4],       // & clap ghost
+    [2],
+    [1,2],       // 4 SD
+    [2,7],       // e HT
+    [0,2,3],     // & BD + OH
+    [2],
+  ];
+
+  function flashPad(el, ms){
+    el.classList.add('hit','lit','press');
+    clearTimeout(el._hitT);
+    el._hitT = setTimeout(()=>{
+      el.classList.remove('hit','press');
+      if(phase!=='playing' && phase!=='composing' && phase!=='loading'){
+        el.classList.remove('lit');
+      }
+    }, ms || 90);
+  }
+
+  pads.forEach(p=>{
+    const down = (e)=>{ e.preventDefault(); flashPad(p, 120); };
+    p.addEventListener('pointerdown', down);
+    p.addEventListener('keydown', e=>{
+      if(e.key==='Enter' || e.key===' '){ e.preventDefault(); flashPad(p, 120); }
+    });
+  });
+
   let frame=0;
   let padTimer=null;
+  let step=0;
   function tickPads(){
     frame++;
     if(phase==='playing'){
+      // ~120 BPM sixteenth notes: interval ~110ms → advance step each tick
+      step = (step + 1) % 16;
+      const active = new Set(PLAY_STEPS[step]);
       pads.forEach((p,i)=>{
-        const on = Math.random() > 0.62;
+        const on = active.has(i);
         p.classList.toggle('lit', on);
-        p.classList.toggle('hit', on && Math.random()>0.5);
+        p.classList.toggle('hit', on);
+        p.classList.toggle('press', on);
       });
     } else if(phase==='composing' || phase==='loading'){
-      // travelling wave across the grid
-      const head = Math.floor((frame * 0.45) % 16);
+      // travelling press across the grid — like scanning banks
+      const head = Math.floor((frame * 0.55) % 16);
       pads.forEach((p,i)=>{
         const d = Math.min((i - head + 16) % 16, (head - i + 16) % 16);
         const on = d <= 1;
         p.classList.toggle('lit', on);
         p.classList.toggle('hit', d===0);
+        p.classList.toggle('press', d===0);
       });
     } else {
-      // idle: soft breath on corners only
-      const breath = !reduceMotion && Math.sin(frame*0.08) > 0.55;
+      // idle: soft LED breath on bank corners (no fake press)
+      const breath = !reduceMotion && Math.sin(frame*0.07) > 0.35;
       pads.forEach((p,i)=>{
         const corner = i===0 || i===3 || i===12 || i===15;
         p.classList.toggle('lit', breath && corner);
-        p.classList.remove('hit');
+        p.classList.remove('hit','press');
       });
     }
   }
@@ -425,6 +562,7 @@
 
   function setPhase(p){
     phase=p; phaseSince=performance.now();
+    if(p==='playing') step=15; // next tick → 0
     playing = (p==='playing');
     const busy = (p==='composing' || p==='loading');
     $('prog').classList.toggle('on', busy);
