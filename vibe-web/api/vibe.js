@@ -1,6 +1,7 @@
 // Vercel serverless function: natural-language intent (中文/English) -> Strudel code.
-// Thin adapter over the shared core (lib/vibe-core.mjs); the same core also powers
-// server.mjs for the mainland-China (Aliyun/Tencent) deploy.
+// Thin adapter over lib/vibe-core.mjs (DeepSeek Chat Completions). The same core
+// powers server.mjs for the mainland-China (Aliyun/Tencent) deploy.
+// Env (server-side only): DEEPSEEK_API_KEY required; optional DEEPSEEK_BASE_URL, DEEPSEEK_MODEL.
 import { generateStrudel } from '../lib/vibe-core.mjs';
 
 export default async function handler(req, res) {

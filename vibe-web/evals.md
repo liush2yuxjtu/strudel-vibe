@@ -1,7 +1,7 @@
 # evals.md — vibe·music mobile flow user stories
 
 > Source: 20 yes/no UX decisions collected against `design/mobile-flow.html`
-> (flow: 01 empty → 02 input → 03 MiniMax composing → 04 live play → 05 edit → 06 stop/share).
+> (flow: 01 empty → 02 input → 03 DeepSeek composing → 04 live play → 05 edit → 06 stop/share).
 > Format: `/user-stories`. Each story is independently deliverable with testable acceptance criteria.
 > Decision legend: ✅ = decided IN, ❌ = decided OUT (kept here as explicit Out-of-Scope guardrails).
 
@@ -69,7 +69,7 @@
 
 **Acceptance Criteria:**
 - Given a non-empty prompt, When I press the keyboard Enter key, Then composition is triggered (same as tapping vibe ⏎). *(#3=Yes)*
-- Given a Chinese, English, or mixed prompt, When I submit, Then it is accepted and sent to MiniMax without language restriction. *(#4=Yes)*
+- Given a Chinese, English, or mixed prompt, When I submit, Then it is accepted and sent to DeepSeek without language restriction. *(#4=Yes)*
 - Given a non-empty prompt, When the field has content, Then the vibe button shows its active/"hot" state.
 
 **Edge Cases:**
@@ -81,17 +81,17 @@
 ---
 
 ### Story 3: Wait through composition with a calm composing state
-**Story:** As a user who just submitted, I want a clear "composing" indicator, so that I know MiniMax is working and the app didn't freeze.
+**Story:** As a user who just submitted, I want a clear "composing" indicator, so that I know DeepSeek is working and the app didn't freeze.
 
 **Priority:** Must-have · **Size:** S
 
 **Acceptance Criteria:**
-- Given a submitted prompt, When MiniMax is composing, Then a composing animation (equalizer) is shown **without** a streaming token/progress log. *(#5=No)*
+- Given a submitted prompt, When DeepSeek is composing, Then a composing animation (equalizer) is shown **without** a streaming token/progress log. *(#5=No)*
 - Given composition is in flight, When the user views the screen, Then **no** cancel/abort control is presented; composition runs to completion. *(#6=No)*
 - Given composition completes, When code is ready, Then the app transitions automatically to the live-play screen (04).
 
 **Edge Cases:**
-- What happens when MiniMax errors or times out? (Show an error state with a way to re-submit — there is no cancel, but a failed run must not strand the user.)
+- What happens when DeepSeek errors or times out? (Show an error state with a way to re-submit — there is no cancel, but a failed run must not strand the user.)
 - What happens if the user backgrounds the app mid-compose? (On return, either show result or the error/retry state.)
 
 **Notes:** No log + no cancel = the composing state must feel short and trustworthy. Keep it visually alive (equalizer) so the absence of detail doesn't read as a stall.
@@ -206,7 +206,7 @@ Pick A or B with the user before implementation. This story assumes **(A)** unti
 - S8 reproducibility reuses S6's load-from-encoded-pattern path.
 
 **External / technical:**
-- MiniMax-M2.7 NL→Strudel endpoint (powers S3/S4).
+- deepseek-chat NL→Strudel endpoint (powers S3/S4).
 - Strudel/WebAudio runtime for playback + hot-reload (S4/S5).
 - Browser autoplay/user-gesture policy (S4, S6 shared links).
 - Persistence layer for S7 theme choice and S8 library (and possibly S6 links).
@@ -227,4 +227,4 @@ Pick A or B with the user before implementation. This story assumes **(A)** unti
 
 1. **S5 conflict:** Is generated code read-only with controlled edits (model A) or freely editable (model B)? Everything in S5 hinges on this.
 2. **S6/S8 persistence:** Local-only or account-backed? Determines cross-device behavior and share-link longevity.
-3. **S3 failure UX:** With no cancel and no log, what exactly does a MiniMax timeout/error show?
+3. **S3 failure UX:** With no cancel and no log, what exactly does a DeepSeek timeout/error show?

@@ -5,8 +5,10 @@
 > - HTTPS（共用现有 sslip.io 证书的另一个端口）：**https://106-14-154-23.sslip.io:8443/**
 >
 > 与已有的 `sub3api`（:3000，Caddy 443）共存：vibe-web 由 `server.mjs` 跑在 `:8131`，
-> systemd 单元 `vibe-web.service`（`EnvironmentFile=/opt/vibe-web/vibe.env`，含 `MINIMAX_API_KEY`），
-> Caddy 增加一个 `106-14-154-23.sslip.io:8443` 站点反代到 `127.0.0.1:8131`。由于复用同一
+> systemd 单元 `vibe-web.service`（`EnvironmentFile=/opt/vibe-web/vibe.env`），
+> Caddy 增加一个 `106-14-154-23.sslip.io:8443` 站点反代到 `127.0.0.1:8131`。
+> 该快照里的 env 文件原先写的是 `MINIMAX_API_KEY`；重新部署本版本时改成
+> `DEEPSEEK_API_KEY`（可选 `DEEPSEEK_BASE_URL`、`DEEPSEEK_MODEL`）。由于复用同一
 > 主机名的已签发证书，**绕开了 sslip.io 的 Let's Encrypt 限频**（新子域名本周已达 250k 限额）。
 > 此处用 sslip.io + 非 80/443 端口免去了备案；正式对外仍建议按下文走备案域名。
 > 端到端校验：`python3 test/browser-eval.py http://106.14.154.23:8131/` → AudioContext `running`、
@@ -25,12 +27,14 @@ GitHub**（这两者在大陆被墙/限速，原先会导致引擎加载慢、�
 
 ---
 
-## 0. 前置：MiniMax Key 在国内可达
+## 0. 前置：DeepSeek Key 在国内可达
 
-`/api/vibe` 在**服务器端**调用 MiniMax 的 Anthropic 兼容接口
-（`https://api.minimaxi.com/anthropic`）。MiniMax 是国内厂商，从阿里云/腾讯云
-国内机房可正常访问，无需改动。Key 通过环境变量 `MINIMAX_API_KEY` 注入，
-**不会下发到浏览器**。
+`/api/vibe` 在**服务器端**调用 DeepSeek 的 OpenAI 兼容 Chat Completions
+（默认 `https://api.deepseek.com/v1/chat/completions`，模型 `deepseek-chat`）。
+DeepSeek 是国内厂商，从阿里云/腾讯云国内机房一般可直接访问。Key 通过环境变量
+`DEEPSEEK_API_KEY` 注入，**不会下发到浏览器**。若机房访问默认域名异常，可设
+`DEEPSEEK_BASE_URL` 指向可达的兼容网关（不要带末尾的 `/v1`，代码会自己拼
+`/v1/chat/completions`）。
 
 ---
 
@@ -58,9 +62,10 @@ GitHub**（这两者在大陆被墙/限速，原先会导致引擎加载慢、�
 git clone <你的仓库>            # 或者只上传 vibe-web/ 目录
 cd vibe-web
 
-# 用真实 key 启动（监听 8080）
-MINIMAX_API_KEY=sk-cp-你的key PORT=8080 node server.mjs
-# 看到 "vibe-music server on :8080 (MINIMAX_API_KEY set)" 即成功
+# 用真实 key 启动（监听 8080）。不要把 key 写进仓库。
+DEEPSEEK_API_KEY=sk-你的key PORT=8080 node server.mjs
+# 看到 "vibe-music server on :8080 (DEEPSEEK_API_KEY set)" 即成功
+# 可选：DEEPSEEK_BASE_URL=https://api.deepseek.com  DEEPSEEK_MODEL=deepseek-chat
 ```
 
 只需要 `vibe-web/` 这一个目录（含 `index.html` / `vendor/` / `samples/` /
@@ -78,7 +83,9 @@ After=network.target
 [Service]
 WorkingDirectory=/opt/vibe-web
 Environment=PORT=8080
-Environment=MINIMAX_API_KEY=sk-cp-你的key
+Environment=DEEPSEEK_API_KEY=sk-你的key
+# Environment=DEEPSEEK_BASE_URL=https://api.deepseek.com
+# Environment=DEEPSEEK_MODEL=deepseek-chat
 ExecStart=/usr/bin/node /opt/vibe-web/server.mjs
 Restart=always
 User=www-data
@@ -122,7 +129,7 @@ server {
     location / {
         proxy_pass http://127.0.0.1:8080;
         proxy_set_header Host $host;
-        proxy_read_timeout 60s;   # /api/vibe 调 MiniMax 可能要几秒
+        proxy_read_timeout 60s;   # /api/vibe 调 DeepSeek 可能要几秒
     }
 }
 ```
@@ -156,7 +163,7 @@ sudo nginx -t && sudo systemctl reload nginx
 
 ```bash
 cd vibe-web
-MINIMAX_API_KEY=sk-cp-... PORT=8099 node server.mjs &
+DEEPSEEK_API_KEY=sk-... PORT=8099 node server.mjs &
 curl -s -X POST localhost:8099/api/vibe -H 'content-type: application/json' \
   -d '{"intent":"四拍鼓加八分hihat"}'      # → {"code":"s(\"bd*4, hh*8\")"} 之类
 curl -s -o /dev/null -w '%{http_code}\n' localhost:8099/samples/bd/BT0A0A7.wav  # → 200

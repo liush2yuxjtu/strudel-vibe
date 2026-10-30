@@ -44,49 +44,52 @@ export function cleanCode(text) {
 }
 
 /**
- * Turn a natural-language intent into a Strudel pattern via MiniMax's
- * Anthropic-compatible endpoint. Pure logic — no framework coupling.
+ * Turn a natural-language intent into a Strudel pattern via DeepSeek's
+ * OpenAI-compatible Chat Completions API. Pure logic — no framework coupling.
  * @param {{intent:string, current?:string}} input
- * @param {NodeJS.ProcessEnv} env  expects MINIMAX_API_KEY (and optional MINIMAX_BASE_URL / MINIMAX_MODEL)
+ * @param {NodeJS.ProcessEnv} env  expects DEEPSEEK_API_KEY (optional DEEPSEEK_BASE_URL / DEEPSEEK_MODEL)
  * @returns {Promise<{status:number, body:object}>}
  */
 export async function generateStrudel({ intent = '', current = '' } = {}, env = {}) {
-  const key = env.MINIMAX_API_KEY;
-  if (!key) return { status: 500, body: { error: 'MINIMAX_API_KEY not configured' } };
+  const key = env.DEEPSEEK_API_KEY;
+  if (!key) return { status: 500, body: { error: 'DEEPSEEK_API_KEY not configured' } };
   if (!String(intent).trim()) return { status: 400, body: { error: 'intent required' } };
 
-  const base = env.MINIMAX_BASE_URL || 'https://api.minimaxi.com/anthropic';
-  const model = env.MINIMAX_MODEL || 'MiniMax-M2.7-highspeed';
+  const base = String(env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com').replace(/\/+$/, '');
+  const model = env.DEEPSEEK_MODEL || 'deepseek-chat';
 
   const userMsg = current && current.trim() && current.trim() !== 'silence'
     ? `CURRENT PATTERN:\n${current.trim()}\n\nINTENT: ${intent}`
     : `INTENT: ${intent}`;
 
   try {
-    const r = await fetch(`${base}/v1/messages`, {
+    const r = await fetch(`${base}/v1/chat/completions`, {
       method: 'POST',
       headers: {
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
+        Authorization: `Bearer ${key}`,
         'content-type': 'application/json',
       },
       body: JSON.stringify({
         model,
         max_tokens: 2000,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: userMsg }],
+        stream: false,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: userMsg },
+        ],
       }),
     });
     if (!r.ok) {
       const t = await r.text().catch(() => '');
-      return { status: 502, body: { error: `MiniMax ${r.status}`, detail: t.slice(0, 300) } };
+      return { status: 502, body: { error: `DeepSeek ${r.status}`, detail: t.slice(0, 300) } };
     }
     const data = await r.json();
-    const text = (data.content || [])
-      .filter((b) => b.type === 'text')
-      .map((b) => b.text)
-      .join('\n');
-    return { status: 200, body: { code: cleanCode(text) } };
+    const raw = data?.choices?.[0]?.message?.content ?? '';
+    // deepseek-chat can wrap a reasoning trace in content; the pattern is what remains.
+    const text = String(raw).replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+    const code = cleanCode(text);
+    if (!code) return { status: 502, body: { error: 'DeepSeek returned empty code' } };
+    return { status: 200, body: { code } };
   } catch (e) {
     return { status: 500, body: { error: String((e && e.message) || e) } };
   }

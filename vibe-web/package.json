@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "vibe-music web — type music in 中文/English, MiniMax writes Strudel, your browser plays it.",
+  "description": "vibe-music web — type music in 中文/English, DeepSeek writes Strudel, your browser plays it.",
   "scripts": {
     "start": "node server.mjs"
   },

@@ -2,8 +2,8 @@
 // /api/vibe endpoint. This is the mainland-China deploy target: run it on an
 // Aliyun/Tencent 轻量应用服务器 or ECS behind an ICP-filed domain (see DEPLOY-CN.md).
 //
-// No dependencies — plain node:http. Start with:  MINIMAX_API_KEY=sk-... node server.mjs
-// Configurable via env: PORT (default 8080), MINIMAX_BASE_URL, MINIMAX_MODEL.
+// No dependencies — plain node:http. Start with:  DEEPSEEK_API_KEY=sk-... node server.mjs
+// Configurable via env: PORT (default 8080), DEEPSEEK_BASE_URL, DEEPSEEK_MODEL.
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -73,5 +73,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`vibe-music server on :${PORT}  (MINIMAX_API_KEY ${process.env.MINIMAX_API_KEY ? 'set' : 'MISSING'})`);
+  console.log(`vibe-music server on :${PORT}  (DEEPSEEK_API_KEY ${process.env.DEEPSEEK_API_KEY ? 'set' : 'MISSING'})`);
 });

@@ -274,8 +274,8 @@
   <div class="rack"><div class="strip" id="strip"></div></div>
 
   <footer>
-    流程链路：空状态 → 一句话输入 → MiniMax 作曲 → 浏览器实时演奏(WebAudio) → 手动改代码热替换 → 停止/分享<br>
-    引擎 <a href="https://strudel.cc" target="_blank">Strudel</a> · NL→code by <span class="pill">MiniMax-M2.7</span> · 终端孪生 <span class="pill">/vibe-music</span> · 配色继承自真实 app
+    流程链路：空状态 → 一句话输入 → DeepSeek 作曲 → 浏览器实时演奏(WebAudio) → 手动改代码热替换 → 停止/分享<br>
+    引擎 <a href="https://strudel.cc" target="_blank">Strudel</a> · NL→code by <span class="pill">deepseek-chat</span> · 终端孪生 <span class="pill">/vibe-music</span> · 配色继承自真实 app
   </footer>
 
 <script>
@@ -294,7 +294,7 @@
   const vbars = (n=22)=>{let s='';for(let i=0;i<n;i++)s+='<i></i>';return `<div class="viz">${s}</div>`;};
 
   const STATUS = `<div class="statusbar"><span>9:41</span><span class="r">5G ▮▮▮ 100%</span></div>`;
-  const APPBAR = `<div class="appbar"><div class="l"><span class="a">vibe</span><span class="b">music</span></div><span class="chipx">MINIMAX-M2.7</span></div>`;
+  const APPBAR = `<div class="appbar"><div class="l"><span class="a">vibe</span><span class="b">music</span></div><span class="chipx">deepseek-chat</span></div>`;
 
   const SCREENS = [
     { idx:"01", nm:"空状态 · 起步", desc:"引擎未启动；提示框等待输入，示例 chip 引导第一句。",
@@ -314,10 +314,10 @@
           <div class="go hot">vibe ⏎</div>
         </div>
         <div class="chips"><span class="chip sel">四拍鼓加八分hihat</span><span class="chip">techno + acid</span><span class="chip">jazzy chords</span></div>
-        <div class="note">按 <b>vibe ⏎</b> 让 MiniMax 把这句话写成 Strudel 代码</div>
+        <div class="note">按 <b>vibe ⏎</b> 让 DeepSeek 把这句话写成 Strudel 代码</div>
         <div class="tbar"><div class="key pri mut">▶ 播放</div><div class="key sm">🎲</div></div>` },
 
-    { idx:"03", nm:"MiniMax 作曲中", desc:"提交后短暂等待；均衡器与日志显示作曲进度。",
+    { idx:"03", nm:"DeepSeek 作曲中", desc:"提交后短暂等待；均衡器与日志显示作曲进度。",
       body:`
         <div class="promptbox">
           <div class="field ph" style="opacity:.6">四拍鼓加八分hihat</div>
@@ -325,7 +325,7 @@
         </div>
         <div class="compose">
           <div class="speq"><i></i><i></i><i></i><i></i><i></i></div>
-          <div class="txt">正在作曲…<small>MINIMAX IS COMPOSING</small></div>
+          <div class="txt">正在作曲…<small>DEEPSEEK IS COMPOSING</small></div>
         </div>
         <div class="log"><span class="u">› 四拍鼓加八分hihat</span></div>
         <div class="note" style="margin-top:auto">引擎就绪 ✦ 几秒内出代码并自动开声</div>` },
