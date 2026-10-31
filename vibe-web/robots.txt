@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://vibe-web-gray.vercel.app/sitemap.xml
+Sitemap: https://jamflow-gray.vercel.app/sitemap.xml

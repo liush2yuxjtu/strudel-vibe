@@ -11,7 +11,7 @@
 3. **自然语言→Strudel（MiniMax）** — `MINIMAX_API_KEY=… translate("四拍鼓加八分hihat")`。
    通过：返回单个 Strudel 表达式（如 `s("bd*4, hh*8")`），且 `compile()` 不抛错。
 
-4. **网页已上线** — `curl -s -o /dev/null -w '%{http_code}' https://vibe-web-gray.vercel.app/`。
+4. **网页已上线** — `curl -s -o /dev/null -w '%{http_code}' https://jamflow-gray.vercel.app/`。
    通过：`200`；`POST /api/vibe {"intent":"house beat"}` 返回可编译的 `{code}`；播放后浏览器 AudioContext 状态为 `running`。
 
 5. **生成过程要"可感知"** — 从点击/回车到出声之间（MiniMax 约 3–5s）持续给反馈。

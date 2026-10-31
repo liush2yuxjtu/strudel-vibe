@@ -7,23 +7,23 @@
 <title>JamFlow · 说一句，立刻出声</title>
 <meta name="description" content="JamFlow：自然语言变成 Strudel，浏览器里实时演奏。不会写 live-coding 也能先听到点子。" />
 <meta name="robots" content="index,follow,max-image-preview:large" />
-<link rel="canonical" href="https://vibe-web-gray.vercel.app/" />
-<link rel="alternate" hreflang="zh-CN" href="https://vibe-web-gray.vercel.app/" />
-<link rel="alternate" hreflang="en" href="https://vibe-web-gray.vercel.app/?lang=en" />
-<link rel="alternate" hreflang="x-default" href="https://vibe-web-gray.vercel.app/" />
+<link rel="canonical" href="https://jamflow-gray.vercel.app/" />
+<link rel="alternate" hreflang="zh-CN" href="https://jamflow-gray.vercel.app/" />
+<link rel="alternate" hreflang="en" href="https://jamflow-gray.vercel.app/?lang=en" />
+<link rel="alternate" hreflang="x-default" href="https://jamflow-gray.vercel.app/" />
 <meta property="og:type" content="website" />
 <meta property="og:locale" content="zh_CN" />
 <meta property="og:locale:alternate" content="en_US" />
 <meta property="og:site_name" content="JamFlow" />
-<meta property="og:url" content="https://vibe-web-gray.vercel.app/" />
+<meta property="og:url" content="https://jamflow-gray.vercel.app/" />
 <meta property="og:title" content="JamFlow · 说一句，立刻出声" />
 <meta property="og:description" content="自然语言 → DeepSeek → Strudel，浏览器实时出声。" />
-<meta property="og:image" content="https://vibe-web-gray.vercel.app/og.png" />
+<meta property="og:image" content="https://jamflow-gray.vercel.app/og.png" />
 <meta property="og:image:alt" content="JamFlow drum pads" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="JamFlow · 说一句，立刻出声" />
 <meta name="twitter:description" content="Say a vibe. Hear Strudel live in your browser." />
-<meta name="twitter:image" content="https://vibe-web-gray.vercel.app/og.png" />
+<meta name="twitter:image" content="https://jamflow-gray.vercel.app/og.png" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23141210'/><rect x='6' y='6' width='8' height='8' rx='1.5' fill='%23FFB000'/><rect x='18' y='6' width='8' height='8' rx='1.5' fill='%233A342E'/><rect x='6' y='18' width='8' height='8' rx='1.5' fill='%233A342E'/><rect x='18' y='18' width='8' height='8' rx='1.5' fill='%23C46B3A'/></svg>" />
 <!-- Strudel engine vendored locally (same bytes as @strudel/web@1.2.6) so it loads
      without unpkg.com — which is unreliable/blocked in mainland China. -->
@@ -564,18 +564,24 @@
   <script type="application/ld+json" id="ldjson">
   {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "@id": "https://vibe-web-gray.vercel.app/#app",
+    "@type": ["WebApplication", "SoftwareApplication"],
+    "@id": "https://jamflow-gray.vercel.app/#app",
     "name": "JamFlow",
-    "alternateName": ["vibe-music", "vibe-web", "strudel-vibe"],
-    "url": "https://vibe-web-gray.vercel.app/",
-    "description": "Natural language to Strudel live music in the browser via DeepSeek. For people who cannot write Strudel.",
+    "alternateName": ["Jam Flow", "vibe-music"],
+    "url": "https://jamflow-gray.vercel.app/",
+    "description": "JamFlow turns a natural-language prompt into playable Strudel and plays it live in the browser via DeepSeek—for people who do not write live-coding. JamFlow：自然语言变成可播放的 Strudel，浏览器实时出声——给不会写 live-coding 的人。",
     "inLanguage": ["zh-CN", "en"],
     "applicationCategory": "MultimediaApplication",
     "operatingSystem": "Any",
     "browserRequirements": "Requires JavaScript and WebAudio",
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-    "featureList": ["NL → DeepSeek → Strudel", "WebAudio live play", "Pads + chips", "Editable code"]
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "url": "https://jamflow-gray.vercel.app/" },
+    "featureList": [
+      "Natural language → DeepSeek → Strudel",
+      "WebAudio live playback",
+      "Pads and prompt chips",
+      "Editable Strudel code"
+    ],
+    "isAccessibleForFree": true
   }
   </script>
   <script defer src="/_vercel/insights/script.js"></script>

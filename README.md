@@ -1,13 +1,13 @@
 # JamFlow
 
-[![Live demo](https://img.shields.io/badge/demo-live-22c55e)](https://vibe-web-gray.vercel.app)
+[![Live demo](https://img.shields.io/badge/demo-live-22c55e)](https://jamflow-gray.vercel.app)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](#notes)
 
 **JamFlow** (formerly vibe-music / vibe-web). **Type a sentence. Hear it.** Chinese or English in, [Strudel](https://strudel.cc) out, played in your browser. [DeepSeek](https://www.deepseek.com/) writes the pattern.
 
 > 打字就能做音乐 — 一句话 → DeepSeek 写 Strudel 代码 → 浏览器实时出声。
 
-**[Open the live demo](https://vibe-web-gray.vercel.app)** — nothing to install. Try `四拍鼓加八分hihat` or `a dreamy minor bassline`.
+**[Open the live demo](https://jamflow-gray.vercel.app)** — nothing to install. Try `四拍鼓加八分hihat` or `a dreamy minor bassline`.
 
 ![JamFlow: type a sentence, DeepSeek writes Strudel, the browser plays it](media/web-still.png)
 
@@ -15,7 +15,7 @@
 
 ### Use the demo
 
-[https://vibe-web-gray.vercel.app](https://vibe-web-gray.vercel.app)
+[https://jamflow-gray.vercel.app](https://jamflow-gray.vercel.app)
 
 ### Run the web app yourself
 
@@ -54,7 +54,7 @@ Compositions: `ViralVertical`, `ViralLandscape`, `ViralCNVertical` (小红书竖
 
 | Folder | What it is |
 |--------|------------|
-| **`vibe-web/`** | The app visitors use. Static page + `/api/vibe`. Browser playback via vendored [`@strudel/web`](https://www.npmjs.com/package/@strudel/web) (WebAudio). Engine (`vendor/`) and samples (`samples/`) are **same-origin** — no unpkg or GitHub at runtime. Vercel, or `node server.mjs` on an Aliyun/Tencent box. **Live:** [vibe-web-gray.vercel.app](https://vibe-web-gray.vercel.app) · 国内部署见 [`vibe-web/DEPLOY-CN.md`](vibe-web/DEPLOY-CN.md) |
+| **`vibe-web/`** | The app visitors use. Static page + `/api/vibe`. Browser playback via vendored [`@strudel/web`](https://www.npmjs.com/package/@strudel/web) (WebAudio). Engine (`vendor/`) and samples (`samples/`) are **same-origin** — no unpkg or GitHub at runtime. Vercel, or `node server.mjs` on an Aliyun/Tencent box. **Live:** [jamflow-gray.vercel.app](https://jamflow-gray.vercel.app) · 国内部署见 [`vibe-web/DEPLOY-CN.md`](vibe-web/DEPLOY-CN.md) |
 | **`strudel-cli/`** | Terminal live-coding: Strudel in plain Node, software synth to `ffplay`, tmux session (`append` / `set` / `hush` / `cps`). |
 | **`demo/`** | Playwright recorders that drive vibe-web and capture the **real WebAudio** output. |
 | **`video/`** | [Remotion](https://www.remotion.dev/) cuts (viral / 小红书) with captured audio and an audio-reactive spectrum. `mobile-mock/` and `design-candidates/` are HTML look explorations. |
