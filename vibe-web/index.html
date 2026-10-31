@@ -580,6 +580,8 @@
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
 
+<canvas id="scribble" class="scribble-layer" aria-hidden="true"></canvas>
+
 <script>
   // ——— i18n (JamFlow): zh default, EN toggle, localStorage ———
   const LANG_KEY = 'jamflow-lang';
@@ -1102,7 +1104,11 @@
   }
   let scribbleOn = readScribblePref();
   const scribbleCanvas = $('scribble');
-  const scribbleCtx = scribbleCanvas.getContext('2d');
+  const scribbleCtx = scribbleCanvas ? scribbleCanvas.getContext('2d') : null;
+  if(!scribbleCanvas || !scribbleCtx){
+    console.warn('[JamFlow] scribble canvas missing; draw-to-music disabled');
+    scribbleOn = false;
+  }
   let scribbleDrawing = false;
   let scribbleLast = null; // {x,y,t}
   let scribbleRecent = []; // {name, midi, t} for pattern build
@@ -1114,10 +1120,12 @@
     const btn = $('scribbleToggle');
     if(!btn) return;
     btn.setAttribute('aria-checked', scribbleOn ? 'true' : 'false');
+    if(!scribbleCanvas) return;
     scribbleCanvas.classList.toggle('on', scribbleOn);
     scribbleCanvas.setAttribute('aria-hidden', scribbleOn ? 'false' : 'true');
   }
   function sizeScribbleCanvas(){
+    if(!scribbleCanvas || !scribbleCtx) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const w = window.innerWidth, h = window.innerHeight;
     scribbleCanvas.width = Math.floor(w * dpr);
@@ -1127,6 +1135,7 @@
     scribbleCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   function clearScribbleInk(){
+    if(!scribbleCanvas || !scribbleCtx) return;
     scribbleCtx.setTransform(1,0,0,1,0,0);
     scribbleCtx.clearRect(0,0,scribbleCanvas.width, scribbleCanvas.height);
     sizeScribbleCanvas();
@@ -1310,13 +1319,16 @@
   }
 
   syncScribbleToggleUi();
-  if(scribbleOn){ sizeScribbleCanvas(); startScribbleFade(); }
-  $('scribbleToggle').onclick = ()=> setScribbleEnabled(!scribbleOn);
+  if(scribbleOn && scribbleCanvas){ sizeScribbleCanvas(); startScribbleFade(); }
+  const scribbleToggleBtn = $('scribbleToggle');
+  if(scribbleToggleBtn) scribbleToggleBtn.onclick = ()=> setScribbleEnabled(!scribbleOn);
   window.addEventListener('resize', ()=>{ if(scribbleOn) sizeScribbleCanvas(); });
-  scribbleCanvas.addEventListener('pointerdown', scribblePointerDown, {passive:false});
-  scribbleCanvas.addEventListener('pointermove', scribblePointerMove, {passive:false});
-  scribbleCanvas.addEventListener('pointerup', scribblePointerUp);
-  scribbleCanvas.addEventListener('pointercancel', scribblePointerUp);
+  if(scribbleCanvas){
+    scribbleCanvas.addEventListener('pointerdown', scribblePointerDown, {passive:false});
+    scribbleCanvas.addEventListener('pointermove', scribblePointerMove, {passive:false});
+    scribbleCanvas.addEventListener('pointerup', scribblePointerUp);
+    scribbleCanvas.addEventListener('pointercancel', scribblePointerUp);
+  }
 
 
   window.__vibe = { phase:()=>phase, phaseSince:()=>phaseSince, audioState, started:()=>started, current:()=>current, repl:()=>repl, sync:'editPattern+onTrigger@deadline', idleAuto:()=>idleAutoOn, bumpIdle, armIdleTimer, IDLE_MS, scribble:()=>scribbleOn, setScribbleEnabled };
