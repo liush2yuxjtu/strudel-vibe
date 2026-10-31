@@ -1,15 +1,15 @@
-# vibe-music
+# JamFlow
 
 [![Live demo](https://img.shields.io/badge/demo-live-22c55e)](https://vibe-web-gray.vercel.app)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](#notes)
 
-**Type a sentence. Hear it.** Chinese or English in, [Strudel](https://strudel.cc) out, played in your browser. [DeepSeek](https://www.deepseek.com/) writes the pattern.
+**JamFlow** (formerly vibe-music / vibe-web). **Type a sentence. Hear it.** Chinese or English in, [Strudel](https://strudel.cc) out, played in your browser. [DeepSeek](https://www.deepseek.com/) writes the pattern.
 
 > 打字就能做音乐 — 一句话 → DeepSeek 写 Strudel 代码 → 浏览器实时出声。
 
 **[Open the live demo](https://vibe-web-gray.vercel.app)** — nothing to install. Try `四拍鼓加八分hihat` or `a dreamy minor bassline`.
 
-![vibe-web: type a sentence, DeepSeek writes Strudel, the browser plays it](media/web-still.png)
+![JamFlow: type a sentence, DeepSeek writes Strudel, the browser plays it](media/web-still.png)
 
 ## Quick start
 

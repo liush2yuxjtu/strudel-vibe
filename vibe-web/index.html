@@ -3,23 +3,26 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>vibe-music · 用一句话写音乐（自然语言 → Strudel）</title>
-<meta name="description" content="vibe-music：给不会写 Strudel 的听歌人。用中文或英文说一句想听的节奏，DeepSeek 生成 Strudel 代码，浏览器里立刻用胶垫鼓机实时演奏。支持示例芯片、16 键胶垫跟鼓点亮、手改代码再播。" />
-<meta name="keywords" content="vibe-music, Strudel, DeepSeek, 自然语言写音乐, 浏览器鼓机, live coding, cyber drums" />
+
+<title>JamFlow · 说一句，立刻出声</title>
+<meta name="description" content="JamFlow：自然语言变成 Strudel，浏览器里实时演奏。不会写 live-coding 也能先听到点子。" />
 <meta name="robots" content="index,follow,max-image-preview:large" />
 <link rel="canonical" href="https://vibe-web-gray.vercel.app/" />
+<link rel="alternate" hreflang="zh-CN" href="https://vibe-web-gray.vercel.app/" />
+<link rel="alternate" hreflang="en" href="https://vibe-web-gray.vercel.app/?lang=en" />
+<link rel="alternate" hreflang="x-default" href="https://vibe-web-gray.vercel.app/" />
 <meta property="og:type" content="website" />
 <meta property="og:locale" content="zh_CN" />
 <meta property="og:locale:alternate" content="en_US" />
-<meta property="og:site_name" content="vibe-music" />
+<meta property="og:site_name" content="JamFlow" />
 <meta property="og:url" content="https://vibe-web-gray.vercel.app/" />
-<meta property="og:title" content="vibe-music · 用一句话写音乐" />
-<meta property="og:description" content="自然语言 → DeepSeek → Strudel，浏览器实时出声。为不会写 live-coding 语法的人准备的胶垫鼓机。" />
+<meta property="og:title" content="JamFlow · 说一句，立刻出声" />
+<meta property="og:description" content="自然语言 → DeepSeek → Strudel，浏览器实时出声。" />
 <meta property="og:image" content="https://vibe-web-gray.vercel.app/og.png" />
-<meta property="og:image:alt" content="vibe-music 鼓机面板：琥珀色 LED 与 16 键胶垫" />
+<meta property="og:image:alt" content="JamFlow drum pads" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="vibe-music · 用一句话写音乐" />
-<meta name="twitter:description" content="说一句想听的节奏，DeepSeek 写出 Strudel，浏览器立刻演奏。" />
+<meta name="twitter:title" content="JamFlow · 说一句，立刻出声" />
+<meta name="twitter:description" content="Say a vibe. Hear Strudel live in your browser." />
 <meta name="twitter:image" content="https://vibe-web-gray.vercel.app/og.png" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23141210'/><rect x='6' y='6' width='8' height='8' rx='1.5' fill='%23FFB000'/><rect x='18' y='6' width='8' height='8' rx='1.5' fill='%233A342E'/><rect x='6' y='18' width='8' height='8' rx='1.5' fill='%233A342E'/><rect x='18' y='18' width='8' height='8' rx='1.5' fill='%23C46B3A'/></svg>" />
 <!-- Strudel engine vendored locally (same bytes as @strudel/web@1.2.6) so it loads
@@ -436,25 +439,29 @@
   .scribble-opts{ display:flex; flex-direction:column; gap:8px; }
 
 
-  /* ——— SEO/GEO about (modest, crawlable) ——— */
-  .about{
-    max-width:920px; width:100%; margin:0 auto;
-    padding:4px clamp(18px,4vw,36px) 8px;
+
+  .lang-toggle{
+    display:inline-flex; gap:2px; padding:3px;
+    background:var(--bay); border:1px solid var(--line); border-radius:999px;
   }
+  .lang-toggle button{
+    border:none; background:transparent; color:var(--mute);
+    font-family:var(--sans); font-size:11px; font-weight:600;
+    padding:5px 10px; border-radius:999px; cursor:pointer;
+  }
+  .lang-toggle button[aria-pressed="true"]{
+    background:var(--recess); color:var(--ink);
+    box-shadow:inset 0 0 0 1px var(--line2);
+  }
+  .about{ max-width:920px; width:100%; margin:0 auto; padding:4px clamp(18px,4vw,36px) 8px; }
   .about-card{
-    background:rgba(30,26,22,.55);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:14px 16px;
+    background:rgba(30,26,22,.45); border:1px solid var(--line);
+    border-radius:12px; padding:12px 14px;
   }
-  .about-card h2{
-    margin:0 0 8px; font-size:13px; font-weight:600; color:var(--mute);
-    letter-spacing:.02em;
-  }
-  .about-card p{
-    margin:0; font-size:13px; line-height:1.55; color:var(--faint);
-  }
-  .about-card p + p{ margin-top:8px; }
+  .about-card h2{ margin:0 0 6px; font-size:12px; font-weight:600; color:var(--mute); }
+  .about-card p{ margin:0; font-size:12.5px; line-height:1.5; color:var(--faint); }
+  .pad-label{ margin:0 0 10px; font-size:12px; color:var(--faint); font-weight:500; min-height:0; }
+  .idle-opt-hint{ display:none; } /* slim: title only */
   @media(max-width:520px){
     .promptbox{flex-direction:column}
     .pads{gap:8px; padding:10px}
@@ -465,142 +472,268 @@
 <body>
   <header class="top above-scribble">
     <div class="brand">
-      <h1 class="wordmark">vibe<span>·music</span></h1>
-      <p class="tagline">说一句，DeepSeek 写 Strudel，浏览器立刻响</p>
+      <h1 class="wordmark">Jam<span>Flow</span></h1>
+      <p class="tagline" data-i18n="tagline">说一句，立刻出声</p>
     </div>
     <div class="status-row">
-      <span class="led-pill" title="播放状态"><i class="led-dot" id="playLed"></i> 演奏</span>
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button type="button" id="langZh" aria-pressed="true">中文</button>
+        <button type="button" id="langEn" aria-pressed="false">EN</button>
+      </div>
+      <span class="led-pill" id="playPill" data-i18n-title="playStatusTitle"><i class="led-dot" id="playLed"></i> <span data-i18n="playLed">演奏</span></span>
       <span class="led-pill"><i class="led-dot" id="apiLed"></i> <span id="status2">API</span></span>
-      <span class="led-pill"><span class="pill">deepseek-chat</span></span>
     </div>
   </header>
 
   <main class="machine">
-    <section class="face" aria-label="vibe 鼓机面板">
-      <p class="ask" id="askLabel">你想听到什么？</p>
+    <section class="face" aria-label="JamFlow">
+      <p class="ask" id="askLabel" data-i18n="ask">想听什么？</p>
       <div class="promptbox above-scribble">
         <input id="intent" autocomplete="off" aria-labelledby="askLabel"
-          placeholder="例如：四拍底鼓加八分 hihat / a dreamy minor bassline" />
-        <button class="primary" id="send" type="button">生成</button>
+          data-i18n-placeholder="intentPh" placeholder="四拍底鼓 / cyber drums" />
+        <button class="primary" id="send" type="button" data-i18n="send">生成</button>
       </div>
       <div class="prog" id="prog" aria-hidden="true"><i></i></div>
-      <div class="state" id="state" role="status" aria-live="polite">点下面的例子，或直接输入。第一次会加载鼓采样…</div>
+      <div class="state" id="state" role="status" aria-live="polite" data-i18n="stateIdle">点例子，或输入</div>
 
       <div class="pad-layout pad-section">
         <div>
-          <p class="pad-label">胶垫 · 按下去会陷，演奏时跟鼓点一起亮</p>
+          <p class="pad-label" data-i18n="pads" hidden></p>
           <div class="pads" id="pads" aria-hidden="true"></div>
         </div>
         <div class="side">
           <div class="transport above-scribble">
-            <button class="primary" id="play" type="button">播放</button>
-            <button class="hot" id="stop" type="button">停止</button>
-            <button id="surprise" type="button">随便来一段</button>
+            <button class="primary" id="play" type="button" data-i18n="play">播放</button>
+            <button class="hot" id="stop" type="button" data-i18n="stop">停止</button>
+            <button id="surprise" type="button" data-i18n="surprise">随机</button>
           </div>
           <div class="scribble-opts above-scribble">
             <div class="idle-opt" id="idleOpt">
               <div class="idle-opt-copy">
-                <span class="idle-opt-title">90 秒没再按 · 自动来一段</span>
-                <span class="idle-opt-hint">空闲时随机 prompt 一点音乐 · 默认开</span>
+                <span class="idle-opt-title" data-i18n="idleTitle">空闲自动</span>
+                <span class="idle-opt-hint" data-i18n="idleHint"></span>
               </div>
               <button type="button" class="switch" id="idleAutoToggle"
-                role="switch" aria-checked="true" aria-label="90秒无操作自动随机音乐" title="关闭后不再自动 prompt">
+                role="switch" aria-checked="true" data-i18n-aria="idleAria" aria-label="空闲自动">
                 <span class="knob" aria-hidden="true"></span>
               </button>
             </div>
             <div class="idle-opt" id="scribbleOpt">
               <div class="idle-opt-copy">
-                <span class="idle-opt-title">随手乱画 · 触发出声</span>
-                <span class="idle-opt-hint">开着时在页面上划，音高跟手走 · 默认关</span>
+                <span class="idle-opt-title" data-i18n="scribbleTitle">乱画</span>
+                <span class="idle-opt-hint" data-i18n="scribbleHint"></span>
               </div>
               <button type="button" class="switch" id="scribbleToggle"
-                role="switch" aria-checked="false" aria-label="随手乱画触发音乐" title="打开后可在页面上乱画出声">
+                role="switch" aria-checked="false" data-i18n-aria="scribbleAria" aria-label="乱画">
                 <span class="knob" aria-hidden="true"></span>
               </button>
             </div>
           </div>
           <div class="chips above-scribble" id="chips"></div>
-          <div class="log above-scribble" id="log" aria-label="对话记录"></div>
+          <div class="log above-scribble" id="log" aria-label="log"></div>
         </div>
       </div>
     </section>
 
-    <section class="lcd above-scribble" aria-label="Strudel 代码">
+    <section class="lcd above-scribble" aria-label="Strudel" data-i18n-aria-section="code">
       <div class="lcd-head">
-        <h2 class="lcd-title">正在演奏的代码（可改）</h2>
-        <span class="lcd-hint" id="vtext">待机</span>
+        <h2 class="lcd-title" data-i18n="codeTitle">代码</h2>
+        <span class="lcd-hint" id="vtext" data-i18n="vIdle">待机</span>
       </div>
       <textarea class="code" id="code" spellcheck="false"
-        placeholder="// 生成的 pattern 会出现在这里，改完按「应用编辑」"></textarea>
+        data-i18n-placeholder="codePh" placeholder="// Strudel"></textarea>
       <div class="row">
-        <button id="apply" type="button">应用编辑</button>
-        <span class="state" style="margin:0">声音在你浏览器里出（WebAudio）</span>
+        <button id="apply" type="button" data-i18n="apply">应用</button>
       </div>
     </section>
   </main>
 
   <section class="about" id="about" aria-labelledby="about-title">
     <div class="about-card">
-      <h2 id="about-title">关于 vibe-music</h2>
-      <p>vibe-music 是一个在浏览器里用的鼓机写歌页：你用中文或英文说一句想听的节奏（例如「赛博朋克鼓点」），DeepSeek 把它写成可播放的 Strudel 代码，再由本机 WebAudio 立刻出声。给不会写 Strudel / live-coding 语法、只想先听到点子的人。</p>
-      <p>关键能力：自然语言生成与演奏、示例芯片一键试听、16 键胶垫跟真鼓点一起亮、可手改代码再播。生产站：https://vibe-web-gray.vercel.app/</p>
+      <h2 id="about-title" data-i18n="aboutTitle">关于 JamFlow</h2>
+      <p data-i18n="aboutBody">JamFlow 把一句话变成可播放的 Strudel，在浏览器里实时出声——给不会写 live-coding 的人。</p>
     </div>
   </section>
 
   <footer>
-    built with <a href="https://strudel.cc" target="_blank" rel="noopener">Strudel</a>
-    · NL→code by DeepSeek
-    · terminal twin: <span class="pill">/vibe-music</span>
+    <a href="https://strudel.cc" target="_blank" rel="noopener">Strudel</a>
+    · DeepSeek
+    · <span class="pill">/vibe-music</span>
   </footer>
 
-  <script type="application/ld+json">
+  <script type="application/ld+json" id="ldjson">
   {
     "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebApplication",
-        "@id": "https://vibe-web-gray.vercel.app/#app",
-        "name": "vibe-music",
-        "alternateName": ["vibe-web", "strudel-vibe"],
-        "url": "https://vibe-web-gray.vercel.app/",
-        "description": "用中文或英文一句话描述想听的节奏，DeepSeek 生成 Strudel 代码并在浏览器实时演奏。面向不会写 Strudel 的听歌人与创作者。",
-        "inLanguage": ["zh-CN", "en"],
-        "applicationCategory": "MultimediaApplication",
-        "operatingSystem": "Any",
-        "browserRequirements": "Requires JavaScript and WebAudio",
-        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-        "featureList": [
-          "自然语言 → DeepSeek → Strudel",
-          "浏览器内 WebAudio 实时演奏",
-          "示例芯片与 16 键胶垫可视化",
-          "可编辑生成的 Strudel 代码"
-        ],
-        "creator": { "@type": "Person", "name": "GodLiu" }
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "vibe-music",
-        "applicationCategory": "MusicApplication",
-        "operatingSystem": "Web",
-        "url": "https://vibe-web-gray.vercel.app/",
-        "description": "Browser drum machine that turns natural-language vibes into Strudel live patterns via DeepSeek."
-      }
-    ]
+    "@type": "WebApplication",
+    "@id": "https://vibe-web-gray.vercel.app/#app",
+    "name": "JamFlow",
+    "alternateName": ["vibe-music", "vibe-web", "strudel-vibe"],
+    "url": "https://vibe-web-gray.vercel.app/",
+    "description": "Natural language to Strudel live music in the browser via DeepSeek. For people who cannot write Strudel.",
+    "inLanguage": ["zh-CN", "en"],
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "Any",
+    "browserRequirements": "Requires JavaScript and WebAudio",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["NL → DeepSeek → Strudel", "WebAudio live play", "Pads + chips", "Editable code"]
   }
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
 
-<canvas id="scribble" class="scribble-layer" aria-hidden="true"></canvas>
-
 <script>
+  // ——— i18n (JamFlow): zh default, EN toggle, localStorage ———
+  const LANG_KEY = 'jamflow-lang';
+  const I18N = {
+    zh: {
+      tagline: '说一句，立刻出声',
+      ask: '想听什么？',
+      intentPh: '四拍底鼓 / cyber drums',
+      send: '生成',
+      stateIdle: '点例子，或输入',
+      pads: '',
+      play: '播放', stop: '停止', surprise: '随机', apply: '应用',
+      idleTitle: '空闲自动', idleHint: '', idleAria: '空闲自动播放',
+      scribbleTitle: '乱画', scribbleHint: '', scribbleAria: '乱画出声',
+      codeTitle: '代码', codePh: '// Strudel',
+      vIdle: '待机', vPlaying: '演奏中', vComposing: '作曲中', vLoading: '加载中',
+      playLed: '演奏', playStatusTitle: '播放',
+      aboutTitle: '关于 JamFlow',
+      aboutBody: 'JamFlow 把一句话变成可播放的 Strudel，在浏览器里实时出声——给不会写 live-coding 的人。',
+      playing: '<b>演奏中</b>',
+      playFail: '无法播放：',
+      composing: '作曲中<span class="dots"></span>',
+      err: '出错：',
+      reqFail: '请求失败：',
+      idleAuto: '自动：',
+      idleOn: '已开空闲自动',
+      idleOff: '已关空闲自动',
+      scribbleOn: '乱画已开',
+      scribbleOff: '乱画已关',
+      scribbleTune: '乱画 · ',
+      stopped: '已停止',
+      apiReady: 'API 就绪',
+      apiOffline: 'API 离线',
+      metaTitle: 'JamFlow · 说一句，立刻出声',
+      metaDesc: 'JamFlow：自然语言变成 Strudel，浏览器里实时演奏。不会写 live-coding 也能先听到点子。',
+    },
+    en: {
+      tagline: 'Say it. Hear it.',
+      ask: 'What do you want to hear?',
+      intentPh: 'four-on-floor / cyber drums',
+      send: 'Go',
+      stateIdle: 'Pick a chip, or type',
+      pads: '',
+      play: 'Play', stop: 'Stop', surprise: 'Random', apply: 'Apply',
+      idleTitle: 'Idle auto', idleHint: '', idleAria: 'Auto-play when idle',
+      scribbleTitle: 'Scribble', scribbleHint: '', scribbleAria: 'Draw to sound',
+      codeTitle: 'Code', codePh: '// Strudel',
+      vIdle: 'Idle', vPlaying: 'Playing', vComposing: 'Writing', vLoading: 'Loading',
+      playLed: 'Play', playStatusTitle: 'Playback',
+      aboutTitle: 'About JamFlow',
+      aboutBody: 'JamFlow turns a sentence into playable Strudel and plays it live in your browser—for people who don’t write live-coding.',
+      playing: '<b>Playing</b>',
+      playFail: 'Can’t play: ',
+      composing: 'Writing<span class="dots"></span>',
+      err: 'Error: ',
+      reqFail: 'Request failed: ',
+      idleAuto: 'Auto: ',
+      idleOn: 'Idle auto on',
+      idleOff: 'Idle auto off',
+      scribbleOn: 'Scribble on',
+      scribbleOff: 'Scribble off',
+      scribbleTune: 'Scribble · ',
+      stopped: 'Stopped',
+      apiReady: 'API ready',
+      apiOffline: 'API offline',
+      metaTitle: 'JamFlow · Say it. Hear it.',
+      metaDesc: 'JamFlow turns natural language into Strudel and plays it live in the browser—no live-coding required.',
+    }
+  };
+  const EXAMPLES_BY_LANG = {
+    zh: ["赛博朋克鼓点真的出声","四拍底鼓加霓虹 hihat","lo-fi 灰尘钢琴软底鼓","酸味 techno 贝斯线","glitchy breakbeat 碎拍","空灵氛围 pad 加远处雷","暖胶碟 soul groove","太空琶音 cascade"],
+    en: ["cyber drums neon stabs","four-on-floor with hats","lo-fi dusty piano soft kick","acid techno bassline","glitchy breakbeat","dreamy minor bassline","warm vinyl soul groove","space arpeggio cascade"],
+  };
+  let lang = 'zh';
+  try{
+    const q = new URLSearchParams(location.search).get('lang');
+    const saved = localStorage.getItem(LANG_KEY);
+    if(q === 'en' || q === 'zh') lang = q;
+    else if(saved === 'en' || saved === 'zh') lang = saved;
+  }catch{}
+  function t(key){
+    const bag = I18N[lang] || I18N.zh;
+    return (bag[key] != null ? bag[key] : (I18N.zh[key] || key));
+  }
+  function applyI18n(){
+    document.documentElement.lang = (lang === 'en') ? 'en' : 'zh-CN';
+    try{ localStorage.setItem(LANG_KEY, lang); }catch{}
+    document.querySelectorAll('[data-i18n]').forEach(el=>{
+      const k = el.getAttribute('data-i18n');
+      const v = t(k);
+      if(el.hasAttribute('hidden') && !v) return;
+      if(el.hasAttribute('hidden') && v){ el.hidden = false; }
+      if(!v){ el.hidden = true; el.textContent=''; return; }
+      el.hidden = false;
+      el.textContent = v;
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+      el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
+    });
+    document.querySelectorAll('[data-i18n-aria]').forEach(el=>{
+      el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el=>{
+      el.setAttribute('title', t(el.getAttribute('data-i18n-title')));
+    });
+    const titleEl = document.querySelector('title');
+    if(titleEl) titleEl.textContent = t('metaTitle');
+    const desc = document.querySelector('meta[name="description"]');
+    if(desc) desc.setAttribute('content', t('metaDesc'));
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if(ogTitle) ogTitle.setAttribute('content', t('metaTitle'));
+    const ogDesc = document.querySelector('meta[property="og:description"]');
+    if(ogDesc) ogDesc.setAttribute('content', t('metaDesc'));
+    const twTitle = document.querySelector('meta[name="twitter:title"]');
+    if(twTitle) twTitle.setAttribute('content', t('metaTitle'));
+    const twDesc = document.querySelector('meta[name="twitter:description"]');
+    if(twDesc) twDesc.setAttribute('content', t('metaDesc'));
+    const zhBtn = document.getElementById('langZh');
+    const enBtn = document.getElementById('langEn');
+    if(zhBtn) zhBtn.setAttribute('aria-pressed', lang==='zh' ? 'true' : 'false');
+    if(enBtn) enBtn.setAttribute('aria-pressed', lang==='en' ? 'true' : 'false');
+    // refresh chips for language
+    const chips = document.getElementById('chips');
+    if(chips && typeof renderChips === 'function') renderChips();
+    // refresh phase label
+    if(typeof phase !== 'undefined'){
+      if(phase==='playing') $('vtext').textContent = t('vPlaying');
+      else if(phase==='idle') $('vtext').textContent = t('vIdle');
+      else if(phase==='composing') $('vtext').textContent = t('vComposing');
+      else if(phase==='loading') $('vtext').textContent = t('vLoading');
+    }
+  }
+  function setLang(next){
+    lang = (next === 'en') ? 'en' : 'zh';
+    applyI18n();
+  }
+
+
   const $ = (id)=>document.getElementById(id);
   let started=false, playing=false, current='';
   // phase: 'idle' | 'loading' (engine/samples) | 'composing' (DeepSeek) | 'playing'
   let phase='idle', phaseSince=performance.now();
-  const EXAMPLES = [
-    "赛博朋克鼓点真的出声","四拍底鼓加霓虹 hihat","lo-fi 灰尘钢琴软底鼓","酸味 techno 贝斯线",
-    "glitchy breakbeat 碎拍","dreamy minor bassline","cyber drums neon stabs","空灵氛围 pad 加远处雷",
-  ];
+  function currentExamples(){ return EXAMPLES_BY_LANG[lang] || EXAMPLES_BY_LANG.zh; }
+  let EXAMPLES = currentExamples();
+  function renderChips(){
+    EXAMPLES = currentExamples();
+    chips.innerHTML = '';
+    EXAMPLES.forEach(tt=>{
+      const c=document.createElement('button');
+      c.type='button'; c.className='chip'; c.textContent=tt;
+      c.onclick=()=>{ $('intent').value=tt; vibe(); };
+      chips.appendChild(c);
+    });
+  }
   const PAD_LABELS = [
     "BD","SD","HH","OH",
     "CP","LT","MT","HT",
@@ -610,12 +743,7 @@
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const chips=$('chips');
-  EXAMPLES.forEach(t=>{
-    const c=document.createElement('button');
-    c.type='button'; c.className='chip'; c.textContent=t;
-    c.onclick=()=>{ $('intent').value=t; vibe(); };
-    chips.appendChild(c);
-  });
+  renderChips();
 
   // Hero: 16 MPC-style rubber pads
   const padsEl=$('pads');
@@ -623,7 +751,7 @@
     const p=document.createElement('div');
     p.className='pad'; p.textContent=lab; p.dataset.i=String(i);
     p.setAttribute('role','button'); p.tabIndex=0;
-    p.setAttribute('aria-label', '垫 '+lab);
+    p.setAttribute('aria-label', 'Pad '+lab);
     padsEl.appendChild(p);
   });
   const pads=[...padsEl.querySelectorAll('.pad')];
@@ -770,9 +898,9 @@
   setInterval(()=>{
     if(phase==='composing'){
       const s=((performance.now()-phaseSince)/1000).toFixed(1);
-      $('vtext').textContent='作曲中 '+s+'s';
+      $('vtext').textContent=t('vComposing')+' '+s+'s';
     } else if(phase==='loading'){
-      $('vtext').textContent='加载音频引擎';
+      $('vtext').textContent=t('vLoading');
     }
   }, 250);
 
@@ -788,8 +916,8 @@
     send.disabled=busy; send.classList.toggle('busy', busy);
     $('play').disabled=busy; $('surprise').disabled=busy;
     $('playLed').classList.toggle('on', p==='playing');
-    if(p==='playing') $('vtext').textContent='演奏中';
-    else if(p==='idle') $('vtext').textContent='待机';
+    if(p==='playing') $('vtext').textContent=t('vPlaying');
+    else if(p==='idle') $('vtext').textContent=t('vIdle');
   }
 
   function logLine(html){ const l=$('log'); l.innerHTML += html+'<br>'; l.scrollTop=l.scrollHeight; }
@@ -830,10 +958,10 @@
       await resumeAudio();
       current=code; $('code').value=code;
       setPhase('playing');
-      setState('<b>正在演奏</b> · 改下面代码再按「应用编辑」');
+      setState(t('playing'));
     }catch(e){
       setPhase('idle');
-      setState('这段没法播放：'+e.message);
+      setState(t('playFail')+e.message);
     }
   }
 
@@ -841,8 +969,8 @@
     const intent=$('intent').value.trim();
     if(!intent) return;
     setPhase('composing');
-    setState('DeepSeek 正在作曲<span class="dots"></span>（约 3–5 秒）');
-    $('vtext').textContent='作曲中';
+    setState(t('composing'));
+    $('vtext').textContent=t('vComposing');
     logLine('<span class="u">› '+intent.replace(/</g,'&lt;')+'</span>');
     ensureStarted();
     try{
@@ -851,13 +979,13 @@
       const data=await r.json();
       if(!r.ok || data.error){
         setPhase('idle');
-        setState('出错：'+(data.error||r.status)+(data.detail?(' — '+data.detail):''));
+        setState(t('err')+(data.error||r.status)+(data.detail?(' — '+data.detail):''));
         return;
       }
       logLine('<span class="c">'+(data.code||'').replace(/</g,'&lt;')+'</span>');
       await playCode(data.code);
       $('intent').value='';
-    }catch(e){ setPhase('idle'); setState('请求失败：'+e.message); }
+    }catch(e){ setPhase('idle'); setState(t('reqFail')+e.message); }
   }
 
 
@@ -921,7 +1049,7 @@
     try{
       const pick = IDLE_PROMPTS[Math.floor(Math.random() * IDLE_PROMPTS.length)];
       $('intent').value = pick;
-      setState('空闲 90 秒 · 自动来一段：<b>'+pick.replace(/</g,'&lt;')+'</b>');
+      setState(t('idleAuto')+'<b>'+pick.replace(/</g,'&lt;')+'</b>');
       await vibe();
     } finally {
       idleFiring = false;
@@ -935,9 +1063,7 @@
     writeIdlePref(idleAutoOn);
     syncIdleToggleUi();
     bumpIdle('toggle');
-    setState(idleAutoOn
-      ? '已开启：90 秒没再按会自动随机来一段'
-      : '已关闭自动随机音乐');
+    setState(idleAutoOn ? t('idleOn') : t('idleOff'));
   };
 
   // Meaningful activity: typing, pads, transport, chips, code edit, send
@@ -1094,7 +1220,7 @@
     try{
       await ensureStarted();
       await playCode(code);
-      setState('乱画成曲 · <b>'+names.join(' ')+'</b>');
+      setState(t('scribbleTune')+'<b>'+names.join(' ')+'</b>');
     }catch(e){
       // voice already sounded; pattern is bonus
     }
@@ -1171,14 +1297,14 @@
       sizeScribbleCanvas();
       startScribbleFade();
       ensureStarted().then(()=>resumeAudio()).catch(()=>{});
-      setState('乱画已开 · 在空白处随手划，音高跟手走');
+      setState(t('scribbleOn'));
     } else {
       scribbleDrawing = false;
       scribbleLast = null;
       clearTimeout(scribblePatternTimer); scribblePatternTimer=null;
       stopScribbleFade();
       clearScribbleInk();
-      setState('已关闭随手乱画');
+      setState(t('scribbleOff'));
     }
     bumpIdle('scribble-toggle');
   }
@@ -1199,17 +1325,22 @@
   $('intent').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); vibe(); }});
   $('play').onclick=()=>{ const c=$('code').value.trim()||current; if(c) playCode(c); };
   $('apply').onclick=()=>{ const c=$('code').value.trim(); if(c) playCode(c); };
-  $('stop').onclick=()=>{ try{ hush(); }catch{} setPhase('idle'); clearPads(); setState('已停止'); };
+  $('stop').onclick=()=>{ try{ hush(); }catch{} setPhase('idle'); clearPads(); setState(t('stopped')); };
   $('surprise').onclick=()=>{ $('intent').value = EXAMPLES[Math.floor(Math.random()*EXAMPLES.length)]; vibe(); };
+
+
+  $('langZh').onclick = ()=> setLang('zh');
+  $('langEn').onclick = ()=> setLang('en');
+  applyI18n();
 
   fetch('/api/vibe',{method:'POST',headers:{'content-type':'application/json'},body:'{}'})
     .then(r=>r.json()).then(d=>{
       const ok = d.error==='intent required';
-      $('status2').textContent = ok ? 'API 就绪' : (d.error||'API');
+      $('status2').textContent = ok ? t('apiReady') : (d.error||'API');
       $('apiLed').classList.toggle('ok', ok);
       $('apiLed').classList.toggle('on', ok);
     })
-    .catch(()=>{ $('status2').textContent='API 离线'; });
+    .catch(()=>{ $('status2').textContent=t('apiOffline'); });
 </script>
 </body>
 </html>

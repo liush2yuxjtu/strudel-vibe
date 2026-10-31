@@ -1,4 +1,4 @@
-# 让中国大陆用户能用 vibe-music（备案 + 阿里云/腾讯云部署）
+# 让中国大陆用户能用 JamFlow / vibe-music（备案 + 阿里云/腾讯云部署）
 
 > **当前已上线（2026-05-29，阿里云轻量 上海 `106.14.154.23`）：**
 > - HTTP（独立端口）：**http://106.14.154.23:8131/**
@@ -77,7 +77,7 @@ DEEPSEEK_API_KEY=sk-你的key PORT=8080 node server.mjs
 
 ```ini
 [Unit]
-Description=vibe-music
+Description=JamFlow (vibe-web)
 After=network.target
 
 [Service]
