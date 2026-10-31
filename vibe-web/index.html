@@ -3,8 +3,24 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<meta name="description" content="vibe-music — 用一句话写音乐。DeepSeek 生成 Strudel，浏览器实时演奏。" />
-<title>vibe-music · 用一句话写音乐</title>
+<title>vibe-music · 用一句话写音乐（自然语言 → Strudel）</title>
+<meta name="description" content="vibe-music：给不会写 Strudel 的听歌人。用中文或英文说一句想听的节奏，DeepSeek 生成 Strudel 代码，浏览器里立刻用胶垫鼓机实时演奏。支持示例芯片、16 键胶垫跟鼓点亮、手改代码再播。" />
+<meta name="keywords" content="vibe-music, Strudel, DeepSeek, 自然语言写音乐, 浏览器鼓机, live coding, cyber drums" />
+<meta name="robots" content="index,follow,max-image-preview:large" />
+<link rel="canonical" href="https://vibe-web-gray.vercel.app/" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="zh_CN" />
+<meta property="og:locale:alternate" content="en_US" />
+<meta property="og:site_name" content="vibe-music" />
+<meta property="og:url" content="https://vibe-web-gray.vercel.app/" />
+<meta property="og:title" content="vibe-music · 用一句话写音乐" />
+<meta property="og:description" content="自然语言 → DeepSeek → Strudel，浏览器实时出声。为不会写 live-coding 语法的人准备的胶垫鼓机。" />
+<meta property="og:image" content="https://vibe-web-gray.vercel.app/og.png" />
+<meta property="og:image:alt" content="vibe-music 鼓机面板：琥珀色 LED 与 16 键胶垫" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="vibe-music · 用一句话写音乐" />
+<meta name="twitter:description" content="说一句想听的节奏，DeepSeek 写出 Strudel，浏览器立刻演奏。" />
+<meta name="twitter:image" content="https://vibe-web-gray.vercel.app/og.png" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23141210'/><rect x='6' y='6' width='8' height='8' rx='1.5' fill='%23FFB000'/><rect x='18' y='6' width='8' height='8' rx='1.5' fill='%233A342E'/><rect x='6' y='18' width='8' height='8' rx='1.5' fill='%233A342E'/><rect x='18' y='18' width='8' height='8' rx='1.5' fill='%23C46B3A'/></svg>" />
 <!-- Strudel engine vendored locally (same bytes as @strudel/web@1.2.6) so it loads
      without unpkg.com — which is unreliable/blocked in mainland China. -->
@@ -419,6 +435,26 @@
   .above-scribble{ position:relative; z-index:50; }
   .scribble-opts{ display:flex; flex-direction:column; gap:8px; }
 
+
+  /* ——— SEO/GEO about (modest, crawlable) ——— */
+  .about{
+    max-width:920px; width:100%; margin:0 auto;
+    padding:4px clamp(18px,4vw,36px) 8px;
+  }
+  .about-card{
+    background:rgba(30,26,22,.55);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px 16px;
+  }
+  .about-card h2{
+    margin:0 0 8px; font-size:13px; font-weight:600; color:var(--mute);
+    letter-spacing:.02em;
+  }
+  .about-card p{
+    margin:0; font-size:13px; line-height:1.55; color:var(--faint);
+  }
+  .about-card p + p{ margin-top:8px; }
   @media(max-width:520px){
     .promptbox{flex-direction:column}
     .pads{gap:8px; padding:10px}
@@ -503,11 +539,56 @@
     </section>
   </main>
 
+  <section class="about" id="about" aria-labelledby="about-title">
+    <div class="about-card">
+      <h2 id="about-title">关于 vibe-music</h2>
+      <p>vibe-music 是一个在浏览器里用的鼓机写歌页：你用中文或英文说一句想听的节奏（例如「赛博朋克鼓点」），DeepSeek 把它写成可播放的 Strudel 代码，再由本机 WebAudio 立刻出声。给不会写 Strudel / live-coding 语法、只想先听到点子的人。</p>
+      <p>关键能力：自然语言生成与演奏、示例芯片一键试听、16 键胶垫跟真鼓点一起亮、可手改代码再播。生产站：https://vibe-web-gray.vercel.app/</p>
+    </div>
+  </section>
+
   <footer>
     built with <a href="https://strudel.cc" target="_blank" rel="noopener">Strudel</a>
     · NL→code by DeepSeek
     · terminal twin: <span class="pill">/vibe-music</span>
   </footer>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "@id": "https://vibe-web-gray.vercel.app/#app",
+        "name": "vibe-music",
+        "alternateName": ["vibe-web", "strudel-vibe"],
+        "url": "https://vibe-web-gray.vercel.app/",
+        "description": "用中文或英文一句话描述想听的节奏，DeepSeek 生成 Strudel 代码并在浏览器实时演奏。面向不会写 Strudel 的听歌人与创作者。",
+        "inLanguage": ["zh-CN", "en"],
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript and WebAudio",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "featureList": [
+          "自然语言 → DeepSeek → Strudel",
+          "浏览器内 WebAudio 实时演奏",
+          "示例芯片与 16 键胶垫可视化",
+          "可编辑生成的 Strudel 代码"
+        ],
+        "creator": { "@type": "Person", "name": "GodLiu" }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "vibe-music",
+        "applicationCategory": "MusicApplication",
+        "operatingSystem": "Web",
+        "url": "https://vibe-web-gray.vercel.app/",
+        "description": "Browser drum machine that turns natural-language vibes into Strudel live patterns via DeepSeek."
+      }
+    ]
+  }
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
 
 <canvas id="scribble" class="scribble-layer" aria-hidden="true"></canvas>
 
