@@ -8,6 +8,11 @@ node_modules/
 
 # local agent / tooling state
 .claude/
+# Track JamFlow /verify skill (rest of .claude stays ignored)
+!.claude/
+!.claude/skills/
+!.claude/skills/verify/
+!.claude/skills/verify/**
 .gstack/
 
 # vercel
@@ -27,3 +32,4 @@ video/out/ViralCNVertical.mp4
 # os / editor
 .DS_Store
 *.log
+
