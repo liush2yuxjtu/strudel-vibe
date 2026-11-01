@@ -585,6 +585,20 @@
   }
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
+  <!-- Amplitude Browser SDK 2 (US); Browser API key is public by design -->
+  <script type="text/javascript">
+  !function(){"use strict";!function(e,t){var r=e.amplitude||{_q:[],_iq:{}};if(r.invoked)e.console&&console.error&&console.error("Amplitude snippet has been loaded.");else{var n=function(e,t){e.prototype[t]=function(){return this._q.push({name:t,args:Array.prototype.slice.call(arguments,0)}),this}},s=function(e,t,r){return function(n){e._q.push({name:t,args:Array.prototype.slice.call(r,0),resolve:n})}},o=function(e,t,r){e[t]=function(){if(r)return{promise:new Promise(s(e,t,Array.prototype.slice.call(arguments)))};!function(e,t,r){e._q.push({name:t,args:Array.prototype.slice.call(r,0)})}(e,t,Array.prototype.slice.call(arguments))}},i=function(e){for(var t=0;t<v.length;t++)o(e,v[t],!1);for(var r=0;r<g.length;r++)o(e,g[r],!0)};r.invoked=!0;var a=t.createElement("script");a.type="text/javascript",a.integrity="sha384-Sk+l9VwU+jvx8zsmLuRDNUQE+0K4h0xsyjdrfb/czM6hRumd1igYdOvGwa0LAGcq",a.crossOrigin="anonymous",a.async=!0,a.src="https://cdn.amplitude.com/libs/analytics-browser-2.48.1-min.js.gz",a.onload=function(){e.amplitude.runQueuedFunctions||console.log("[Amplitude] Error: could not load SDK")};var c=t.getElementsByTagName("script")[0];c.parentNode.insertBefore(a,c);for(var u=function(){return this._q=[],this},p=["add","append","clearAll","prepend","set","setOnce","unset","preInsert","postInsert","remove","getUserProperties"],l=0;l<p.length;l++)n(u,p[l]);r.Identify=u;for(var d=function(){return this._q=[],this},f=["getEventProperties","setProductId","setQuantity","setPrice","setRevenue","setRevenueType","setReceipt","setReceiptSig","setCurrency","setEventProperties"],y=0;y<f.length;y++)n(d,f[y]);r.Revenue=d;var v=["getDeviceId","setDeviceId","getSessionId","setSessionId","getUserId","setUserId","setOptOut","setTransport","reset","extendSession"],g=["init","add","remove","track","logEvent","identify","groupIdentify","setGroup","revenue","flush"];i(r),r.createInstance=function(e){return r._iq[e]={_q:[]},i(r._iq[e]),r._iq[e]},e.amplitude=r}}(window,document)}();
+  amplitude.init("3090b782f1425be150950d8aac803b7e", {
+    autocapture: {
+      attribution: true,
+      pageViews: true,
+      sessions: true,
+      formInteractions: false,
+      fileDownloads: false,
+      elementInteractions: false
+    }
+  });
+  </script>
 
 <canvas id="scribble" class="scribble-layer" aria-hidden="true"></canvas>
 
@@ -721,12 +735,33 @@
     }
   }
   function setLang(next){
+    const prev = lang;
     lang = (next === 'en') ? 'en' : 'zh';
     applyI18n();
+    if(prev !== lang) jamTrack('lang_switch', { from: prev, to: lang });
   }
 
 
   const $ = (id)=>document.getElementById(id);
+  // Amplitude helpers — never send full prompt/code (PII)
+  function jamCtx(extra){
+    let scribble = false, idle = true;
+    try { scribble = !!scribbleOn; } catch(_){}
+    try { idle = !!idleAutoOn; } catch(_){}
+    const base = {
+      lang: (typeof lang === 'string' ? lang : 'zh'),
+      scribble_on: scribble,
+      idle_on: idle,
+    };
+    return Object.assign(base, extra || {});
+  }
+  function jamTrack(name, props){
+    try{
+      if(window.amplitude && typeof window.amplitude.track === 'function'){
+        window.amplitude.track(name, jamCtx(props));
+      }
+    }catch(_){}
+  }
   let started=false, playing=false, current='';
   // phase: 'idle' | 'loading' (engine/samples) | 'composing' (DeepSeek) | 'playing'
   let phase='idle', phaseSince=performance.now();
@@ -738,7 +773,7 @@
     EXAMPLES.forEach(tt=>{
       const c=document.createElement('button');
       c.type='button'; c.className='chip'; c.textContent=tt;
-      c.onclick=()=>{ $('intent').value=tt; vibe(); };
+      c.onclick=()=>{ jamTrack('chip_click', { intent_len: tt.length }); $('intent').value=tt; vibe({ source: 'chip' }); };
       chips.appendChild(c);
     });
   }
@@ -967,15 +1002,18 @@
       current=code; $('code').value=code;
       setPhase('playing');
       setState(t('playing'));
+      jamTrack('vibe_play', { code_len: (code||'').length });
     }catch(e){
       setPhase('idle');
       setState(t('playFail')+e.message);
     }
   }
 
-  async function vibe(){
+  async function vibe(opts){
     const intent=$('intent').value.trim();
     if(!intent) return;
+    const source = (opts && opts.source) || 'manual';
+    jamTrack('vibe_generate_submit', { intent_len: intent.length, source });
     setPhase('composing');
     setState(t('composing'));
     $('vtext').textContent=t('vComposing');
@@ -1058,7 +1096,7 @@
       const pick = IDLE_PROMPTS[Math.floor(Math.random() * IDLE_PROMPTS.length)];
       $('intent').value = pick;
       setState(t('idleAuto')+'<b>'+pick.replace(/</g,'&lt;')+'</b>');
-      await vibe();
+      await vibe({ source: 'idle' });
     } finally {
       idleFiring = false;
       armIdleTimer();
@@ -1072,6 +1110,7 @@
     syncIdleToggleUi();
     bumpIdle('toggle');
     setState(idleAutoOn ? t('idleOn') : t('idleOff'));
+    jamTrack('idle_toggle', { idle_on: idleAutoOn });
   };
 
   // Meaningful activity: typing, pads, transport, chips, code edit, send
@@ -1322,6 +1361,7 @@
       setState(t('scribbleOff'));
     }
     bumpIdle('scribble-toggle');
+    jamTrack('scribble_toggle', { scribble_on: scribbleOn });
   }
 
   syncScribbleToggleUi();
@@ -1343,8 +1383,8 @@
   $('intent').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); vibe(); }});
   $('play').onclick=()=>{ const c=$('code').value.trim()||current; if(c) playCode(c); };
   $('apply').onclick=()=>{ const c=$('code').value.trim(); if(c) playCode(c); };
-  $('stop').onclick=()=>{ try{ hush(); }catch{} setPhase('idle'); clearPads(); setState(t('stopped')); };
-  $('surprise').onclick=()=>{ $('intent').value = EXAMPLES[Math.floor(Math.random()*EXAMPLES.length)]; vibe(); };
+  $('stop').onclick=()=>{ try{ hush(); }catch{} setPhase('idle'); clearPads(); setState(t('stopped')); jamTrack('vibe_stop'); };
+  $('surprise').onclick=()=>{ $('intent').value = EXAMPLES[Math.floor(Math.random()*EXAMPLES.length)]; vibe({ source: 'surprise' }); };
 
 
   $('langZh').onclick = ()=> setLang('zh');
