@@ -484,6 +484,31 @@
     font-size:12px; font-weight:600; padding:6px 12px; border-radius:999px;
     background:var(--led); color:#1A1200; border:1px solid var(--led);
   }
+
+  /* ——— first-visit must-hear CTA ——— */
+  .first-demo{
+    display:none; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    margin:10px 0 4px; padding:12px 14px;
+    background:linear-gradient(135deg, rgba(255,176,0,.16), rgba(196,107,58,.12));
+    border:1px solid rgba(255,176,0,.42); border-radius:14px;
+    box-shadow:0 0 0 1px rgba(255,176,0,.08), 0 8px 24px rgba(0,0,0,.22);
+  }
+  .first-demo.on{ display:flex; }
+  .first-demo-copy{ display:flex; flex-direction:column; gap:2px; min-width:0; flex:1; }
+  .first-demo-copy strong{ font-size:14.5px; font-weight:650; color:var(--ink); letter-spacing:.01em; }
+  .first-demo-copy span{ font-size:12px; color:var(--faint); line-height:1.4; }
+  .first-demo-actions{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
+  .first-demo-go{
+    font-size:13.5px; font-weight:700; padding:9px 16px; border-radius:999px;
+    background:var(--led); color:#1A1200; border:1px solid var(--led);
+    box-shadow:0 0 18px rgba(255,176,0,.28);
+  }
+  .first-demo-go:hover{ filter:brightness(1.05); }
+  .first-demo-go:disabled{ opacity:.55; cursor:wait; filter:none; }
+  .first-demo-skip{
+    font-size:12px; font-weight:600; padding:7px 12px; border-radius:999px;
+    background:var(--recess); color:var(--mute); border:1px solid var(--line2);
+  }
   @media(max-width:520px){
     .promptbox{flex-direction:column}
     .pads{gap:8px; padding:10px}
@@ -517,6 +542,17 @@
       </div>
       <div class="prog" id="prog" aria-hidden="true"><i></i></div>
       <div class="state" id="state" role="status" aria-live="polite" data-i18n="stateIdle">点例子，或输入</div>
+
+      <div class="first-demo above-scribble" id="firstDemo" hidden role="region" aria-label="first demo">
+        <div class="first-demo-copy">
+          <strong data-i18n="firstDemoTitle">点一下就出声</strong>
+          <span data-i18n="firstDemoHint">本地试听 · 不用等生成</span>
+        </div>
+        <div class="first-demo-actions">
+          <button type="button" class="first-demo-go" id="firstDemoGo" data-i18n="firstDemoGo">试听</button>
+          <button type="button" class="first-demo-skip" id="firstDemoSkip" data-i18n="firstDemoSkip">跳过</button>
+        </div>
+      </div>
 
       <div class="pad-layout pad-section">
         <div>
@@ -642,6 +678,11 @@
       intentPh: '四拍底鼓 / cyber drums',
       send: '生成',
       stateIdle: '点例子，或输入',
+      firstDemoTitle: '点一下就出声',
+      firstDemoHint: '本地试听 · 不用等生成',
+      firstDemoGo: '试听',
+      firstDemoSkip: '跳过',
+      firstDemoPlaying: '<b>试听中</b> · 本地鼓点贝斯',
       pads: '',
       play: '播放', stop: '停止', surprise: '随机', apply: '应用',
       idleTitle: '空闲自动', idleHint: '约 90 秒无操作后自动出一首', idleAria: '空闲自动播放',
@@ -678,6 +719,11 @@
       intentPh: 'four-on-floor / cyber drums',
       send: 'Go',
       stateIdle: 'Pick a chip, or type',
+      firstDemoTitle: 'Tap to hear sound',
+      firstDemoHint: 'Local demo · no generate wait',
+      firstDemoGo: 'Try it',
+      firstDemoSkip: 'Skip',
+      firstDemoPlaying: '<b>Demo</b> · local drums + bass',
       pads: '',
       play: 'Play', stop: 'Stop', surprise: 'Random', apply: 'Apply',
       idleTitle: 'Idle auto', idleHint: 'After ~90s idle, plays one for you', idleAria: 'Auto-play when idle',
@@ -1011,6 +1057,7 @@
     $('playLed').classList.toggle('on', p==='playing');
     if(p==='playing') $('vtext').textContent=t('vPlaying');
     else if(p==='idle') $('vtext').textContent=t('vIdle');
+    try{ syncFirstDemoUi(); }catch(_){}
   }
 
   function logLine(html){ const l=$('log'); l.innerHTML += html+'<br>'; l.scrollTop=l.scrollHeight; }
@@ -1039,6 +1086,44 @@
     play.setAttribute('data-has-code', has ? '1' : '0');
   }
 
+  // ——— first-visit must-hear (local Strudel demo; requires explicit tap) ———
+  const FIRST_DEMO_LS_KEY = 'jamflow-first-demo-seen';
+  // Short drum+bass using local /samples — no /api/vibe.
+  const FIRST_DEMO_CODE = 'stack(s("bd*4, ~ sd ~ sd, hh*8").gain(0.82), note("<c2 g1 bb1 f1>").s("bass").gain(0.48).lpf(900))';
+  function firstDemoSeen(){
+    try{ return localStorage.getItem(FIRST_DEMO_LS_KEY) === '1'; }catch{ return false; }
+  }
+  function markFirstDemoSeen(){
+    try{ localStorage.setItem(FIRST_DEMO_LS_KEY, '1'); }catch{}
+  }
+  function syncFirstDemoUi(){
+    const el = $('firstDemo');
+    if(!el) return;
+    const show = !firstDemoSeen();
+    el.hidden = !show;
+    el.classList.toggle('on', show);
+    const go = $('firstDemoGo');
+    if(go){
+      const busy = (phase==='composing' || phase==='loading');
+      go.disabled = busy;
+    }
+  }
+  function dismissFirstDemo(reason){
+    markFirstDemoSeen();
+    syncFirstDemoUi();
+    if(reason) jamTrack('first_demo_dismiss', { reason: reason });
+  }
+  async function runFirstDemo(){
+    const go = $('firstDemoGo');
+    if(go) go.disabled = true;
+    markFirstDemoSeen();
+    syncFirstDemoUi();
+    jamTrack('first_demo_play', { source: 'first_demo' });
+    bumpIdle('first-demo');
+    setState(t('firstDemoPlaying'));
+    await playCode(FIRST_DEMO_CODE, { source: 'first_demo' });
+  }
+
   let enginePromise=null;
   let repl=null;
   function ensureStarted(){
@@ -1054,7 +1139,7 @@
     return enginePromise;
   }
 
-  async function playCode(code){
+  async function playCode(code, trackProps){
     if(!started){ setPhase('loading'); }
     await ensureStarted();
     try{
@@ -1062,9 +1147,9 @@
       await resumeAudio();
       current=code; $('code').value=code;
       setPhase('playing');
-      setState(t('playing'));
+      setState((trackProps && trackProps.source === 'first_demo') ? t('firstDemoPlaying') : t('playing'));
       syncPlayButton();
-      jamTrack('vibe_play', { code_len: (code||'').length });
+      jamTrack('vibe_play', Object.assign({ code_len: (code||'').length }, trackProps || {}));
     }catch(e){
       setPhase('idle');
       setState(t('playFail')+e.message);
@@ -1075,6 +1160,7 @@
     const intent=$('intent').value.trim();
     if(!intent) return;
     const source = (opts && opts.source) || 'manual';
+    if(!firstDemoSeen()) dismissFirstDemo('generate');
     jamTrack('vibe_generate_submit', { intent_len: intent.length, source });
     setPhase('composing');
     setState(t('composing'));
@@ -1507,11 +1593,11 @@
   }
 
 
-  window.__vibe = { phase:()=>phase, phaseSince:()=>phaseSince, audioState, started:()=>started, current:()=>current, repl:()=>repl, sync:'editPattern+onTrigger@deadline', idleAuto:()=>idleAutoOn, bumpIdle, armIdleTimer, IDLE_MS, scribble:()=>scribbleOn, setScribbleEnabled };
+  window.__vibe = { phase:()=>phase, phaseSince:()=>phaseSince, audioState, started:()=>started, current:()=>current, repl:()=>repl, sync:'editPattern+onTrigger@deadline', idleAuto:()=>idleAutoOn, bumpIdle, armIdleTimer, IDLE_MS, scribble:()=>scribbleOn, setScribbleEnabled, firstDemoSeen, runFirstDemo, dismissFirstDemo, FIRST_DEMO_LS_KEY };
 
   $('send').onclick=vibe;
   $('intent').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); vibe(); }});
-  $('play').onclick=()=>{ const c=$('code').value.trim()||current; if(c) playCode(c); };
+  $('play').onclick=()=>{ const c=$('code').value.trim()||current; if(c){ if(!firstDemoSeen()) dismissFirstDemo('play'); playCode(c); } };
   $('apply').onclick=()=>{ const c=$('code').value.trim(); if(c) playCode(c); };
   $('stop').onclick=()=>{ try{ hush(); }catch{} setPhase('idle'); clearPads(); setState(t('stopped')); jamTrack('vibe_stop'); };
   $('surprise').onclick=()=>{ $('intent').value = EXAMPLES[Math.floor(Math.random()*EXAMPLES.length)]; vibe({ source: 'surprise' }); };
@@ -1543,6 +1629,11 @@
   };
 
   syncPlayButton();
+  syncFirstDemoUi();
+  const firstDemoGo = $('firstDemoGo');
+  if(firstDemoGo) firstDemoGo.onclick = ()=>{ runFirstDemo(); };
+  const firstDemoSkip = $('firstDemoSkip');
+  if(firstDemoSkip) firstDemoSkip.onclick = ()=>{ dismissFirstDemo('skip'); bumpIdle('first-demo-skip'); };
 
   fetch('/api/vibe',{method:'POST',headers:{'content-type':'application/json'},body:'{}'})
     .then(r=>r.json()).then(d=>{
