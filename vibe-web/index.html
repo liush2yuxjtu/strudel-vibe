@@ -1194,9 +1194,11 @@
   }
 
   async function vibe(opts){
-    const intent=$('intent').value.trim();
-    if(!intent) return;
+    const intent=(opts && opts.intent != null ? String(opts.intent) : $('intent').value).trim();
+    if(!intent) return { error: 'intent required', code: 'INTENT_REQUIRED', retryable: false };
+    if(opts && opts.intent != null) $('intent').value = intent;
     const source = (opts && opts.source) || 'manual';
+    const signal = opts && opts.signal;
     if(!firstDemoSeen()) dismissFirstDemo('generate');
     else revealPads();
     jamTrack('vibe_generate_submit', { intent_len: intent.length, source });
@@ -1207,17 +1209,25 @@
     ensureStarted();
     try{
       const r=await fetch('/api/vibe',{method:'POST',headers:{'content-type':'application/json'},
-        body:JSON.stringify({intent, current})});
+        body:JSON.stringify({intent, current}), signal});
       const data=await r.json();
       if(!r.ok || data.error){
         setPhase('idle');
         setState(t('err')+(data.error||r.status)+(data.detail?(' — '+data.detail):''));
-        return;
+        return { error: data.error||String(r.status), code: 'GENERATE_FAILED', retryable: r.status>=500, detail: data.detail };
       }
       logLine('<span class="c">'+(data.code||'').replace(/</g,'&lt;')+'</span>');
       await playCode(data.code);
       $('intent').value='';
-    }catch(e){ setPhase('idle'); setState(t('reqFail')+e.message); }
+      return { code: data.code, phase: 'playing' };
+    }catch(e){
+      if(signal && signal.aborted){
+        setPhase('idle');
+        return { error: 'cancelled', code: 'ABORTED', retryable: true };
+      }
+      setPhase('idle'); setState(t('reqFail')+e.message);
+      return { error: String(e && e.message || e), code: 'GENERATE_FAILED', retryable: true };
+    }
   }
 
 
@@ -1631,7 +1641,71 @@
   }
 
 
-  window.__vibe = { phase:()=>phase, phaseSince:()=>phaseSince, audioState, started:()=>started, current:()=>current, repl:()=>repl, sync:'editPattern+onTrigger@deadline', idleAuto:()=>idleAutoOn, bumpIdle, armIdleTimer, IDLE_MS, scribble:()=>scribbleOn, setScribbleEnabled, firstDemoSeen, runFirstDemo, dismissFirstDemo, revealPads, syncPadsReadyUi, FIRST_DEMO_LS_KEY };
+  // WebMCP bridge — consumed by lib/webmcp-tools.mjs (native document.modelContext)
+  window.__vibeWebMcp = {
+    async getStatus(){
+      const codeEl = $('code');
+      const codeVal = (codeEl && codeEl.value ? codeEl.value.trim() : '') || current || '';
+      return {
+        lang,
+        phase,
+        playing: phase === 'playing',
+        code_preview: codeVal.slice(0, 120),
+        examples: currentExamples().slice(),
+        scribble_on: !!scribbleOn,
+        idle_on: !!idleAutoOn,
+      };
+    },
+    async generateMusic(intent, opts){
+      return vibe({ intent, source: 'webmcp', signal: opts && opts.signal });
+    },
+    async controlPlayback(action, opts){
+      if(action === 'stop'){
+        try{ hush(); }catch{}
+        setPhase('idle');
+        clearPads();
+        setState(t('stopped'));
+        jamTrack('vibe_stop', { source: 'webmcp' });
+        return { phase: 'idle' };
+      }
+      const c = ((opts && opts.code) ? String(opts.code).trim() : '') || ($('code').value.trim() || current);
+      if(!c){
+        return {
+          error: 'No Strudel pattern to play.',
+          code: 'NO_PATTERN',
+          retryable: false,
+          suggestion: 'Call generate_music or run_example first.',
+        };
+      }
+      if(!firstDemoSeen()) dismissFirstDemo('play');
+      await playCode(c, { source: 'webmcp' });
+      return { phase: phase, code: c };
+    },
+    async runExample({ label, surprise, signal } = {}){
+      const list = currentExamples();
+      let pick = label;
+      if(surprise){
+        pick = list[Math.floor(Math.random() * list.length)];
+      } else if(!list.includes(label)){
+        return {
+          error: 'Chip not found: ' + label,
+          code: 'CHIP_NOT_FOUND',
+          retryable: false,
+          suggestion: 'Call get_jam_status for examples.',
+        };
+      }
+      $('intent').value = pick;
+      const result = await vibe({ intent: pick, source: surprise ? 'webmcp-surprise' : 'webmcp-chip', signal });
+      if(result && result.error) return result;
+      return { label: pick, code: result && result.code, phase: (result && result.phase) || phase };
+    },
+    async setLanguage(language){
+      setLang(language);
+      return { language: lang, examples_preview: currentExamples().slice(0, 4) };
+    },
+  };
+
+  window.__vibe = { phase:()=>phase, phaseSince:()=>phaseSince, audioState, started:()=>started, current:()=>current, repl:()=>repl, sync:'editPattern+onTrigger@deadline', idleAuto:()=>idleAutoOn, bumpIdle, armIdleTimer, IDLE_MS, scribble:()=>scribbleOn, setScribbleEnabled, firstDemoSeen, runFirstDemo, dismissFirstDemo, revealPads, syncPadsReadyUi, FIRST_DEMO_LS_KEY, webmcp:()=>window.__vibeWebMcp };
 
   $('send').onclick=vibe;
   $('intent').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); vibe(); }});
@@ -1683,6 +1757,20 @@
       $('apiLed').classList.toggle('on', ok);
     })
     .catch(()=>{ apiStatus = 'offline'; refreshApiStatusLabel(); });
+</script>
+<script type="module">
+  // Native WebMCP registration (feature-detected). AbortController teardown on pagehide.
+  import { registerJamflowWebMcp } from './lib/webmcp-tools.mjs';
+  const bridge = window.__vibeWebMcp;
+  if (bridge) {
+    const result = await registerJamflowWebMcp(bridge);
+    if (result && result.controller) {
+      window.addEventListener('pagehide', () => {
+        try { result.controller.abort(); } catch (_) {}
+      }, { once: true });
+    }
+    try { window.__jamflowWebMcp = result; } catch (_) {}
+  }
 </script>
 </body>
 </html>

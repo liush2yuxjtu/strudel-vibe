@@ -1,0 +1,157 @@
+[
+  {
+    "name": "Direct generate Chinese intent",
+    "messages": [
+      {
+        "role": "user",
+        "type": "message",
+        "content": "做一段四拍底鼓加八分 hihat"
+      }
+    ],
+    "expectedCall": [
+      {
+        "functionName": "generate_music",
+        "arguments": {
+          "intent": { "$pattern": ".+" }
+        }
+      }
+    ]
+  },
+  {
+    "name": "Stop playback",
+    "messages": [
+      {
+        "role": "user",
+        "type": "message",
+        "content": "先停一下音乐"
+      }
+    ],
+    "expectedCall": [
+      {
+        "functionName": "control_playback",
+        "arguments": {
+          "action": "stop"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Play current pattern",
+    "messages": [
+      {
+        "role": "user",
+        "type": "message",
+        "content": "再播放当前这段"
+      }
+    ],
+    "expectedCall": [
+      {
+        "functionName": "control_playback",
+        "arguments": {
+          "action": "play"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Switch to English then surprise",
+    "messages": [
+      {
+        "role": "user",
+        "type": "message",
+        "content": "Switch the UI to English and play a random example for me"
+      }
+    ],
+    "expectedCall": {
+      "ordered": [
+        {
+          "functionName": "set_ui_language",
+          "arguments": { "language": "en" }
+        },
+        {
+          "functionName": "run_example",
+          "arguments": { "surprise": true }
+        }
+      ]
+    }
+  },
+  {
+    "name": "List status before picking chip",
+    "messages": [
+      {
+        "role": "user",
+        "type": "message",
+        "content": "现在在放什么？有哪些例子可以点？"
+      }
+    ],
+    "expectedCall": [
+      {
+        "functionName": "get_jam_status",
+        "arguments": {}
+      }
+    ]
+  },
+  {
+    "name": "Missing intent should ask not invent",
+    "messages": [
+      {
+        "role": "user",
+        "type": "message",
+        "content": "帮我生成一下音乐"
+      }
+    ],
+    "expectedCall": [
+      {
+        "functionName": "generate_music",
+        "arguments": {
+          "intent": { "$pattern": ".+" }
+        }
+      }
+    ],
+    "notes": "If the model asks a clarifying question with no tool call, that is also acceptable; if it calls generate_music it must supply a non-empty intent only after the user clarified."
+  },
+  {
+    "name": "Run named chip after status",
+    "messages": [
+      {
+        "role": "user",
+        "type": "message",
+        "content": "用例子里的 lo-fi 灰尘钢琴软底鼓"
+      },
+      {
+        "role": "model",
+        "type": "functioncall",
+        "functioncall": {
+          "name": "get_jam_status",
+          "arguments": {}
+        }
+      },
+      {
+        "role": "tool",
+        "type": "functionresponse",
+        "functionresponse": {
+          "name": "get_jam_status",
+          "response": {
+            "ok": true,
+            "lang": "zh",
+            "phase": "idle",
+            "examples": ["赛博朋克鼓点真的出声", "四拍底鼓加霓虹 hihat", "lo-fi 灰尘钢琴软底鼓"]
+          }
+        }
+      },
+      {
+        "role": "user",
+        "type": "message",
+        "content": "就那个 lo-fi 的"
+      }
+    ],
+    "expectedCall": [
+      {
+        "functionName": "run_example",
+        "arguments": {
+          "label": { "$pattern": "lo-fi.*" }
+        }
+      }
+    ]
+  }
+]

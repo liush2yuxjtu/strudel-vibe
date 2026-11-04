@@ -1,0 +1,91 @@
+{
+  "tools": [
+    {
+      "name": "get_jam_status",
+      "description": "Reads JamFlow playback state, UI language, and example prompt chips. Use when checking what is playing, which language is active, or which chips are available before generating or running an example.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "generate_music",
+      "description": "Turns a Chinese or English music description into Strudel and plays it in the browser. Use when the user describes what they want to hear or asks to change the current pattern.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "intent": {
+            "type": "string",
+            "description": "Musical intent in Chinese or English, as the user phrased it"
+          }
+        },
+        "required": ["intent"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "untrustedContentHint": true
+      }
+    },
+    {
+      "name": "control_playback",
+      "description": "Starts or stops browser playback of the current Strudel pattern. Use when the user asks to play, resume, or stop the music without regenerating it.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["play", "stop"],
+            "description": "Playback action to perform"
+          },
+          "code": {
+            "type": "string",
+            "description": "Optional Strudel expression to play; defaults to the editor or last pattern"
+          }
+        },
+        "required": ["action"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "run_example",
+      "description": "Runs a curated prompt chip or a random surprise prompt, then generates and plays music. Use when the user picks an example, wants a surprise, or prefers not to type an intent.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Exact chip text from get_jam_status examples, when not using surprise"
+          },
+          "surprise": {
+            "type": "boolean",
+            "description": "If true, pick a random example for the current language"
+          }
+        },
+        "additionalProperties": false
+      },
+      "annotations": {
+        "untrustedContentHint": true
+      }
+    },
+    {
+      "name": "set_ui_language",
+      "description": "Switches the JamFlow interface between Chinese and English and refreshes example chips. Use when the user asks for 中文, English, or a language change.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "enum": ["zh", "en"],
+            "description": "UI language code"
+          }
+        },
+        "required": ["language"],
+        "additionalProperties": false
+      }
+    }
+  ]
+}
