@@ -5,8 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 
 <title>JamFlow · 说一句，立刻出声</title>
-<meta name="description" content="JamFlow：自然语言变成 Strudel，浏览器里实时演奏。不会写 live-coding 也能先听到点子。" />
+<meta name="description" content="JamFlow：说一句氛围，浏览器里立刻听到 Strudel 音乐。自然语言 → DeepSeek → 可播放代码，不会写 live-coding 也能先出声。" />
 <meta name="robots" content="index,follow,max-image-preview:large" />
+<meta name="theme-color" content="#141210" />
+<meta name="application-name" content="JamFlow" />
 <link rel="canonical" href="https://jamflow-gray.vercel.app/" />
 <link rel="alternate" hreflang="zh-CN" href="https://jamflow-gray.vercel.app/" />
 <link rel="alternate" hreflang="en" href="https://jamflow-gray.vercel.app/?lang=en" />
@@ -17,13 +19,18 @@
 <meta property="og:site_name" content="JamFlow" />
 <meta property="og:url" content="https://jamflow-gray.vercel.app/" />
 <meta property="og:title" content="JamFlow · 说一句，立刻出声" />
-<meta property="og:description" content="自然语言 → DeepSeek → Strudel，浏览器实时出声。" />
+<meta property="og:description" content="JamFlow：说一句氛围，浏览器里立刻听到 Strudel 音乐。自然语言 → DeepSeek → 可播放代码。" />
 <meta property="og:image" content="https://jamflow-gray.vercel.app/og.png" />
-<meta property="og:image:alt" content="JamFlow drum pads" />
+<meta property="og:image:secure_url" content="https://jamflow-gray.vercel.app/og.png" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="JamFlow — say a vibe, hear Strudel in the browser" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="JamFlow · 说一句，立刻出声" />
-<meta name="twitter:description" content="Say a vibe. Hear Strudel live in your browser." />
+<meta name="twitter:description" content="JamFlow: say a vibe, hear Strudel music in the browser. No live-coding required." />
 <meta name="twitter:image" content="https://jamflow-gray.vercel.app/og.png" />
+<meta name="twitter:image:alt" content="JamFlow — say a vibe, hear Strudel in the browser" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23141210'/><rect x='6' y='6' width='8' height='8' rx='1.5' fill='%23FFB000'/><rect x='18' y='6' width='8' height='8' rx='1.5' fill='%233A342E'/><rect x='6' y='18' width='8' height='8' rx='1.5' fill='%233A342E'/><rect x='18' y='18' width='8' height='8' rx='1.5' fill='%23C46B3A'/></svg>" />
 <!-- Strudel engine vendored locally (same bytes as @strudel/web@1.2.6) so it loads
      without unpkg.com — which is unreliable/blocked in mainland China. -->
@@ -674,7 +681,7 @@
   <section class="about" id="about" aria-labelledby="about-title">
     <div class="about-card">
       <h2 id="about-title" data-i18n="aboutTitle">关于 JamFlow</h2>
-      <p data-i18n="aboutBody">JamFlow 把一句话变成可播放的 Strudel，在浏览器里实时出声——给不会写 live-coding 的人。</p>
+      <p data-i18n="aboutBody">JamFlow：说一句氛围，浏览器里立刻听到 Strudel 音乐。自然语言变成可播放代码，给不会写 live-coding 的人。</p>
     </div>
   </section>
 
@@ -687,24 +694,86 @@
   <script type="application/ld+json" id="ldjson">
   {
     "@context": "https://schema.org",
-    "@type": ["WebApplication", "SoftwareApplication"],
-    "@id": "https://jamflow-gray.vercel.app/#app",
-    "name": "JamFlow",
-    "alternateName": ["Jam Flow", "vibe-music"],
-    "url": "https://jamflow-gray.vercel.app/",
-    "description": "JamFlow turns a natural-language prompt into playable Strudel and plays it live in the browser via DeepSeek—for people who do not write live-coding. JamFlow：自然语言变成可播放的 Strudel，浏览器实时出声——给不会写 live-coding 的人。",
-    "inLanguage": ["zh-CN", "en"],
-    "applicationCategory": "MultimediaApplication",
-    "operatingSystem": "Any",
-    "browserRequirements": "Requires JavaScript and WebAudio",
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "url": "https://jamflow-gray.vercel.app/" },
-    "featureList": [
-      "Natural language → DeepSeek → Strudel",
-      "WebAudio live playback",
-      "Pads and prompt chips",
-      "Editable Strudel code"
-    ],
-    "isAccessibleForFree": true
+    "@graph": [
+      {
+        "@type": ["WebApplication", "SoftwareApplication"],
+        "@id": "https://jamflow-gray.vercel.app/#app",
+        "name": "JamFlow",
+        "alternateName": ["Jam Flow", "vibe-music"],
+        "url": "https://jamflow-gray.vercel.app/",
+        "description": "JamFlow: say a vibe, hear Strudel music in the browser. Natural language becomes playable Strudel via DeepSeek and WebAudio—for people who do not write live-coding. JamFlow：说一句氛围，浏览器里立刻听到 Strudel 音乐。",
+        "inLanguage": ["zh-CN", "en"],
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript and WebAudio",
+        "image": "https://jamflow-gray.vercel.app/og.png",
+        "screenshot": "https://jamflow-gray.vercel.app/og.png",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://jamflow-gray.vercel.app/" },
+        "featureList": [
+          "Natural language → DeepSeek → Strudel",
+          "Local one-tap demo before AI generate",
+          "WebAudio live playback",
+          "Pads and prompt chips",
+          "Editable Strudel code",
+          "Chinese and English UI"
+        ],
+        "isAccessibleForFree": true,
+        "dateModified": "2026-11-05"
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://jamflow-gray.vercel.app/#webpage",
+        "url": "https://jamflow-gray.vercel.app/",
+        "name": "JamFlow",
+        "description": "JamFlow: say a vibe, hear Strudel music in the browser.",
+        "isPartOf": { "@id": "https://jamflow-gray.vercel.app/#app" },
+        "inLanguage": ["zh-CN", "en"],
+        "primaryImageOfPage": { "@type": "ImageObject", "url": "https://jamflow-gray.vercel.app/og.png", "width": 1200, "height": 630 },
+        "dateModified": "2026-11-05"
+      },
+      {
+        "@type": "HowTo",
+        "@id": "https://jamflow-gray.vercel.app/#howto",
+        "name": "How to make music with JamFlow",
+        "description": "Turn one sentence into live Strudel audio in the browser.",
+        "totalTime": "PT1M",
+        "step": [
+          { "@type": "HowToStep", "position": 1, "name": "Hear a local demo (optional)", "text": "On a first visit, tap Play a beat / 立刻出声 to hear local drums and bass with no AI wait." },
+          { "@type": "HowToStep", "position": 2, "name": "Describe a vibe", "text": "Type what you want to hear in the prompt, or pick an example chip." },
+          { "@type": "HowToStep", "position": 3, "name": "Generate and play", "text": "Tap Go / 生成. DeepSeek writes Strudel; the browser plays it with WebAudio." }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://jamflow-gray.vercel.app/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is JamFlow?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "JamFlow is a free browser app: say a vibe, hear Strudel music. Natural language becomes playable Strudel via DeepSeek and WebAudio—no live-coding required."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I need to know live-coding?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Type a sentence or tap an example. You can still open and edit the generated Strudel code if you want."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is JamFlow free?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. JamFlow is free to use in the browser at jamflow-gray.vercel.app."
+            }
+          }
+        ]
+      }
+    ]
   }
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
@@ -753,7 +822,7 @@
       vIdle: '待机', vPlaying: '演奏中', vComposing: '作曲中', vLoading: '加载中',
       playLed: '演奏', playStatusTitle: '播放',
       aboutTitle: '关于 JamFlow',
-      aboutBody: 'JamFlow 把一句话变成可播放的 Strudel，在浏览器里实时出声——给不会写 live-coding 的人。',
+      aboutBody: 'JamFlow：说一句氛围，浏览器里立刻听到 Strudel 音乐。自然语言变成可播放代码，给不会写 live-coding 的人。',
       playing: '<b>演奏中</b>',
       playFail: '无法播放：',
       composing: '作曲中<span class="dots"></span>',
@@ -769,7 +838,7 @@
       apiReady: 'API 就绪',
       apiOffline: 'API 离线',
       metaTitle: 'JamFlow · 说一句，立刻出声',
-      metaDesc: 'JamFlow：自然语言变成 Strudel，浏览器里实时演奏。不会写 live-coding 也能先听到点子。',
+      metaDesc: 'JamFlow：说一句氛围，浏览器里立刻听到 Strudel 音乐。自然语言 → DeepSeek → 可播放代码，不会写 live-coding 也能先出声。',
     },
     en: {
       tagline: 'Say it. Hear it.',
@@ -795,7 +864,7 @@
       vIdle: 'Idle', vPlaying: 'Playing', vComposing: 'Writing', vLoading: 'Loading',
       playLed: 'Play', playStatusTitle: 'Playback',
       aboutTitle: 'About JamFlow',
-      aboutBody: 'JamFlow turns a sentence into playable Strudel and plays it live in your browser—for people who don’t write live-coding.',
+      aboutBody: 'JamFlow: say a vibe, hear Strudel music in the browser. Natural language becomes playable code—for people who don’t write live-coding.',
       playing: '<b>Playing</b>',
       playFail: 'Can’t play: ',
       composing: 'Writing<span class="dots"></span>',
@@ -811,7 +880,7 @@
       apiReady: 'API ready',
       apiOffline: 'API offline',
       metaTitle: 'JamFlow · Say it. Hear it.',
-      metaDesc: 'JamFlow turns natural language into Strudel and plays it live in the browser—no live-coding required.',
+      metaDesc: 'JamFlow: say a vibe, hear Strudel music in the browser. Natural language → DeepSeek → playable code—no live-coding required.',
     }
   };
   const EXAMPLES_BY_LANG = {
