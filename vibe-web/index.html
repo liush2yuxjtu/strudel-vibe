@@ -507,50 +507,68 @@
     }
   }
 
-  /* ——— first-visit must-hear CTA (dominant above-fold; local sound, no generate wait) ——— */
+  /* ——— first-visit must-hear CTA (single focus above ask; local sound, no generate wait) ——— */
   .first-demo{
-    display:none; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
-    margin:12px 0 6px; padding:14px 14px;
-    background:rgba(255,176,0,.12);
-    border:1.5px solid rgba(255,176,0,.55); border-radius:14px;
-    box-shadow:0 0 0 1px rgba(255,176,0,.14), 0 8px 28px rgba(255,176,0,.14);
+    display:none; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    margin:0 0 16px; padding:16px 16px;
+    background:linear-gradient(165deg, rgba(255,176,0,.16) 0%, rgba(255,176,0,.08) 100%);
+    border:1.5px solid rgba(255,176,0,.58); border-radius:14px;
+    /* offset elevation (craft floor) — not zero-offset halo */
+    box-shadow:0 6px 18px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.04);
   }
   .first-demo.on{ display:flex; }
   .first-demo.on.first-demo-glow{
-    animation: firstDemoIn .4s ease-out, firstDemoGlow 2.1s ease-in-out 2;
+    animation: firstDemoIn .35s ease-out, firstDemoPulse 1.8s ease-in-out 2;
   }
   @keyframes firstDemoIn{
-    from{ opacity:0; transform:translateY(-6px); }
+    from{ opacity:0; transform:translateY(-5px); }
     to{ opacity:1; transform:none; }
   }
-  @keyframes firstDemoGlow{
-    0%,100%{ box-shadow:0 0 0 1px rgba(255,176,0,.14), 0 8px 28px rgba(255,176,0,.14); border-color:rgba(255,176,0,.55); }
-    50%{ box-shadow:0 0 0 3px rgba(255,176,0,.32), 0 10px 34px rgba(255,176,0,.28); border-color:rgba(255,176,0,.85); }
+  @keyframes firstDemoPulse{
+    0%,100%{ border-color:rgba(255,176,0,.58); box-shadow:0 6px 18px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.04); }
+    50%{ border-color:rgba(255,176,0,.92); box-shadow:0 8px 22px rgba(0,0,0,.4), 0 0 0 2px rgba(255,176,0,.28); }
   }
-  .first-demo-copy{ display:flex; flex-direction:column; gap:3px; min-width:0; flex:1; }
-  .first-demo-copy strong{ font-size:16px; font-weight:700; color:var(--ink); letter-spacing:.01em; line-height:1.25; }
-  .first-demo-copy span{ font-size:12.5px; color:var(--mute); line-height:1.4; }
-  .first-demo-actions{ display:flex; align-items:center; gap:12px; flex-shrink:0; }
+  .first-demo-copy{ display:flex; flex-direction:column; gap:4px; min-width:0; flex:1; }
+  .first-demo-copy strong{ font-size:17px; font-weight:700; color:var(--ink); letter-spacing:.01em; line-height:1.25; }
+  /* warm secondary on amber bay — not gray mute */
+  .first-demo-copy span{ font-size:13px; color:#E6D2A4; line-height:1.4; }
+  .first-demo-actions{ display:flex; align-items:center; gap:10px; flex-shrink:0; }
   .first-demo-go{
-    font-size:15px; font-weight:700; padding:12px 18px; border-radius:12px;
+    font-size:16px; font-weight:700; min-height:48px; padding:12px 20px; border-radius:12px;
     background:var(--led); color:#1A1200; border:1px solid var(--led);
-    text-decoration:none;
-    box-shadow:0 2px 0 rgba(0,0,0,.22);
+    text-decoration:none; letter-spacing:.01em;
+    box-shadow:0 2px 0 rgba(0,0,0,.28), 0 6px 14px rgba(255,176,0,.22);
   }
   .first-demo-go:hover{ filter:brightness(1.05); background:var(--led); border-color:var(--led); }
   .first-demo-go:disabled{ opacity:.55; cursor:wait; filter:none; }
   .first-demo-skip{
-    font-size:13px; font-weight:500; padding:8px 4px; border-radius:0;
-    background:transparent; color:var(--faint); border:none;
+    font-size:13px; font-weight:500; min-height:44px; min-width:44px; padding:10px 8px; border-radius:8px;
+    background:transparent; color:rgba(232,210,164,.72); border:none;
     text-decoration:underline; text-underline-offset:3px;
   }
-  .first-demo-skip:hover{ color:var(--mute); border:none; background:transparent; }
+  .first-demo-skip:hover{ color:var(--ink); border:none; background:transparent; }
+  /* while must-hear is on: one amber primary only; demote generate path */
+  .face.first-demo-active .ask,
+  .face.first-demo-active .promptbox,
+  .face.first-demo-active .state,
+  .face.first-demo-active .chips{
+    opacity:.55;
+    transition:opacity .25s ease;
+  }
+  .face.first-demo-active .promptbox input{ pointer-events:auto; }
+  .face.first-demo-active #send.primary{
+    background:transparent; color:var(--ink); border-color:var(--line2);
+    box-shadow:none; font-weight:600;
+  }
+  .face.first-demo-active #send.primary:hover{
+    border-color:var(--mute); filter:none; background:rgba(255,255,255,.03);
+  }
   @media(max-width:520px){
     .promptbox{flex-direction:column}
     .pads{gap:8px; padding:10px}
     .pad{padding:8px; font-size:10px; border-radius:10px}
-    .first-demo{ flex-direction:column; align-items:stretch; gap:10px; }
-    .first-demo-actions{ width:100%; justify-content:stretch; }
+    .first-demo{ flex-direction:column; align-items:stretch; gap:12px; margin-bottom:14px; }
+    .first-demo-actions{ width:100%; justify-content:stretch; gap:8px; }
     .first-demo-go{ flex:1; width:100%; text-align:center; }
     .first-demo-skip{ margin-left:auto; margin-right:auto; }
   }
@@ -574,6 +592,16 @@
 
   <main class="machine">
     <section class="face" aria-label="JamFlow">
+      <div class="first-demo above-scribble" id="firstDemo" hidden role="region" data-i18n-aria="firstDemoAria" aria-label="先听一下">
+        <div class="first-demo-copy">
+          <strong data-i18n="firstDemoTitle">先听一下就懂</strong>
+          <span data-i18n="firstDemoHint">本地鼓点贝斯 · 一点就响 · 不用等 AI</span>
+        </div>
+        <div class="first-demo-actions">
+          <button type="button" class="primary first-demo-go" id="firstDemoGo" data-i18n="firstDemoGo">立刻出声</button>
+          <button type="button" class="first-demo-skip" id="firstDemoSkip" data-i18n="firstDemoSkip">跳过，自己写</button>
+        </div>
+      </div>
       <p class="ask" id="askLabel" data-i18n="ask">打一句中文，点生成</p>
       <div class="promptbox above-scribble">
         <input id="intent" autocomplete="off" aria-labelledby="askLabel"
@@ -582,16 +610,6 @@
       </div>
       <div class="prog" id="prog" aria-hidden="true"><i></i></div>
       <div class="state" id="state" role="status" aria-live="polite" data-i18n="stateIdle">点下面例子一键开，或自己打字</div>
-      <div class="first-demo above-scribble" id="firstDemo" hidden role="region" aria-label="first demo">
-        <div class="first-demo-copy">
-          <strong data-i18n="firstDemoTitle">点一下就出声</strong>
-          <span data-i18n="firstDemoHint">本地试听 · 不用等 AI 生成</span>
-        </div>
-        <div class="first-demo-actions">
-          <button type="button" class="primary first-demo-go" id="firstDemoGo" data-i18n="firstDemoGo">立刻出声</button>
-          <button type="button" class="first-demo-skip" id="firstDemoSkip" data-i18n="firstDemoSkip">跳过</button>
-        </div>
-      </div>
       <div class="chips chips-under-prompt above-scribble" id="chips"></div>
 
       <div class="pad-layout pad-section" id="padSection">
@@ -717,10 +735,11 @@
       intentPh: '在这里打一句你想听的…',
       send: '生成',
       stateIdle: '点下面例子一键开，或自己打字',
-      firstDemoTitle: '点一下就出声',
-      firstDemoHint: '本地试听 · 不用等 AI 生成',
+      firstDemoTitle: '先听一下就懂',
+      firstDemoHint: '本地鼓点贝斯 · 一点就响 · 不用等 AI',
       firstDemoGo: '立刻出声',
-      firstDemoSkip: '跳过',
+      firstDemoSkip: '跳过，自己写',
+      firstDemoAria: '先听一下',
       firstDemoPlaying: '<b>试听中</b> · 本地鼓点贝斯',
       pads: '',
       play: '播放', stop: '停止', surprise: '随机', apply: '应用',
@@ -758,10 +777,11 @@
       intentPh: 'Type what you want to hear here…',
       send: 'Go',
       stateIdle: 'Tap an example below, or type your own',
-      firstDemoTitle: 'Tap to hear sound',
-      firstDemoHint: 'Local demo · no AI wait',
-      firstDemoGo: 'Tap to hear',
-      firstDemoSkip: 'Skip',
+      firstDemoTitle: 'Hear it first',
+      firstDemoHint: 'Local drums + bass · one tap · no AI wait',
+      firstDemoGo: 'Play a beat',
+      firstDemoSkip: 'Skip, I’ll type',
+      firstDemoAria: 'Hear a demo first',
       firstDemoPlaying: '<b>Demo</b> · local drums + bass',
       pads: '',
       play: 'Play', stop: 'Stop', surprise: 'Random', apply: 'Apply',
@@ -1142,6 +1162,8 @@
     el.hidden = !show;
     el.classList.toggle('on', show);
     el.classList.toggle('first-demo-glow', show);
+    const face = el.closest('.face') || document.querySelector('.face');
+    if(face) face.classList.toggle('first-demo-active', show);
     const go = $('firstDemoGo');
     if(go){
       const busy = (phase==='composing' || phase==='loading');
