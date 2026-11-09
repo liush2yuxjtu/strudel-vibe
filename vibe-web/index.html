@@ -777,10 +777,38 @@
     ]
   }
   </script>
+  <script>
+  (() => {
+    const params = new URLSearchParams(location.search);
+    const local = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+    let internal = local || params.has('audit') || params.get('traffic') === 'internal_test';
+    try {
+      internal = internal || sessionStorage.getItem('jamflow-internal-test') === '1';
+      if(internal) sessionStorage.setItem('jamflow-internal-test', '1');
+    } catch {}
+    const production = ['jamflow-gray.vercel.app', 'vibe-web-gray.vercel.app'].includes(location.hostname);
+    window.__jamflowTraffic = Object.freeze({
+      traffic_class: internal ? 'internal_test' : navigator.webdriver ? 'automation_declared' : 'unknown',
+      environment: local ? 'local' : production ? 'production' : 'preview',
+      schema_version: 2,
+      release: 'funnel-reliability-v2',
+    });
+    window.va = window.va || function(){ (window.vaq = window.vaq || []).push(arguments); };
+    window.va('beforeSend', event => window.__jamflowTraffic.traffic_class === 'internal_test' ? null : event);
+  })();
+  </script>
   <script defer src="/_vercel/insights/script.js"></script>
   <!-- Amplitude Browser SDK 2 (US); Browser API key is public by design -->
   <script type="text/javascript">
   !function(){"use strict";!function(e,t){var r=e.amplitude||{_q:[],_iq:{}};if(r.invoked)e.console&&console.error&&console.error("Amplitude snippet has been loaded.");else{var n=function(e,t){e.prototype[t]=function(){return this._q.push({name:t,args:Array.prototype.slice.call(arguments,0)}),this}},s=function(e,t,r){return function(n){e._q.push({name:t,args:Array.prototype.slice.call(r,0),resolve:n})}},o=function(e,t,r){e[t]=function(){if(r)return{promise:new Promise(s(e,t,Array.prototype.slice.call(arguments)))};!function(e,t,r){e._q.push({name:t,args:Array.prototype.slice.call(r,0)})}(e,t,Array.prototype.slice.call(arguments))}},i=function(e){for(var t=0;t<v.length;t++)o(e,v[t],!1);for(var r=0;r<g.length;r++)o(e,g[r],!0)};r.invoked=!0;var a=t.createElement("script");a.type="text/javascript",a.integrity="sha384-Sk+l9VwU+jvx8zsmLuRDNUQE+0K4h0xsyjdrfb/czM6hRumd1igYdOvGwa0LAGcq",a.crossOrigin="anonymous",a.async=!0,a.src="https://cdn.amplitude.com/libs/analytics-browser-2.48.1-min.js.gz",a.onload=function(){e.amplitude.runQueuedFunctions||console.log("[Amplitude] Error: could not load SDK")};var c=t.getElementsByTagName("script")[0];c.parentNode.insertBefore(a,c);for(var u=function(){return this._q=[],this},p=["add","append","clearAll","prepend","set","setOnce","unset","preInsert","postInsert","remove","getUserProperties"],l=0;l<p.length;l++)n(u,p[l]);r.Identify=u;for(var d=function(){return this._q=[],this},f=["getEventProperties","setProductId","setQuantity","setPrice","setRevenue","setRevenueType","setReceipt","setReceiptSig","setCurrency","setEventProperties"],y=0;y<f.length;y++)n(d,f[y]);r.Revenue=d;var v=["getDeviceId","setDeviceId","getSessionId","setSessionId","getUserId","setUserId","setOptOut","setTransport","reset","extendSession"],g=["init","add","remove","track","logEvent","identify","groupIdentify","setGroup","revenue","flush"];i(r),r.createInstance=function(e){return r._iq[e]={_q:[]},i(r._iq[e]),r._iq[e]},e.amplitude=r}}(window,document)}();
+  amplitude.add({
+    name: 'jamflow-traffic-context',
+    type: 'enrichment',
+    async execute(event){
+      event.event_properties = Object.assign({}, event.event_properties || {}, window.__jamflowTraffic);
+      return event;
+    },
+  });
   amplitude.init("3090b782f1425be150950d8aac803b7e", {
     autocapture: {
       attribution: true,
@@ -804,7 +832,11 @@
       ask: '打一句中文，点生成',
       intentPh: '在这里打一句你想听的…',
       send: '生成',
-      stateIdle: '点下面例子一键开，或自己打字',
+      stateIdle: '输入一句音乐描述，或选例子让 AI 生成（需要等待）',
+      intentRequired: '先写一句你想听的音乐，再点生成。',
+      demoNext: '<b>试听已启动</b> · 现在写一句，把它改成你的音乐。',
+      audioUnavailable: '音频尚未启动，请再点一次播放。',
+      signalUnconfirmed: '尚未检测到音频信号。请检查音量，或再点播放。',
       firstDemoTitle: '先听一下就懂',
       firstDemoHint: '本地鼓点贝斯 · 一点就响 · 不用等 AI',
       firstDemoGo: '立刻出声',
@@ -846,7 +878,11 @@
       ask: 'Type one line, then Go',
       intentPh: 'Type what you want to hear here…',
       send: 'Go',
-      stateIdle: 'Tap an example below, or type your own',
+      stateIdle: 'Type a music idea, or choose an example for AI generation (takes a moment)',
+      intentRequired: 'Describe the music you want, then choose Go.',
+      demoNext: '<b>Demo started</b> · Type a line to make it your own.',
+      audioUnavailable: 'Audio has not started. Tap Play to retry.',
+      signalUnconfirmed: 'No audio signal detected yet. Check the volume or tap Play to retry.',
       firstDemoTitle: 'Hear it first',
       firstDemoHint: 'Local drums + bass · one tap · no AI wait',
       firstDemoGo: 'Play a beat',
@@ -962,6 +998,7 @@
     try { scribble = !!scribbleOn; } catch(_){}
     try { idle = !!idleAutoOn; } catch(_){}
     const base = {
+      ...window.__jamflowTraffic,
       lang: (typeof lang === 'string' ? lang : 'zh'),
       scribble_on: scribble,
       idle_on: idle,
@@ -1119,8 +1156,10 @@
     }catch{}
     // Cap lookahead flash scheduling; drop if wildly late
     if(delay > 800) delay = 0;
+    const attempt = activeAttempt;
     setTimeout(()=>{
-      if(phase !== 'playing') return;
+      if(phase !== 'playing' || activeAttempt !== attempt) return;
+      if(attempt) lastTriggeredAttempt = attempt.attempt_id;
       flashPad(pads[idx], sound==='hh' || sound==='hat' || sound==='ch' || sound==='hc' ? 70 : 110);
     }, delay);
   }
@@ -1193,11 +1232,19 @@
   function setState(html){ $('state').innerHTML=html; }
 
   async function resumeAudio(){
-    try{
-      const ac = (typeof getAudioContext==='function') ? getAudioContext() : null;
-      if(ac && ac.state!=='running') await ac.resume();
-      return ac ? ac.state : null;
-    }catch{ return null; }
+    const ac = (typeof getAudioContext === 'function') ? getAudioContext() : null;
+    if(!ac) throw new Error(t('audioUnavailable'));
+    if(ac.state !== 'running'){
+      let timer;
+      try {
+        await Promise.race([
+          ac.resume(),
+          new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(t('audioUnavailable'))), 5000); }),
+        ]);
+      } finally { clearTimeout(timer); }
+    }
+    if(ac.state !== 'running') throw new Error(t('audioUnavailable'));
+    return ac.state;
   }
   function audioState(){
     try{ return (typeof getAudioContext==='function') ? getAudioContext().state : 'none'; }
@@ -1257,84 +1304,189 @@
     if(reason) jamTrack('first_demo_dismiss', { reason: reason });
   }
   async function runFirstDemo(){
-    const go = $('firstDemoGo');
-    if(go) go.disabled = true;
-    markFirstDemoSeen();
-    syncFirstDemoUi();
-    revealPads();
-    jamTrack('first_demo_play', { source: 'first_demo' });
+    if(phase === 'composing' || phase === 'loading') return busyResult();
+    const attempt = beginAttempt('first_demo');
+    jamTrack('first_demo_click', attempt);
     bumpIdle('first-demo');
-    setState(t('firstDemoPlaying'));
-    await playCode(FIRST_DEMO_CODE, { source: 'first_demo' });
+    const result = await playCode(FIRST_DEMO_CODE, attempt);
+    if(!result.error){
+      markFirstDemoSeen();
+      syncFirstDemoUi();
+      jamTrack('first_demo_play', { ...attempt, evidence: 'evaluated_context_running' });
+      setState(t('demoNext'));
+    }
+    return result;
   }
 
   let enginePromise=null;
   let repl=null;
+  let activeAttempt=null;
+  let attemptSequence=0;
+  let lastTriggeredAttempt=null;
+  let playbackQueue=Promise.resolve();
+  const SIGNAL_ANALYSER = 9001;
+  function beginAttempt(source){
+    const attempt = { attempt_id: (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + (++attemptSequence)), source };
+    activeAttempt = attempt;
+    return attempt;
+  }
+  function busyResult(){
+    return { error: 'An operation is already in progress.', code: 'BUSY', retryable: true };
+  }
+  function assertActive(attempt){
+    if(activeAttempt !== attempt) throw Object.assign(new Error('cancelled'), { code: 'ABORTED' });
+  }
+  function stopPlayback(source){
+    const attempt = activeAttempt;
+    activeAttempt = null;
+    try{ hush(); }catch{}
+    setPhase('idle');
+    clearPads();
+    setState(t('stopped'));
+    jamTrack('vibe_stop', { ...(attempt || {}), source });
+    return { phase: 'idle' };
+  }
   function ensureStarted(){
     if(started) return Promise.resolve(repl);
     if(enginePromise) return enginePromise;
-    // Samples from THIS origin (/samples) — github raw is blocked in mainland China.
-    // editPattern wraps every evaluated pattern with onTrigger so pads flash on real haps
-    // (deadline-aligned to WebAudio). Second arg false = non-dominant (keep audio output).
-    enginePromise = initStrudel({
-      prebake: () => samples('/samples/strudel.json'),
-      editPattern: (pat) => pat.onTrigger(onHapHit, false),
-    }).then((r)=>{ repl=r; started=true; return r; });
+    let initialization;
+    try {
+      initialization = initStrudel({
+        prebake: () => samples('/samples/strudel.json'),
+        editPattern: (pat) => pat.analyze(SIGNAL_ANALYSER).onTrigger(onHapHit, false),
+      });
+    } catch(error) { return Promise.reject(error); }
+    enginePromise = Promise.resolve(initialization).then((r)=>{ repl=r; started=true; return r; }).catch(error => {
+      enginePromise = null;
+      throw error;
+    });
     return enginePromise;
+  }
+  async function evaluateActive(code, attempt){
+    const pending = playbackQueue.then(async () => {
+      assertActive(attempt);
+      await evaluate(code, true);
+      if(activeAttempt !== attempt){
+        try{ hush(); }catch{}
+        assertActive(attempt);
+      }
+    });
+    playbackQueue = pending.catch(() => {});
+    return pending;
+  }
+  async function observePlaybackSignal(attempt){
+    const until = performance.now() + 4000;
+    while(activeAttempt === attempt && phase === 'playing' && performance.now() < until){
+      try{
+        const data = typeof getAnalyzerData === 'function' ? getAnalyzerData('time', SIGNAL_ANALYSER) : null;
+        if(data && data.length && lastTriggeredAttempt === attempt.attempt_id && audioState() === 'running'){
+          const rms = Math.sqrt(data.reduce((sum, sample) => sum + sample * sample, 0) / data.length);
+          if(rms > 0.0001){
+            jamTrack('playback_signal', { ...attempt, evidence: 'engine_analyser_rms', rms });
+            return;
+          }
+        }
+      } catch {}
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    if(activeAttempt === attempt && phase === 'playing'){
+      jamTrack('playback_signal_unconfirmed', { ...attempt, evidence: 'no_signal_observed_within_4s' });
+      setState(t('signalUnconfirmed'));
+    }
   }
 
   async function playCode(code, trackProps){
-    if(!started){ setPhase('loading'); }
-    await ensureStarted();
+    const provided = trackProps && trackProps.attempt_id;
+    if(!provided && (phase === 'composing' || phase === 'loading')) return busyResult();
+    const attempt = provided ? trackProps : beginAttempt((trackProps && trackProps.source) || 'transport');
     try{
-      await evaluate(code, true);
+      assertActive(attempt);
+      setPhase('loading');
+      await Promise.all([resumeAudio(), ensureStarted()]);
+      assertActive(attempt);
       await resumeAudio();
+      assertActive(attempt);
+      await evaluateActive(code, attempt);
+      assertActive(attempt);
+      await resumeAudio();
+      assertActive(attempt);
       current=code; $('code').value=code;
       setPhase('playing');
-      setState((trackProps && trackProps.source === 'first_demo') ? t('firstDemoPlaying') : t('playing'));
+      setState(attempt.source === 'first_demo' ? t('firstDemoPlaying') : t('playing'));
       revealPads();
       syncPlayButton();
-      jamTrack('vibe_play', Object.assign({ code_len: (code||'').length }, trackProps || {}));
+      const evidence = { ...attempt, code_len: (code || '').length, evidence: 'evaluated_context_running' };
+      jamTrack('playback_started', evidence);
+      jamTrack('vibe_play', evidence);
+      void observePlaybackSignal(attempt);
+      return { phase: 'playing', code, attempt_id: attempt.attempt_id };
     }catch(e){
-      setPhase('idle');
-      setState(t('playFail')+e.message);
+      const cancelled = e.code === 'ABORTED' || activeAttempt !== attempt;
+      if(activeAttempt === attempt){
+        try{ hush(); }catch{}
+        setPhase('idle');
+        setState(t('playFail') + String(e.message || e).replace(/</g, '&lt;'));
+      }
+      const result = { error: String(e.message || e), code: cancelled ? 'ABORTED' : 'PLAYBACK_FAILED', retryable: true, attempt_id: attempt.attempt_id };
+      jamTrack('playback_failed', { ...attempt, error_code: result.code });
+      return result;
     }
   }
 
   async function vibe(opts){
     const intent=(opts && opts.intent != null ? String(opts.intent) : $('intent').value).trim();
-    if(!intent) return { error: 'intent required', code: 'INTENT_REQUIRED', retryable: false };
+    if(!intent){
+      setState(t('intentRequired'));
+      $('intent').focus();
+      jamTrack('generate_validation_failed', { source: (opts && opts.source) || 'manual', error_code: 'INTENT_REQUIRED' });
+      return { error: 'intent required', code: 'INTENT_REQUIRED', retryable: false };
+    }
+    if(phase === 'composing' || phase === 'loading') return busyResult();
     if(opts && opts.intent != null) $('intent').value = intent;
-    const source = (opts && opts.source) || 'manual';
     const signal = opts && opts.signal;
-    if(!firstDemoSeen()) dismissFirstDemo('generate');
-    else revealPads();
-    jamTrack('vibe_generate_submit', { intent_len: intent.length, source });
+    if(signal && signal.aborted) return { error: 'cancelled', code: 'ABORTED', retryable: true };
+    const attempt = beginAttempt((opts && opts.source) || 'manual');
+    const onAbort = () => { if(activeAttempt === attempt) stopPlayback(attempt.source); };
+    if(signal) signal.addEventListener('abort', onAbort, { once: true });
+    jamTrack('vibe_generate_submit', { ...attempt, intent_len: intent.length });
     setPhase('composing');
     setState(t('composing'));
     $('vtext').textContent=t('vComposing');
     logLine('<span class="u">› '+intent.replace(/</g,'&lt;')+'</span>');
-    ensureStarted();
     try{
+      await Promise.all([resumeAudio(), ensureStarted()]);
+      assertActive(attempt);
       const r=await fetch('/api/vibe',{method:'POST',headers:{'content-type':'application/json'},
         body:JSON.stringify({intent, current}), signal});
+      assertActive(attempt);
       const data=await r.json();
-      if(!r.ok || data.error){
+      assertActive(attempt);
+      if(!r.ok || data.error || typeof data.code !== 'string' || !data.code.trim()){
+        try{ hush(); }catch{}
         setPhase('idle');
-        setState(t('err')+(data.error||r.status)+(data.detail?(' — '+data.detail):''));
-        return { error: data.error||String(r.status), code: 'GENERATE_FAILED', retryable: r.status>=500, detail: data.detail };
+        setState(t('err') + String(data.error || r.status).replace(/</g, '&lt;'));
+        jamTrack('vibe_generate_failed', { ...attempt, error_code: 'GENERATE_FAILED', status: r.status });
+        return { error: String(data.error || r.status), code: 'GENERATE_FAILED', retryable: r.status >= 500, attempt_id: attempt.attempt_id };
       }
-      logLine('<span class="c">'+(data.code||'').replace(/</g,'&lt;')+'</span>');
-      await playCode(data.code);
-      $('intent').value='';
-      return { code: data.code, phase: 'playing' };
+      jamTrack('vibe_generate_success', { ...attempt, code_len: data.code.length });
+      logLine('<span class="c">'+data.code.replace(/</g,'&lt;')+'</span>');
+      const result = await playCode(data.code, attempt);
+      if(result.error) return result;
+      if($('intent').value.trim() === intent) $('intent').value='';
+      if(!firstDemoSeen()) dismissFirstDemo('generate');
+      return result;
     }catch(e){
-      if(signal && signal.aborted){
+      const cancelled = (signal && signal.aborted) || e.code === 'ABORTED' || activeAttempt !== attempt;
+      if(activeAttempt === attempt){
+        try{ hush(); }catch{}
         setPhase('idle');
-        return { error: 'cancelled', code: 'ABORTED', retryable: true };
+        setState(cancelled ? t('stopped') : t('reqFail') + String(e.message || e).replace(/</g, '&lt;'));
       }
-      setPhase('idle'); setState(t('reqFail')+e.message);
-      return { error: String(e && e.message || e), code: 'GENERATE_FAILED', retryable: true };
+      const result = { error: cancelled ? 'cancelled' : String(e.message || e), code: cancelled ? 'ABORTED' : 'GENERATE_FAILED', retryable: true, attempt_id: attempt.attempt_id };
+      jamTrack('vibe_generate_failed', { ...attempt, error_code: result.code });
+      return result;
+    } finally {
+      if(signal) signal.removeEventListener('abort', onAbort);
     }
   }
 
@@ -1616,9 +1768,8 @@
     if(names.length < 2) return;
     const code = 'note("'+names.join(' ')+'").s("triangle").gain(0.28).clip(0.35).room(0.25).lpf(1800)';
     try{
-      await ensureStarted();
-      await playCode(code);
-      setState(t('scribbleTune')+'<b>'+names.join(' ')+'</b>');
+      const result = await playCode(code, { source: 'scribble' });
+      if(!result.error) setState(t('scribbleTune')+'<b>'+names.join(' ')+'</b>');
     }catch(e){
       // voice already sounded; pattern is bonus
     }
@@ -1768,14 +1919,7 @@
       return vibe({ intent, source: 'webmcp', signal: opts && opts.signal });
     },
     async controlPlayback(action, opts){
-      if(action === 'stop'){
-        try{ hush(); }catch{}
-        setPhase('idle');
-        clearPads();
-        setState(t('stopped'));
-        jamTrack('vibe_stop', { source: 'webmcp' });
-        return { phase: 'idle' };
-      }
+      if(action === 'stop') return stopPlayback('webmcp');
       const c = ((opts && opts.code) ? String(opts.code).trim() : '') || ($('code').value.trim() || current);
       if(!c){
         return {
@@ -1785,9 +1929,9 @@
           suggestion: 'Call generate_music or run_example first.',
         };
       }
-      if(!firstDemoSeen()) dismissFirstDemo('play');
-      await playCode(c, { source: 'webmcp' });
-      return { phase: phase, code: c };
+      const result = await playCode(c, { source: 'webmcp' });
+      if(!result.error && !firstDemoSeen()) dismissFirstDemo('play');
+      return result;
     },
     async runExample({ label, surprise, signal } = {}){
       const list = currentExamples();
@@ -1817,9 +1961,9 @@
 
   $('send').onclick=vibe;
   $('intent').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); vibe(); }});
-  $('play').onclick=()=>{ const c=$('code').value.trim()||current; if(c){ if(!firstDemoSeen()) dismissFirstDemo('play'); playCode(c); } };
+  $('play').onclick=async()=>{ const c=$('code').value.trim()||current; if(c){ const result = await playCode(c); if(!result.error && !firstDemoSeen()) dismissFirstDemo('play'); } };
   $('apply').onclick=()=>{ const c=$('code').value.trim(); if(c) playCode(c); };
-  $('stop').onclick=()=>{ try{ hush(); }catch{} setPhase('idle'); clearPads(); setState(t('stopped')); jamTrack('vibe_stop'); };
+  $('stop').onclick=()=>stopPlayback('transport');
   $('surprise').onclick=()=>{ $('intent').value = EXAMPLES[Math.floor(Math.random()*EXAMPLES.length)]; vibe({ source: 'surprise' }); };
 
 
@@ -1853,6 +1997,16 @@
   syncPadsReadyUi();
   const firstDemoGo = $('firstDemoGo');
   if(firstDemoGo) firstDemoGo.onclick = ()=>{ runFirstDemo(); };
+  const firstDemoRegion = $('firstDemo');
+  if(firstDemoRegion && typeof IntersectionObserver === 'function'){
+    const demoObserver = new IntersectionObserver(entries => {
+      if(entries.some(entry => entry.isIntersecting && entry.intersectionRatio >= 0.5)){
+        jamTrack('first_demo_exposed', { source: 'first_demo', evidence: 'viewport_intersection_50pct' });
+        demoObserver.disconnect();
+      }
+    }, { threshold: 0.5 });
+    demoObserver.observe(firstDemoRegion);
+  }
   const firstDemoSkip = $('firstDemoSkip');
   if(firstDemoSkip) firstDemoSkip.onclick = ()=>{ dismissFirstDemo('skip'); bumpIdle('first-demo-skip'); };
 
