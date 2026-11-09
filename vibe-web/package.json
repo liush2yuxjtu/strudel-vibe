@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node server.mjs",
     "test": "node --import ./test/offline.mjs --test test/*.test.mjs",
-    "test:browser": "node test/funnel.browser.mjs"
+    "test:browser": "node test/funnel.browser.mjs",
+    "test:mobile": "node test/mobile.browser.mjs"
   },
   "engines": {
     "node": ">=18"

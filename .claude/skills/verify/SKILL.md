@@ -100,7 +100,9 @@ If local Chromium cannot launch, use the actual isolated Vercel preview in an ac
 3. Submit invalid Strudel through Apply or `control_playback`. Require `PLAYBACK_FAILED`, an idle phase, and no playback evidence. Then replay valid code to prove recovery.
 4. Stop playback. Require idle, `playing=false`, and `playback_evidence=none`.
 5. Verify request failure restores controls and retains input. A preview without a DeepSeek key can prove this failure path, not successful AI generation.
-6. Record mobile coverage separately. An unavailable mobile browser is SKIP with the actual reason; desktop acceptance does not prove mobile behavior.
+6. Run `npm run test:mobile` for 360px and 390px Chromium touch emulation against production, or set `JAMFLOW_URL` for a preview. The script rejects non-empty generation requests, tests local audio and the previously returned AI pattern, and checks overflow, empty-input focus, invalid-code rejection, and Stop. Record emulation separately from physical-device or Safari coverage.
+
+Both browser scripts require Playwright and its browser. If the runner lacks them, use `npm install --no-save --package-lock=false playwright@1.62.1` and `npx playwright install --with-deps --only-shell chromium`, or select installed dependencies with `PLAYWRIGHT_MODULE_PATH` and `CHROMIUM_PATH`. If the local execution environment cannot launch Chromium, use an isolated short-lived test runner within the authorized cost budget, then stop it. A one-vCPU, non-persistent Vercel Sandbox with a five-minute timeout was sufficient for this project. Do not leave test compute running.
 
 Report I as PASS only for the named checks actually completed. List mocked generation, real generation, and human listening separately. Do not invent evidence for an unavailable check.
 

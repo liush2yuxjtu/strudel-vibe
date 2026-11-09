@@ -66,11 +66,14 @@ async function scenario(name, run, options = {}) {
         window.initStrudel = (...args) => {
           window.__initCalls++;
           if (window.__failure === 'init-once' && window.__initCalls === 1) return Promise.reject(new Error('test init failed'));
-          if (window.__failure === 'slow-init') return new Promise(resolve => setTimeout(resolve, 650)).then(() => realInitStrudel(...args));
-          return realInitStrudel(...args);
+          const initialized = window.__failure === 'slow-init'
+            ? new Promise(resolve => setTimeout(resolve, 650)).then(() => realInitStrudel(...args))
+            : realInitStrudel(...args);
+          return Promise.resolve(initialized).then(repl => {
+            if (window.__failure === 'evaluate') window.evaluate = () => Promise.reject(new Error('test invalid pattern'));
+            return repl;
+          });
         };
-        const realEvaluate = window.evaluate;
-        window.evaluate = (...args) => window.__failure === 'evaluate' ? Promise.reject(new Error('test invalid pattern')) : realEvaluate(...args);
         if (window.__failure === 'audio') window.getAudioContext = () => ({state:'suspended', resume:async()=>{throw new Error('test audio blocked')}});
       `;
       return route.fulfill({ contentType: 'text/javascript', body: vendor + injected });

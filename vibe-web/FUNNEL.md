@@ -67,4 +67,10 @@ stack(s("bd*4, ~ cp, hh*8").gain(0.8), note("<c2 c2 eb2 g2>").s("sine").lpf(500)
 
 The generation attempt `c1af2c78-0a91-4d42-ab98-2d18d594e858` reached `phase=playing`, `audio_state=running`, and `playback_evidence=engine_signal`. Stop returned `idle`, `playing=false`, and `none`. Replay of the same returned code again reached engine signal without another generation request. Final playback was stopped.
 
-This is evidence of a real model response and engine signal, not a human listening result. The application did not return provider token usage or the exact charge. Mobile acceptance remains separate.
+This is evidence of a real model response and engine signal, not a human listening result. The application did not return provider token usage or the exact charge.
+
+Chromium mobile emulation at 390×844 and 360×844 also passed. There was no horizontal overflow; the demo target was 48px tall; empty input focused the description; demo and replay of the returned AI pattern reached engine signal; invalid code returned `PLAYBACK_FAILED`; Stop cleared playback evidence. These mobile checks made zero generation requests and blocked external browser requests. Physical devices and Safari were not tested.
+
+Reproduce this with `npm run test:mobile`. The script accepts `PLAYWRIGHT_MODULE_PATH`, `CHROMIUM_PATH`, and `JAMFLOW_URL`; it refuses non-empty generation requests so it cannot consume model quota.
+
+The complete `test:browser` suite also passed all 10 scenarios in a short-lived Vercel Sandbox with Playwright 1.62.1. Its API responses were mocked; Strudel and samples were real. The failure fixture installs its evaluation override after engine initialization because Strudel installs global functions during startup. Both temporary sandboxes were stopped after verification.
