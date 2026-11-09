@@ -112,7 +112,7 @@ Use team `team_1VUYYia3RReNLUn2r8ciX2Nb`. Resolve the production domain before d
 2. Confirm the PR is merged into `main`. Deploy the merged commit to the production project with source root `vibe-web`, preserving its existing server-side environment. Do not copy secrets into source or promote a keyless preview as production.
 3. Require a READY production deployment for the intended commit. Check the domain alias maps to that deployment. Check served HTML contains `funnel-reliability-v2`, `playback_evidence`, and `repl.state.evalError` for this release.
 4. Repeat I's local-demo, invalid-code, replay, Stop, and empty-input checks on `https://jamflow-gray.vercel.app/?audit=<run-id>`. Capture the actual returned status. A build badge or HTTP 200 is insufficient.
-5. Use the existing empty-body API health probe to check configuration without a model request. A real generation probe uses metered API capacity; honor the session's spending authorization and record whether it was run. Never expose the key or count health probes as generated music.
+5. Use the existing empty-body API health probe to check configuration without a model request. For real generation, read the standing development-cost authorization in root `AGENTS.md`; it is sufficient authorization for necessary task usage estimated below US$5. Do not ask again for the same approved small-cost category. Record the real response, playback evidence, and whether a model request ran. Never expose the key or count health probes as generated music.
 6. If production fails an applicable acceptance check, do not report deployment success. Restore the recorded deployment if safe, or fix and repeat the failed check. Keep a short evidence record on the PR.
 
 ## Report format (required)

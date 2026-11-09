@@ -56,3 +56,15 @@ The browser checks cover empty input, demo playback, initialization retry, block
 3. Inspect the network and compare one attempt across submit, response, playback, and signal events. Confirm that the automatic pageview carries traffic classification.
 4. Perform one authorized real generation and a human listening check before claiming that the complete production experience works. A successful mocked request is not that evidence.
 5. Compare eligible cohorts after release. This patch does not identify historical visitors or establish improved conversion by itself.
+
+## Production acceptance on 2026-11-09
+
+Production commit `bc9bb3b` passed one authorized real generation at `jamflow-gray.vercel.app` with the `full-verify-bc9bb3b` audit mark. The description requested a light four-beat rhythm with a soft C minor bassline. The returned pattern was:
+
+```js
+stack(s("bd*4, ~ cp, hh*8").gain(0.8), note("<c2 c2 eb2 g2>").s("sine").lpf(500).gain(0.5).room(0.2))
+```
+
+The generation attempt `c1af2c78-0a91-4d42-ab98-2d18d594e858` reached `phase=playing`, `audio_state=running`, and `playback_evidence=engine_signal`. Stop returned `idle`, `playing=false`, and `none`. Replay of the same returned code again reached engine signal without another generation request. Final playback was stopped.
+
+This is evidence of a real model response and engine signal, not a human listening result. The application did not return provider token usage or the exact charge. Mobile acceptance remains separate.
