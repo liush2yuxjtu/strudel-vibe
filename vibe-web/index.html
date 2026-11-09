@@ -836,6 +836,7 @@
       intentRequired: '先写一句你想听的音乐，再点生成。',
       demoNext: '<b>试听已启动</b> · 现在写一句，把它改成你的音乐。',
       audioUnavailable: '音频尚未启动，请再点一次播放。',
+      patternUnavailable: '引擎没有返回可播放的音乐，请重试。',
       signalUnconfirmed: '尚未检测到音频信号。请检查音量，或再点播放。',
       firstDemoTitle: '先听一下就懂',
       firstDemoHint: '本地鼓点贝斯 · 一点就响 · 不用等 AI',
@@ -882,6 +883,7 @@
       intentRequired: 'Describe the music you want, then choose Go.',
       demoNext: '<b>Demo started</b> · Type a line to make it your own.',
       audioUnavailable: 'Audio has not started. Tap Play to retry.',
+      patternUnavailable: 'The engine did not return a playable pattern. Try again.',
       signalUnconfirmed: 'No audio signal detected yet. Check the volume or tap Play to retry.',
       firstDemoTitle: 'Hear it first',
       firstDemoHint: 'Local drums + bass · one tap · no AI wait',
@@ -1367,11 +1369,13 @@
   async function evaluateActive(code, attempt){
     const pending = playbackQueue.then(async () => {
       assertActive(attempt);
-      await evaluate(code, true);
+      const pattern = await evaluate(code, true);
       if(activeAttempt !== attempt){
         try{ hush(); }catch{}
         assertActive(attempt);
       }
+      if(repl && repl.state && repl.state.evalError) throw repl.state.evalError;
+      if(!pattern) throw new Error(t('patternUnavailable'));
     });
     playbackQueue = pending.catch(() => {});
     return pending;

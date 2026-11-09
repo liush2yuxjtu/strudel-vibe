@@ -112,6 +112,14 @@ try {
     assert.equal((await events(page)).filter(e => e.event_type === 'first_demo_play').length, 1);
     await page.locator('#stop').click(); assert.equal(await phase(page), 'idle');
   });
+  await scenario('real Strudel parse errors stay failures even when evaluate resolves', async page => {
+    await page.locator('#firstDemoGo').click(); await settle(page);
+    await page.locator('#stop').click();
+    await page.locator('#code').fill('not a valid strudel pattern');
+    await page.locator('#apply').click(); await settle(page);
+    assert.equal(await phase(page), 'idle');
+    assert.match(await page.locator('#state').innerText(), /无法播放|Play failed/i);
+  });
   await scenario('failed initialization keeps demo retry and retry starts engine again', async page => {
     await page.locator('#firstDemoGo').click(); await settle(page);
     assert.equal(await phase(page), 'idle');

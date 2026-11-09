@@ -31,7 +31,7 @@ function app(overrides = {}) {
     getAudioContext: () => ({ state: 'running' }),
     getAnalyzerData: () => new Float32Array([0.01, -0.01]),
     initStrudel: async () => ({}),
-    evaluate: async () => vm.runInContext('lastTriggeredAttempt = activeAttempt.attempt_id', c),
+    evaluate: async () => { vm.runInContext('lastTriggeredAttempt = activeAttempt.attempt_id', c); return { _Pattern: true }; },
     fetch: async () => ({ ok: true, status: 200, json: async () => ({ code: 's("bd")' }) }),
     hush: () => { c.hushCount++; }, ...overrides,
   };
@@ -108,7 +108,7 @@ test('stop invalidates late engine initialization', async () => {
 });
 test('stop during evaluation cannot stop a subsequent successful play', async () => {
   const gate = deferred(); let evals = 0;
-  const c = app({ evaluate: async () => { if (++evals === 1) await gate.promise; } });
+  const c = app({ evaluate: async () => { if (++evals === 1) await gate.promise; return { _Pattern: true }; } });
   const old = c.playCode('s("bd")');
   while (!evals) await Promise.resolve();
   c.stopPlayback('manual'); const next = c.playCode('s("hh")'); gate.resolve();
@@ -142,7 +142,7 @@ test('first visit can unlock the namespaced engine before global functions exist
   assert.equal((await result).phase, 'playing');
 });
 test('status distinguishes logical playback from observed signal', async () => {
-  const c = app({ evaluate: async () => {} });
+  const c = app({ evaluate: async () => ({ _Pattern: true }) });
   Object.assign(c, { lang: 'zh', scribbleOn: false, idleAutoOn: false, currentExamples: () => [] });
   const bridge = vm.runInContext('({' + between('    async getStatus(){', '    async generateMusic(') + '})', c);
   assert.equal((await bridge.getStatus()).playback_evidence, 'none');
@@ -153,6 +153,16 @@ test('status distinguishes logical playback from observed signal', async () => {
   assert.equal(status.playback_evidence, 'engine_signal'); assert.equal(status.audio_state, 'running');
   assert.ok(status.attempt_id);
   c.stopPlayback('cleanup'); assert.equal((await bridge.getStatus()).playback_evidence, 'none');
+});
+test('engine-reported evaluation failure cannot be mistaken for resolved success', async () => {
+  const engine = { state: { evalError: new SyntaxError('test syntax error') } };
+  const c = app({ initStrudel: async () => engine, evaluate: async () => undefined });
+  const result = await c.vibe({ intent: 'drums' });
+  assert.equal(result.code, 'PLAYBACK_FAILED'); assert.equal(result.error, 'test syntax error');
+  assert.equal(c.phase, 'idle'); assert.equal(names(c).includes('playback_started'), false);
+  const noPattern = app({ evaluate: async () => undefined });
+  assert.equal((await noPattern.runFirstDemo()).code, 'PLAYBACK_FAILED');
+  assert.equal(noPattern.seen, false);
 });
 
 const trafficScript = between('  (() => {\n    const params', '  </script>');
