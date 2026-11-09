@@ -22,6 +22,8 @@ Operation events carry `attempt_id` and `source`. A generation response and its 
 
 The signal uses the existing Strudel analyser through `.analyze(9001)`. It can include overlapping voices or effect tails. Device volume, output routing, and human hearing remain outside this evidence.
 
+WebMCP status includes `audio_state`, `attempt_id`, and `playback_evidence`. Evidence is `none`, `software_started`, or `engine_signal`. A logical `playing` status alone is not a listening result.
+
 ## Traffic cohorts
 
 Every Amplitude event, including automatic pageviews, receives these properties before it leaves the client:

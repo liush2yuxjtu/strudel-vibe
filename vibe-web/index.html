@@ -1322,6 +1322,7 @@
   let enginePromise=null;
   let repl=null;
   let activeAttempt=null;
+  let signalObservedAttempt=null;
   let attemptSequence=0;
   let lastTriggeredAttempt=null;
   let playbackQueue=Promise.resolve();
@@ -1383,6 +1384,7 @@
         if(data && data.length && lastTriggeredAttempt === attempt.attempt_id && audioState() === 'running'){
           const rms = Math.sqrt(data.reduce((sum, sample) => sum + sample * sample, 0) / data.length);
           if(rms > 0.0001){
+            signalObservedAttempt = attempt.attempt_id;
             jamTrack('playback_signal', { ...attempt, evidence: 'engine_analyser_rms', rms });
             return;
           }
@@ -1910,6 +1912,10 @@
         lang,
         phase,
         playing: phase === 'playing',
+        audio_state: audioState(),
+        attempt_id: activeAttempt && activeAttempt.attempt_id,
+        playback_evidence: phase !== 'playing' ? 'none'
+          : activeAttempt && signalObservedAttempt === activeAttempt.attempt_id ? 'engine_signal' : 'software_started',
         code_preview: codeVal.slice(0, 120),
         examples: currentExamples().slice(),
         scribble_on: !!scribbleOn,

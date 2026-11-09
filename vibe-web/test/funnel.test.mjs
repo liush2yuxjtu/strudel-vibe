@@ -141,6 +141,19 @@ test('first visit can unlock the namespaced engine before global functions exist
   assert.equal(resumed, true);
   assert.equal((await result).phase, 'playing');
 });
+test('status distinguishes logical playback from observed signal', async () => {
+  const c = app({ evaluate: async () => {} });
+  Object.assign(c, { lang: 'zh', scribbleOn: false, idleAutoOn: false, currentExamples: () => [] });
+  const bridge = vm.runInContext('({' + between('    async getStatus(){', '    async generateMusic(') + '})', c);
+  assert.equal((await bridge.getStatus()).playback_evidence, 'none');
+  await c.runFirstDemo();
+  assert.equal((await bridge.getStatus()).playback_evidence, 'software_started');
+  vm.runInContext('signalObservedAttempt = activeAttempt.attempt_id', c);
+  const status = await bridge.getStatus();
+  assert.equal(status.playback_evidence, 'engine_signal'); assert.equal(status.audio_state, 'running');
+  assert.ok(status.attempt_id);
+  c.stopPlayback('cleanup'); assert.equal((await bridge.getStatus()).playback_evidence, 'none');
+});
 
 const trafficScript = between('  (() => {\n    const params', '  </script>');
 function traffic(hostname, search = '', webdriver = false, stored = new Map(), storageFails = false) {
