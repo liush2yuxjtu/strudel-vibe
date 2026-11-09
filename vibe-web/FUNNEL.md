@@ -43,7 +43,7 @@ For the new release, report production `unknown`, production `automation_declare
 
 ## Local checks
 
-Run `npm test` from `vibe-web`. It disables the vendored WebMCP SDK's optional telemetry with its supported `__WEBMCP_TELEMETRY__` flag. The tests use mock dependencies and do not call DeepSeek.
+Run `npm test` from `vibe-web`. The preload disables optional SDK telemetry and replaces global fetch with a rejecting function before SDK imports. The telemetry flag alone does not disable the SDK collection transport. The tests use mock dependencies and cannot call DeepSeek or send SDK collection requests.
 
 Run `npm run test:browser` with Playwright available and Chromium installed. `PLAYWRIGHT_MODULE_PATH` can select an existing Playwright module, and `CHROMIUM_PATH` can select Chromium. The suite starts a temporary local server, uses real Strudel and samples, and mocks API responses. It blocks external browser requests and disables SDK telemetry. It does not replace a real AI generation or a human listening check.
 

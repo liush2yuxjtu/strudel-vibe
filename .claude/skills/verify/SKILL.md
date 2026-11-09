@@ -1,7 +1,7 @@
 ---
 name: verify
 description: >-
-  Use before any JamFlow (strudel-vibe / vibe-web) git commit or Vercel deploy,
+  Use before any JamFlow (strudel-vibe / vibe-web) git commit, merge, or Vercel deploy,
   and when the user says /verify for this repo: run the checklist; FAIL or
   BLOCKED blocks commit/deploy until fixed and re-verified.
 ---
@@ -30,6 +30,7 @@ Each check: **PASS** | **FAIL** | **BLOCKED** | **SKIP** (with reason). No “pa
 | `vibe-web/index.html` UI/CSS/i18n only | A, B, C, D, E |
 | `vibe-web/api/**` or DeepSeek/Strudel generation | A, B, F (+ E if shipped) |
 | Deploy / aliases / branding | A, E, G |
+| Playback, generation client, analytics, or funnel changes | A–E, H before commit; I before merge; J after deploy |
 | Docs only | all SKIP |
 | First-time / unclear scope | A–G |
 
@@ -73,6 +74,47 @@ From production HTML or local `index.html` source:
 2. `vibe-web-gray.vercel.app` may 307 to jamflow-gray (OK).
 3. **FAIL** if commit copy or UI claims the wrong product domain.
 
+### H — Playback and funnel regressions
+
+Run `cd vibe-web && npm test`. This includes the existing WebMCP tests and `test/funnel.test.mjs`. The committed preload disables SDK telemetry and replaces global fetch with a rejecting function before SDK imports. Keep unit tests offline; the telemetry flag alone does not disable the SDK collection transport.
+
+Require these outcomes:
+
+- Keep the demo available after initialization or playback fails. Reset failed initialization so retry can succeed.
+- Start audio unlock and engine initialization in the original click. Before Strudel installs global functions, use its exported namespace. Do not use a permissive autoplay flag to hide a missing user gesture.
+- Inspect both the evaluation result and `repl.state.evalError`. The vendored engine can resolve its Promise after recording a syntax error. A resolved Promise alone is not success.
+- Propagate failed playback through generation and WebMCP. Retain the prompt and restore controls after failure.
+- Reject overlapping work. Stop must invalidate delayed initialization, generation, and evaluation without stopping a newer attempt.
+- Correlate submit, API response, and playback with one `attempt_id` and `source`.
+- Label automatic Amplitude pageviews as well as custom events before SDK initialization. Keep known tests, declared automation, and unknown traffic separate. Never infer a crawler from country, Linux, or an empty referrer.
+- Treat submit, software start, engine signal, and human hearing as different evidence. See `vibe-web/FUNNEL.md` for event definitions.
+
+### I — Browser acceptance before merge
+
+Run `npm run test:browser` from `vibe-web` when Playwright and Chromium are available. `PLAYWRIGHT_MODULE_PATH` and `CHROMIUM_PATH` select existing installations. This suite uses real Strudel and samples, mocks API responses, and blocks external requests. Do not describe it as a real AI generation test.
+
+If local Chromium cannot launch, use the actual isolated Vercel preview in an accessible browser. Record the exact preview deployment and commit. Use `?audit=<run-id>` for every verification visit. Reuse authorized Vercel access; do not disable deployment protection.
+
+1. On a fresh visit, check empty input feedback and focus in Chinese and English.
+2. Click the local demo. Read WebMCP `get_jam_status`: require `phase=playing`, `audio_state=running`, and `playback_evidence=engine_signal` after the observation period. An engine signal is not human hearing.
+3. Submit invalid Strudel through Apply or `control_playback`. Require `PLAYBACK_FAILED`, an idle phase, and no playback evidence. Then replay valid code to prove recovery.
+4. Stop playback. Require idle, `playing=false`, and `playback_evidence=none`.
+5. Verify request failure restores controls and retains input. A preview without a DeepSeek key can prove this failure path, not successful AI generation.
+6. Record mobile coverage separately. An unavailable mobile browser is SKIP with the actual reason; desktop acceptance does not prove mobile behavior.
+
+Report I as PASS only for the named checks actually completed. List mocked generation, real generation, and human listening separately. Do not invent evidence for an unavailable check.
+
+### J — Production deployment provenance and acceptance
+
+Use team `team_1VUYYia3RReNLUn2r8ciX2Nb`. Resolve the production domain before deploying. `jamflow-gray.vercel.app` belongs to project `jamflow` (`prj_Wkevgdev2NAkRjZmHJujgmQ40Rhj`). The Git-linked `vibe-web` project (`prj_w4TPAEtA5B3bbkzekIFMz61I9tMJ`) supplies PR previews; its successful build does not prove that the JamFlow production domain changed.
+
+1. Record the current production deployment as the rollback target. Read the PR head and required checks again before merging with an expected-head lease.
+2. Confirm the PR is merged into `main`. Deploy the merged commit to the production project with source root `vibe-web`, preserving its existing server-side environment. Do not copy secrets into source or promote a keyless preview as production.
+3. Require a READY production deployment for the intended commit. Check the domain alias maps to that deployment. Check served HTML contains `funnel-reliability-v2`, `playback_evidence`, and `repl.state.evalError` for this release.
+4. Repeat I's local-demo, invalid-code, replay, Stop, and empty-input checks on `https://jamflow-gray.vercel.app/?audit=<run-id>`. Capture the actual returned status. A build badge or HTTP 200 is insufficient.
+5. Use the existing empty-body API health probe to check configuration without a model request. A real generation probe uses metered API capacity; honor the session's spending authorization and record whether it was run. Never expose the key or count health probes as generated music.
+6. If production fails an applicable acceptance check, do not report deployment success. Restore the recorded deployment if safe, or fix and repeat the failed check. Keep a short evidence record on the PR.
+
 ## Report format (required)
 
 ```
@@ -80,10 +122,13 @@ JamFlow /verify
 A … PASS|FAIL|BLOCKED|SKIP — note
 B …
 …
-Verdict: PASS → ok to commit/push main
+H …
+I …
+J …
+Verdict: PASS → applicable checks completed for the stated phase
          FAIL/BLOCKED → stop; list fixes
 ```
 
 ## After PASS
 
-Per user rule: commit and push **directly to main** (no feature branch / no waiting for a second ask to push), unless the user said otherwise.
+Follow the user's authorized delivery path. For a PR, update its branch, re-check the head, merge when authorized, and verify the actual production target when deployment is requested. Do not infer that a commit or a preview build has shipped.
