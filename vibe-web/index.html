@@ -1232,7 +1232,8 @@
   function setState(html){ $('state').innerHTML=html; }
 
   async function resumeAudio(){
-    const ac = (typeof getAudioContext === 'function') ? getAudioContext() : null;
+    const ac = typeof getAudioContext === 'function' ? getAudioContext()
+      : typeof strudel !== 'undefined' && typeof strudel.getAudioContext === 'function' ? strudel.getAudioContext() : null;
     if(!ac) throw new Error(t('audioUnavailable'));
     if(ac.state !== 'running'){
       let timer;

@@ -133,6 +133,14 @@ test('first click unlocks shared audio before engine initialization or network w
     assert.equal((await pending).phase, 'playing');
   }
 });
+test('first visit can unlock the namespaced engine before global functions exist', async () => {
+  let resumed = false;
+  const ac = { state: 'suspended', resume() { resumed = true; this.state = 'running'; return Promise.resolve(); } };
+  const c = app({ getAudioContext: undefined, strudel: { getAudioContext: () => ac }, initStrudel: async () => { c.getAudioContext = () => ac; return {}; } });
+  const result = c.runFirstDemo();
+  assert.equal(resumed, true);
+  assert.equal((await result).phase, 'playing');
+});
 
 const trafficScript = between('  (() => {\n    const params', '  </script>');
 function traffic(hostname, search = '', webdriver = false, stored = new Map(), storageFails = false) {
