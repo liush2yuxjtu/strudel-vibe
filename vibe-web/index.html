@@ -4,8 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 
-<title>JamFlow · 说一句，立刻出声</title>
-<meta name="description" content="JamFlow：说一句氛围，浏览器里立刻听到 Strudel 音乐。自然语言 → DeepSeek → 可播放代码，不会写 live-coding 也能先出声。" />
+<title>JamFlow · 说一句 → 可改的 Strudel</title>
+<meta name="description" content="JamFlow：自然语言 → 可编辑 Strudel（不是导出 MP3）。卡在 strudel.cc 语法、或想像 Tidal/Estuary 却不想装环境时，浏览器里先出声再改代码。" />
 <meta name="robots" content="index,follow,max-image-preview:large" />
 <meta name="theme-color" content="#141210" />
 <meta name="application-name" content="JamFlow" />
@@ -19,8 +19,8 @@
 <meta property="og:locale:alternate" content="en_US" />
 <meta property="og:site_name" content="JamFlow" />
 <meta property="og:url" content="https://jamflow-gray.vercel.app/" />
-<meta property="og:title" content="JamFlow · 说一句，立刻出声" />
-<meta property="og:description" content="JamFlow：说一句氛围，浏览器里立刻听到 Strudel 音乐。自然语言 → DeepSeek → 可播放代码。" />
+<meta property="og:title" content="JamFlow · 说一句 → 可改的 Strudel" />
+<meta property="og:description" content="JamFlow：自然语言 → 可编辑 Strudel（不是 MP3）。卡在语法时用一句话生成，也可粘贴 strudel.cc 代码再改。" />
 <meta property="og:image" content="https://jamflow-gray.vercel.app/og.png" />
 <meta property="og:image:secure_url" content="https://jamflow-gray.vercel.app/og.png" />
 <meta property="og:image:type" content="image/png" />
@@ -28,8 +28,8 @@
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="JamFlow — say a vibe, hear Strudel in the browser" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="JamFlow · 说一句，立刻出声" />
-<meta name="twitter:description" content="JamFlow: say a vibe, hear Strudel music in the browser. No live-coding required." />
+<meta name="twitter:title" content="JamFlow · 说一句 → 可改的 Strudel" />
+<meta name="twitter:description" content="JamFlow: natural language → editable Strudel in the browser (not an MP3 export). Paste code from strudel.cc or skip the syntax wall." />
 <meta name="twitter:image" content="https://jamflow-gray.vercel.app/og.png" />
 <meta name="twitter:image:alt" content="JamFlow — say a vibe, hear Strudel in the browser" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23141210'/><rect x='6' y='6' width='8' height='8' rx='1.5' fill='%23FFB000'/><rect x='18' y='6' width='8' height='8' rx='1.5' fill='%233A342E'/><rect x='6' y='18' width='8' height='8' rx='1.5' fill='%233A342E'/><rect x='18' y='18' width='8' height='8' rx='1.5' fill='%23C46B3A'/></svg>" />
@@ -317,6 +317,9 @@
   button.pad[disabled]{opacity:1; cursor:pointer}
 
   .chips{display:flex; gap:8px; flex-wrap:wrap}
+  .chip-paste{ border-style:dashed; color:var(--ink); background:transparent; }
+  .chip-paste:hover{ border-color:var(--led); }
+  .code-bridge-hint{ margin:0 0 8px; font-size:11.5px; line-height:1.4; color:var(--faint); }
   .chip{
     font-family:var(--sans); font-size:12.5px; font-weight:500;
     color:var(--mute); background:var(--recess);
@@ -586,7 +589,7 @@
   <header class="top above-scribble">
     <div class="brand">
       <h1 class="wordmark">Jam<span>Flow</span></h1>
-      <p class="tagline" data-i18n="tagline">说一句，立刻出声</p>
+      <p class="tagline" data-i18n="tagline">说一句 → 可改的 Strudel</p>
     </div>
     <div class="status-row">
       <div class="lang-toggle" role="group" aria-label="Language">
@@ -610,14 +613,14 @@
           <button type="button" class="first-demo-skip" id="firstDemoSkip" data-i18n="firstDemoSkip">跳过，自己写</button>
         </div>
       </div>
-      <p class="ask" id="askLabel" data-i18n="ask">打一句中文，点生成</p>
+      <p class="ask" id="askLabel" data-i18n="ask">卡在语法？说一句，或粘贴已有代码</p>
       <div class="promptbox above-scribble">
         <input id="intent" autocomplete="off" aria-labelledby="askLabel"
-          data-i18n-placeholder="intentPh" placeholder="在这里打一句你想听的…" value="" />
+          data-i18n-placeholder="intentPh" placeholder="例如：把太吵的 hihat 收成四拍底鼓…" value="" />
         <button class="primary" id="send" type="button" data-i18n="send">生成</button>
       </div>
       <div class="prog" id="prog" aria-hidden="true"><i></i></div>
-      <div class="state" id="state" role="status" aria-live="polite" data-i18n="stateIdle">点下面例子一键开，或自己打字</div>
+      <div class="state" id="state" role="status" aria-live="polite" data-i18n="stateIdle">自然语言 → 可编辑 Strudel · 不是导出 MP3</div>
       <div class="chips chips-under-prompt above-scribble" id="chips"></div>
 
       <div class="pad-layout pad-section" id="padSection">
@@ -668,13 +671,14 @@
 
     <section class="lcd above-scribble" aria-label="Strudel" data-i18n-aria-section="code">
       <div class="lcd-head">
-        <h2 class="lcd-title" data-i18n="codeTitle">代码</h2>
+        <h2 class="lcd-title" data-i18n="codeTitle">Strudel 代码</h2>
         <span class="lcd-hint" id="vtext" data-i18n="vIdle">待机</span>
       </div>
+      <p class="code-bridge-hint" data-i18n="codeBridgeHint">可从 strudel.cc 粘贴后点应用并播放</p>
       <textarea class="code" id="code" spellcheck="false"
-        data-i18n-placeholder="codePh" placeholder="// Strudel"></textarea>
+        data-i18n-placeholder="codePh" placeholder="// paste Strudel from strudel.cc, then Apply"></textarea>
       <div class="row">
-        <button id="apply" type="button" data-i18n="apply">应用</button>
+        <button id="apply" type="button" data-i18n="apply">应用并播放</button>
       </div>
     </section>
   </main>
@@ -682,7 +686,7 @@
   <section class="about" id="about" aria-labelledby="about-title">
     <div class="about-card">
       <h2 id="about-title" data-i18n="aboutTitle">关于 JamFlow</h2>
-      <p data-i18n="aboutBody">JamFlow：说一句氛围，浏览器里立刻听到 Strudel 音乐。自然语言变成可播放代码，给不会写 live-coding 的人。</p>
+      <p data-i18n="aboutBody">JamFlow：自然语言 → 可编辑 Strudel（浏览器 WebAudio，不是导出成曲 MP3）。相对 strudel.cc：先过语法墙；相对 TidalCycles：免本地安装；相对 Estuary：同一浏览器协作感，但入口是一句话或粘贴已有代码。</p>
     </div>
   </section>
 
@@ -702,7 +706,7 @@
         "name": "JamFlow",
         "alternateName": ["Jam Flow", "vibe-music"],
         "url": "https://jamflow-gray.vercel.app/",
-        "description": "JamFlow: say a vibe, hear Strudel music in the browser. Natural language becomes playable Strudel via DeepSeek and WebAudio—for people who do not write live-coding. JamFlow：说一句氛围，浏览器里立刻听到 Strudel 音乐。",
+        "description": "JamFlow: natural language → editable Strudel in the browser (not an MP3 song export). Skip the strudel.cc syntax wall, or paste existing code—unlike TidalCycles (local install) or Estuary (hand-written live code). JamFlow：自然语言 → 可编辑 Strudel。",
         "inLanguage": ["zh-CN", "en"],
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Any",
@@ -711,15 +715,15 @@
         "screenshot": "https://jamflow-gray.vercel.app/og.png",
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://jamflow-gray.vercel.app/" },
         "featureList": [
-          "Natural language → DeepSeek → Strudel",
+          "Natural language → DeepSeek → editable Strudel",
+          "Paste existing Strudel code and play",
           "Local one-tap demo before AI generate",
-          "WebAudio live playback",
+          "WebAudio live playback (not MP3 export)",
           "Pads and prompt chips",
-          "Editable Strudel code",
           "Chinese and English UI"
         ],
         "isAccessibleForFree": true,
-        "dateModified": "2026-11-05"
+        "dateModified": "2026-11-09"
       },
       {
         "@type": "WebPage",
@@ -730,13 +734,13 @@
         "isPartOf": { "@id": "https://jamflow-gray.vercel.app/#app" },
         "inLanguage": ["zh-CN", "en"],
         "primaryImageOfPage": { "@type": "ImageObject", "url": "https://jamflow-gray.vercel.app/og.png", "width": 1200, "height": 630 },
-        "dateModified": "2026-11-05"
+        "dateModified": "2026-11-09"
       },
       {
         "@type": "HowTo",
         "@id": "https://jamflow-gray.vercel.app/#howto",
         "name": "How to make music with JamFlow",
-        "description": "Turn one sentence into live Strudel audio in the browser.",
+        "description": "Turn one sentence—or pasted Strudel—into live editable Strudel audio in the browser.",
         "totalTime": "PT1M",
         "step": [
           { "@type": "HowToStep", "position": 1, "name": "Hear a local demo (optional)", "text": "On a first visit, tap Play a beat / 立刻出声 to hear local drums and bass with no AI wait." },
@@ -753,7 +757,15 @@
             "name": "What is JamFlow?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "JamFlow is a free browser app: say a vibe, hear Strudel music. Natural language becomes playable Strudel via DeepSeek and WebAudio—no live-coding required."
+              "text": "JamFlow is a free browser app: natural language becomes editable Strudel via DeepSeek and WebAudio. It is not an MP3 song exporter—you hear and edit live code in the browser."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How is JamFlow different from Strudel.cc, TidalCycles, or Estuary?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Strudel.cc, TidalCycles, and Estuary are hand-written live-coding tools (Tidal often needs a local install). JamFlow keeps the Strudel engine but adds a sentence-to-code on-ramp and a paste path for code you already wrote on strudel.cc—useful when syntax is the blocker."
             }
           },
           {
@@ -761,7 +773,7 @@
             "name": "Do I need to know live-coding?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "No. Type a sentence or tap an example. You can still open and edit the generated Strudel code if you want."
+              "text": "No. Type a sentence or tap an example. You can also paste Strudel from strudel.cc into the code panel and hit Apply & play, then edit."
             }
           },
           {
@@ -828,11 +840,11 @@
   const LANG_KEY = 'jamflow-lang';
   const I18N = {
     zh: {
-      tagline: '说一句，立刻出声',
-      ask: '打一句中文，点生成',
-      intentPh: '在这里打一句你想听的…',
+      tagline: '说一句 → 可改的 Strudel',
+      ask: '卡在语法？说一句，或粘贴已有代码',
+      intentPh: '例如：把太吵的 hihat 收成四拍底鼓…',
       send: '生成',
-      stateIdle: '输入一句音乐描述，或选例子让 AI 生成（需要等待）',
+      stateIdle: '自然语言 → 可编辑 Strudel · 不是导出 MP3',
       intentRequired: '先写一句你想听的音乐，再点生成。',
       demoNext: '<b>试听已启动</b> · 现在写一句，把它改成你的音乐。',
       audioUnavailable: '音频尚未启动，请再点一次播放。',
@@ -845,18 +857,23 @@
       firstDemoAria: '先听一下',
       firstDemoPlaying: '<b>试听中</b> · 本地鼓点贝斯',
       pads: '',
-      play: '播放', stop: '停止', surprise: '随机', apply: '应用',
+      play: '播放', stop: '停止', surprise: '随机', apply: '应用并播放',
       idleTitle: '空闲自动', idleHint: '约 90 秒无操作后自动出一首', idleAria: '空闲自动播放',
       idleCountdown: '空闲自动将在 {n}s 后播放', idleDismiss: '推迟',
       scribbleTitle: '乱画', scribbleHint: '左右音高 · 上下八度', scribbleAria: '乱画出声',
       scribbleCoach: '左右＝音高 · 上下＝八度 · 再点开关退出', scribbleGotIt: '知道了',
       scribbleMapping: '乱画已开 · 左右音高，上下八度',
       chipsMore: '更多', chipsLess: '收起',
-      codeTitle: '代码', codePh: '// Strudel',
+      pasteChip: '粘贴我的 Strudel',
+      pasteHint: '在下方代码框粘贴 strudel.cc 代码，再点「应用并播放」',
+      pasteReady: '<b>已粘贴</b> · 正在应用并播放',
+      pasteEmpty: '剪贴板里没有像 Strudel 的代码，已打开编辑框供粘贴',
+      codeBridgeHint: '可从 strudel.cc 粘贴后点应用并播放',
+      codeTitle: 'Strudel 代码', codePh: '// 从 strudel.cc 粘贴，再点应用并播放',
       vIdle: '待机', vPlaying: '演奏中', vComposing: '作曲中', vLoading: '加载中',
       playLed: '演奏', playStatusTitle: '播放',
       aboutTitle: '关于 JamFlow',
-      aboutBody: 'JamFlow：说一句氛围，浏览器里立刻听到 Strudel 音乐。自然语言变成可播放代码，给不会写 live-coding 的人。',
+      aboutBody: 'JamFlow：自然语言 → 可编辑 Strudel（浏览器 WebAudio，不是导出成曲 MP3）。相对 strudel.cc：先过语法墙；相对 TidalCycles：免本地安装；相对 Estuary：同一浏览器协作感，但入口是一句话或粘贴已有代码。',
       playing: '<b>演奏中</b>',
       playFail: '无法播放：',
       composing: '作曲中<span class="dots"></span>',
@@ -871,15 +888,15 @@
       stopped: '已停止',
       apiReady: 'API 就绪',
       apiOffline: 'API 离线',
-      metaTitle: 'JamFlow · 说一句，立刻出声',
-      metaDesc: 'JamFlow：说一句氛围，浏览器里立刻听到 Strudel 音乐。自然语言 → DeepSeek → 可播放代码，不会写 live-coding 也能先出声。',
+      metaTitle: 'JamFlow · 说一句 → 可改的 Strudel',
+      metaDesc: 'JamFlow：自然语言 → 可编辑 Strudel（不是导出 MP3）。卡在 strudel.cc 语法、或想像 Tidal/Estuary 却不想装环境时，浏览器里先出声再改代码。',
     },
     en: {
-      tagline: 'Say it. Hear it.',
-      ask: 'Type one line, then Go',
-      intentPh: 'Type what you want to hear here…',
+      tagline: 'Say it → editable Strudel',
+      ask: 'Stuck on syntax? Describe it, or paste code',
+      intentPh: 'e.g. tame noisy hats into four-on-floor…',
       send: 'Go',
-      stateIdle: 'Type a music idea, or choose an example for AI generation (takes a moment)',
+      stateIdle: 'NL → editable Strudel · not an MP3 export',
       intentRequired: 'Describe the music you want, then choose Go.',
       demoNext: '<b>Demo started</b> · Type a line to make it your own.',
       audioUnavailable: 'Audio has not started. Tap Play to retry.',
@@ -892,18 +909,23 @@
       firstDemoAria: 'Hear a demo first',
       firstDemoPlaying: '<b>Demo</b> · local drums + bass',
       pads: '',
-      play: 'Play', stop: 'Stop', surprise: 'Random', apply: 'Apply',
+      play: 'Play', stop: 'Stop', surprise: 'Random', apply: 'Apply & play',
       idleTitle: 'Idle auto', idleHint: 'After ~90s idle, plays one for you', idleAria: 'Auto-play when idle',
       idleCountdown: 'Idle auto in {n}s', idleDismiss: 'Not now',
       scribbleTitle: 'Scribble', scribbleHint: 'Left–right pitch · up–down octave', scribbleAria: 'Draw to sound',
       scribbleCoach: 'Left–right = pitch · up–down = octave · toggle off to exit', scribbleGotIt: 'Got it',
       scribbleMapping: 'Scribble on · left–right pitch, up–down octave',
       chipsMore: 'More', chipsLess: 'Less',
-      codeTitle: 'Code', codePh: '// Strudel',
+      pasteChip: 'Paste my Strudel',
+      pasteHint: 'Paste strudel.cc code in the panel below, then Apply & play',
+      pasteReady: '<b>Pasted</b> · applying and playing',
+      pasteEmpty: 'No Strudel-like code on the clipboard — editor focused for paste',
+      codeBridgeHint: 'Paste from strudel.cc, then Apply & play',
+      codeTitle: 'Strudel code', codePh: '// paste Strudel from strudel.cc, then Apply',
       vIdle: 'Idle', vPlaying: 'Playing', vComposing: 'Writing', vLoading: 'Loading',
       playLed: 'Play', playStatusTitle: 'Playback',
       aboutTitle: 'About JamFlow',
-      aboutBody: 'JamFlow: say a vibe, hear Strudel music in the browser. Natural language becomes playable code—for people who don’t write live-coding.',
+      aboutBody: 'JamFlow: natural language → editable Strudel in the browser (WebAudio—not an MP3 song export). Vs strudel.cc: skip the syntax wall. Vs TidalCycles: no local install. Vs Estuary: same browser live-code feel, but start from a sentence or paste existing code.',
       playing: '<b>Playing</b>',
       playFail: 'Can’t play: ',
       composing: 'Writing<span class="dots"></span>',
@@ -918,13 +940,13 @@
       stopped: 'Stopped',
       apiReady: 'API ready',
       apiOffline: 'API offline',
-      metaTitle: 'JamFlow · Say it. Hear it.',
-      metaDesc: 'JamFlow: say a vibe, hear Strudel music in the browser. Natural language → DeepSeek → playable code—no live-coding required.',
+      metaTitle: 'JamFlow · Say it → editable Strudel',
+      metaDesc: 'JamFlow: natural language → editable Strudel in the browser (not an MP3 export). Stuck on strudel.cc syntax, or want Tidal/Estuary without installing? Hear it, then edit the code.',
     }
   };
   const EXAMPLES_BY_LANG = {
-    zh: ["赛博朋克鼓点真的出声","四拍底鼓加霓虹 hihat","lo-fi 灰尘钢琴软底鼓","酸味 techno 贝斯线","glitchy breakbeat 碎拍","空灵氛围 pad 加远处雷","暖胶碟 soul groove","太空琶音 cascade"],
-    en: ["cyber drums neon stabs","four-on-floor with hats","lo-fi dusty piano soft kick","acid techno bassline","glitchy breakbeat","dreamy minor bassline","warm vinyl soul groove","space arpeggio cascade"],
+    zh: ["四拍底鼓加霓虹 hihat","把太密的 breakbeat 收干净","极简 techno 贝斯像 Tidal 练习","空灵 pad 加远处雷","酸味贝斯加稀疏踢鼓","修好飘的 arp 对上拍子","lo-fi 灰尘钢琴软底鼓","赛博朋克鼓点真的出声"],
+    en: ["four-on-floor neon hats","clean up a muddy breakbeat","minimal techno bass like a Tidal drill","dreamy pad with distant thunder","acid bass with sparse kicks","lock a floating arp to the grid","lo-fi dusty piano soft kick","cyber drums neon stabs"],
   };
   let lang = 'zh';
   try{
@@ -1021,18 +1043,64 @@
   let EXAMPLES = currentExamples();
   const CHIP_PREVIEW = 4;
   let chipsExpanded = false;
+  function looksLikeStrudel(src){
+    const s = String(src || '');
+    if(s.length < 6 || s.length > 20000) return false;
+    return /(?:^|[^A-Za-z])(?:stack|sound|note|n|chord|scale|fast|slow|rev|every|sometimes|jux|off|room|lpf|hpf|gain|delay|pan|speed|chop|striate|euclid|cat|seq|s)\s*\(/.test(s)
+      || /\$[\"']/.test(s)
+      || /s\s*\(\s*[`"']/.test(s);
+  }
+  async function openPasteBridge(){
+    jamTrack('paste_bridge_open', { source: 'chip' });
+    bumpIdle('paste-bridge');
+    const codeEl = $('code');
+    const lcd = document.querySelector('.lcd');
+    if(lcd && typeof lcd.scrollIntoView === 'function'){
+      try{ lcd.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }catch{ lcd.scrollIntoView(); }
+    }
+    if(!codeEl) return;
+    codeEl.focus();
+    let pasted = false;
+    try{
+      if(navigator.clipboard && typeof navigator.clipboard.readText === 'function'){
+        const txt = String(await navigator.clipboard.readText() || '').trim();
+        if(txt && looksLikeStrudel(txt)){
+          codeEl.value = txt;
+          pasted = true;
+          syncPadsReadyUi();
+        }
+      }
+    }catch(_){}
+    if(pasted){
+      setState(t('pasteReady'));
+      const result = await playCode(codeEl.value.trim(), { source: 'paste_bridge' });
+      if(!result.error && !firstDemoSeen()) dismissFirstDemo('play');
+      jamTrack('paste_bridge_apply', { source: 'chip', code_len: codeEl.value.trim().length, ok: !result.error });
+    } else {
+      setState(t('pasteEmpty'));
+    }
+  }
   function renderChips(){
     EXAMPLES = currentExamples();
     chips.innerHTML = '';
+    const paste = document.createElement('button');
+    paste.type = 'button';
+    paste.className = 'chip chip-paste';
+    paste.textContent = t('pasteChip');
+    paste.setAttribute('aria-label', t('pasteChip'));
+    paste.onclick = ()=>{ openPasteBridge(); };
+    chips.appendChild(paste);
     const list = EXAMPLES;
-    const show = chipsExpanded ? list : list.slice(0, CHIP_PREVIEW);
+    // Keep ≤ CHIP_PREVIEW controls before More (paste counts as one).
+    const previewSlots = Math.max(0, CHIP_PREVIEW - 1);
+    const show = chipsExpanded ? list : list.slice(0, previewSlots);
     show.forEach(tt=>{
       const c=document.createElement('button');
       c.type='button'; c.className='chip'; c.textContent=tt;
       c.onclick=()=>{ jamTrack('chip_click', { intent_len: tt.length }); $('intent').value=tt; vibe({ source: 'chip' }); };
       chips.appendChild(c);
     });
-    if(list.length > CHIP_PREVIEW){
+    if(list.length > previewSlots){
       const more=document.createElement('button');
       more.type='button'; more.className='chip chip-more';
       more.textContent = chipsExpanded ? t('chipsLess') : t('chipsMore');
@@ -1973,7 +2041,7 @@
   $('send').onclick=vibe;
   $('intent').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); vibe(); }});
   $('play').onclick=async()=>{ const c=$('code').value.trim()||current; if(c){ const result = await playCode(c); if(!result.error && !firstDemoSeen()) dismissFirstDemo('play'); } };
-  $('apply').onclick=()=>{ const c=$('code').value.trim(); if(c) playCode(c); };
+  $('apply').onclick=async()=>{ const c=$('code').value.trim(); if(!c){ setState(t('pasteHint')); const el=$('code'); if(el) el.focus(); return; } const result = await playCode(c, { source: 'apply' }); if(!result.error && !firstDemoSeen()) dismissFirstDemo('play'); };
   $('stop').onclick=()=>stopPlayback('transport');
   $('surprise').onclick=()=>{ $('intent').value = EXAMPLES[Math.floor(Math.random()*EXAMPLES.length)]; vibe({ source: 'surprise' }); };
 
