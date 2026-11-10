@@ -26,7 +26,7 @@ function app(overrides = {}) {
   const c = {
     phase: 'idle', current: '', started: false, state: '', seen: false, hushCount: 0,
     events: [], reads: 0, evaluations: 0, initializations: 0, scrolls: 0,
-    crypto: { randomUUID }, performance, setTimeout, clearTimeout, Promise,
+    crypto: { randomUUID }, performance, setTimeout, clearTimeout, Promise, AbortController,
     FIRST_DEMO_CODE: good, lang: 'en', scribbleOn: false, idleAutoOn: false,
     $(id) {
       if (!elements.has(id)) elements.set(id, { value: '', textContent: '', hidden: false, focus() { c.focused = id; } });

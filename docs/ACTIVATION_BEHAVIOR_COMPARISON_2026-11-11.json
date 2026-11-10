@@ -1,0 +1,65 @@
+{
+  "before": {
+    "checkout": "/vercel/sandbox/jamflow-base",
+    "observedAt": "2026-11-10T16:23:07.786Z",
+    "api": "mock delayed response; real Strudel and samples",
+    "cases": [
+      {
+        "name": "IME candidate confirmation",
+        "generationRequests": 1,
+        "phase": "composing",
+        "draft": "轻快的鼓点"
+      },
+      {
+        "name": "busy preset and cancel",
+        "enabledBefore": 4,
+        "enabledAfterLanguage": 4,
+        "draftAfterPresetClick": "四拍底鼓加霓虹 hihat",
+        "stopBox": {
+          "x": 101.609375,
+          "y": 895.890625,
+          "width": 62.234375,
+          "height": 42
+        },
+        "cancelBox": null,
+        "abortedWithin250ms": false,
+        "phase": "idle",
+        "generationRequests": 1
+      }
+    ]
+  },
+  "after": {
+    "checkout": "/vercel/sandbox/jamflow-candidate",
+    "observedAt": "2026-11-10T16:23:54.196Z",
+    "api": "mock delayed response; real Strudel and samples",
+    "cases": [
+      {
+        "name": "IME candidate confirmation",
+        "generationRequests": 0,
+        "phase": "idle",
+        "draft": "轻快的鼓点"
+      },
+      {
+        "name": "busy preset and cancel",
+        "enabledBefore": 0,
+        "enabledAfterLanguage": 0,
+        "draftAfterPresetClick": "keep my original prompt",
+        "stopBox": {
+          "x": 101.609375,
+          "y": 949.890625,
+          "width": 62.234375,
+          "height": 42
+        },
+        "cancelBox": {
+          "x": 35,
+          "y": 459.328125,
+          "width": 144.140625,
+          "height": 44
+        },
+        "abortedWithin250ms": true,
+        "phase": "idle",
+        "generationRequests": 1
+      }
+    ]
+  }
+}

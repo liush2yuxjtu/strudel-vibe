@@ -9,6 +9,7 @@ The client distinguishes an attempted operation, an API response, software playb
 | `first_demo_exposed` | At least half of the demo region entered the viewport. |
 | `first_demo_click` | A local demo attempt began. |
 | `vibe_generate_submit` | A non-empty generation attempt began. This does not prove an API response. |
+| `vibe_generate_request_sent` | Audio initialization finished and the client began its API fetch. `elapsed_ms` starts at submit. |
 | `vibe_generate_success` | The API returned a successful response with non-empty code. This does not prove valid or audible code. |
 | `vibe_generate_failed` | Generation did not complete, including cancellation or audio initialization failure. |
 | `playback_started`, legacy `vibe_play` | Code evaluation completed and the AudioContext was running. |
@@ -32,8 +33,13 @@ Every Amplitude event, including automatic pageviews, receives these properties 
 | --- | --- |
 | `traffic_class` | `internal_test`, `automation_declared`, `unknown` |
 | `environment` | `local`, `preview`, `production` |
-| `schema_version` | `2` |
-| `release` | `funnel-reliability-v2` |
+| `schema_version` | `3` |
+| `release` | `funnel-reliability-v2` (legacy compatibility) |
+| `activation_version` | `activation-entry-v3-20261111` |
+| `page_instance_id` | Random per document load; not a person ID |
+| `viewport_bucket` | `mobile` (≤520px), `desktop` |
+| `entry_language` | `zh`, `en` at entry |
+| `entry_state` | `demo_seen`, `demo_unseen`, `storage_unavailable`; not a new-user flag |
 
 Localhost, `?audit=...`, and `?traffic=internal_test` mark a known test. The explicit test mark persists within sessionStorage for that tab. A fresh tab session without the mark returns to normal classification. Declared WebDriver automation receives a diagnostic label, not a claim that a visitor is a crawler. Country, Linux, and missing referrers do not determine classification.
 
@@ -152,3 +158,15 @@ The first-visit local demo no longer visually suppresses the Generate button. St
 New event names: `intent_first_focus`, `intent_first_input`, `demo_next_shown`, and `demo_to_prompt`. Properties exclude actual prompt text. Treat their first post-deploy cohort separately from history. The new assisted conversion flow is **optional**, not a mandatory step of the main Page→generate funnel.
 
 Validation: `npm test` 49/49 PASS; `npm run test:browser` 12/12 PASS using real Chromium / Strudel and mocked model responses (the two new cases cover the demo bridge and mobile English). A real DeepSeek request, physical device, and production conversion uplift are not established by these checks.
+
+## Activation reliability — 2026-11-11
+
+See [diagnosis, fixed baseline and release evidence](../docs/ACTIVATION_P0_2026-11-11.md).
+
+`activation_ready` means controls were bound. `generate_entry_exposed` means at least half of Generate stayed in a visible document viewport continuously for one second, once per page instance. It does not prove attention. `activation_first_action` records only a trusted pointer/keyboard category, never key values or text. Automation can still produce trusted browser input; this event does not certify a human.
+
+`intent_prefilled` distinguishes programmatic draft filling from the native `intent_first_input` event. Generation attempts carry `input_origin` and `trigger` through submit, request, response and playback. Demo customization remains prefill plus an explicit Generate; it never counts as a submit by itself. Existing exposure events and the Page→submit definition are preserved.
+
+Busy controls cannot overwrite the draft, including when language switches rebuild chips. IME confirmation does not submit. Stop and the nearby Cancel abort the owning client fetch; stale cleanup cannot affect a newer attempt. The 60-second deadline covers initialization and API response, retains the prompt, and enables retry. It does not promise upstream billing cancellation or a 60-second playback SLA.
+
+Compare production `unknown` unique users with the same ordered 24-hour funnel, explicit UTC endpoints and matured entrants. Segment the new activation version and report internal tests separately. Historical builds lack this version field; the old cohort is a historical reference, not a randomized control. Zero eligible entrants means conversion is UNKNOWN. Preserve the ≥25% and ≥5 distinct generating-user promotion gate.

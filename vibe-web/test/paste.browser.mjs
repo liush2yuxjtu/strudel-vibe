@@ -70,10 +70,15 @@ try {
       const response = await page.goto(url.href,{waitUntil:'domcontentloaded',timeout:30000});
       assert.equal(response.status(),200);
       await page.waitForFunction(()=>!!window.__vibeWebMcp);
+      // The async SDK replaces the snippet's queued track stub when it loads.
+      await page.waitForFunction(()=>{
+        const deviceId=window.amplitude?.getDeviceId?.();
+        return typeof deviceId==='string' && deviceId.length>0;
+      },null,{timeout:15000});
       await page.evaluate(()=>{
         window.__pasteAuditEvents=[];
         const original=window.amplitude.track;
-        window.amplitude.track=function(name,props,...args){
+        window.__pasteAuditTrack=window.amplitude.track=function(name,props,...args){
           window.__pasteAuditEvents.push({event_type:name,event_properties:JSON.parse(JSON.stringify(props||{}))});
           return original.call(this,name,props,...args);
         };
@@ -149,10 +154,11 @@ try {
         report.generation={requests:generationRequests,request:requestBody,response:data,status:response.status(),playing:played,busyScreenshot,guards:'PASS',sameAttemptEvidence:false,exactCharge:'not returned'};
         await page.locator('#stop').click();
       }
+      assert.equal(await page.evaluate(()=>window.amplitude.track===window.__pasteAuditTrack),true,'Amplitude recorder was not replaced');
       item.events=await page.evaluate(()=>window.__pasteAuditEvents);
       if(report.generation && config.id==='desktop-zh'){
         const attempt=report.generation.playing.attempt_id;
-        for(const name of ['vibe_generate_submit','vibe_generate_success','playback_started','playback_signal']){
+        for(const name of ['vibe_generate_submit','vibe_generate_request_sent','vibe_generate_success','playback_started','playback_signal']){
           assert.ok(item.events.some(e=>e.event_type===name&&e.event_properties.attempt_id===attempt),'same generation attempt '+name);
         }
         report.generation.sameAttemptEvidence=true;

@@ -17,7 +17,7 @@ function app(overrides = {}) {
   const elements = new Map();
   const c = {
     started: false, current: '', phase: 'idle', editorImport: null, editorRevision: 0, lastTriggeredAttempt: null, seen: false, state: '', events: [], hushCount: 0,
-    crypto: { randomUUID }, performance, setTimeout, clearTimeout, Promise,
+    crypto: { randomUUID }, performance, setTimeout, clearTimeout, Promise, AbortController,
     FIRST_DEMO_CODE: 's("bd*4")',
     $(id) {
       if (!elements.has(id)) elements.set(id, { value: '', textContent: '', focus() { c.focused = id; } });
@@ -122,6 +122,89 @@ test('already aborted generation does not submit', async () => {
   const c = app(); assert.equal((await c.vibe({ intent: 'drums', signal: controller.signal })).code, 'ABORTED');
   assert.equal(names(c).includes('vibe_generate_submit'), false);
 });
+test('Stop aborts the actual request and an old completion cannot clear a new request', async () => {
+  const first = deferred(), second = deferred();
+  const requests = [];
+  const c = app({ fetch: (url, options) => {
+    requests.push(options);
+    return requests.length === 1 ? first.promise : second.promise;
+  } });
+  const old = c.vibe({ intent:'first draft' });
+  while(requests.length < 1) await Promise.resolve();
+  assert.equal(requests[0].signal.aborted, false);
+  c.stopPlayback('cancel_generate');
+  assert.equal(requests[0].signal.aborted, true);
+  const next = c.vibe({ intent:'second draft' });
+  assert.equal((await old).code, 'ABORTED');
+  while(requests.length < 2) await Promise.resolve();
+  first.resolve({ ok:true, json:async()=>({ code:'s("sd")' }) });
+  await Promise.resolve();
+  assert.equal(c.phase, 'composing');
+  assert.equal(c.$('intent').value, 'second draft');
+  c.stopPlayback('cancel_generate');
+  assert.equal(requests[1].signal.aborted, true, 'new request still owns cancellation after old finally');
+  assert.equal((await next).code, 'ABORTED');
+  assert.equal(names(c).includes('vibe_generate_success'), false);
+});
+test('generation deadline aborts a stalled request, retains the prompt, and permits retry', async () => {
+  let deadline, request, calls=0;
+  const c = app({
+    setTimeout(callback, ms){
+      if(ms===60000){ deadline=callback; return undefined; }
+      return setTimeout(callback, ms);
+    },
+    fetch: async (url, options) => {
+      request=options;
+      if(++calls===1) return new Promise(()=>{});
+      return { ok:true, json:async()=>({ code:'s("bd")' }) };
+    },
+  });
+  const pending = c.vibe({ intent:'my saved prompt' });
+  while(!request) await Promise.resolve();
+  deadline();
+  const result=await pending;
+  assert.equal(result.code, 'GENERATE_TIMEOUT');
+  assert.equal(result.retryable, true);
+  assert.equal(request.signal.aborted, true);
+  assert.equal(c.phase, 'idle');
+  assert.equal(c.state, 'generateTimeout');
+  assert.equal(c.$('intent').value, 'my saved prompt');
+  assert.equal((await c.vibe()).phase, 'playing');
+});
+test('external abort cancels the browser request rather than only ignoring its response', async () => {
+  let request;
+  const external = new AbortController();
+  const c=app({ fetch:(url, options)=>{ request=options; return new Promise(()=>{}); } });
+  const pending=c.vibe({ intent:'drums', signal:external.signal });
+  while(!request) await Promise.resolve();
+  external.abort();
+  assert.equal((await pending).code, 'ABORTED');
+  assert.equal(request.signal.aborted, true);
+  assert.equal(c.$('intent').value, 'drums');
+});
+test('prefilled intent has provenance without pretending a user typed it', async () => {
+  const c=app();
+  c.prefillIntent('make the demo quieter', 'demo_customized');
+  await c.vibe({ trigger:'button' });
+  assert.equal(names(c).includes('intent_first_input'), false);
+  const operation=c.events.filter(e=>['vibe_generate_submit','vibe_generate_request_sent','vibe_generate_success','playback_started','playback_signal'].includes(e.name));
+  for(const event of operation){
+    assert.equal(event.props.input_origin, 'demo_customized');
+    assert.equal(event.props.trigger, 'button');
+  }
+  assert.ok(operation.some(e=>e.name==='vibe_generate_request_sent'));
+});
+test('IME candidate confirmation does not submit; a later deliberate Enter submits once', () => {
+  let keydown, submissions=0, prevented=0;
+  const c={ $:()=>({ addEventListener:(event, fn)=>{keydown=fn;} }), vibe:()=>{submissions++;} };
+  vm.createContext(c);
+  vm.runInContext(between("  $('intent').addEventListener('keydown',e=>{", "  $('play').onclick"), c);
+  keydown({ key:'Enter', isComposing:true, keyCode:13, preventDefault(){prevented++;} });
+  keydown({ key:'Enter', isComposing:false, keyCode:229, preventDefault(){prevented++;} });
+  assert.equal(submissions, 0); assert.equal(prevented, 0);
+  keydown({ key:'Enter', isComposing:false, keyCode:13, preventDefault(){prevented++;} });
+  assert.equal(submissions, 1); assert.equal(prevented, 1);
+});
 test('first click unlocks shared audio before engine initialization or network wait', async () => {
   for (const mode of ['demo', 'generate']) {
     let resumed = false, initialized = false;
@@ -168,7 +251,8 @@ test('engine-reported evaluation failure cannot be mistaken for resolved success
 
 const trafficScript = between('  (() => {\n    const params', '  </script>');
 function traffic(hostname, search = '', webdriver = false, stored = new Map(), storageFails = false) {
-  const c = { window: {}, location: { hostname, search }, navigator: { webdriver }, URLSearchParams,
+  const c = { window: {}, location: { hostname, search }, navigator: { webdriver }, URLSearchParams, crypto:{randomUUID}, innerWidth:390,
+    localStorage:{ getItem(){ if(storageFails) throw Error('denied'); return null; } },
     sessionStorage: { getItem(k) { if (storageFails) throw Error('denied'); return stored.get(k); }, setItem(k, v) { if (storageFails) throw Error('denied'); stored.set(k, v); } } };
   vm.createContext(c); vm.runInContext(trafficScript, c); return c;
 }
@@ -197,6 +281,12 @@ test('Amplitude enrichment exists before init and labels automatic pageviews', a
   c.amplitude = { add(p) { assert.equal(initialized, false); plugin = p; }, init() { assert.ok(plugin); initialized = true; } };
   vm.runInContext(between('  amplitude.add({', '  </script>'), c);
   const e = await plugin.execute({ event_type: '[Amplitude] Page Viewed', event_properties: { path: '/' } });
-  assert.equal(e.event_properties.traffic_class, 'internal_test'); assert.equal(e.event_properties.schema_version, 2);
+  assert.equal(e.event_properties.traffic_class, 'internal_test'); assert.equal(e.event_properties.schema_version, 3);
+  assert.equal(e.event_properties.activation_version, 'activation-entry-v3-20261111');
+  assert.equal(e.event_properties.release, 'funnel-reliability-v2');
+  assert.equal(e.event_properties.viewport_bucket, 'mobile');
+  assert.equal(e.event_properties.entry_state, 'demo_unseen');
+  assert.equal(e.event_properties.entry_language, 'zh');
+  assert.ok(e.event_properties.page_instance_id);
   assert.equal(e.event_properties.path, '/');
 });

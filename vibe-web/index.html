@@ -143,6 +143,7 @@
   .state{margin:12px 0 0; font-size:13.5px; color:var(--mute); min-height:1.35em; line-height:1.45}
   .state b{color:var(--led); font-weight:600}
   .state .dots::after{content:''; animation:dots 1.1s steps(4,end) infinite}
+  #cancelGenerate{margin-top:10px;min-height:44px}
   @keyframes dots{0%{content:''}25%{content:'·'}50%{content:'··'}75%{content:'···'}100%{content:''}}
 
   /* ——— hero: 16 MPC-style rubber pads ——— */
@@ -618,6 +619,7 @@
         <button class="primary" id="send" type="button" data-i18n="send">生成</button>
       </div>
       <div class="prog" id="prog" aria-hidden="true"><i></i></div>
+      <button id="cancelGenerate" class="above-scribble" type="button" hidden data-i18n="cancelGenerate">取消生成</button>
       <div class="state" id="state" role="status" aria-live="polite" data-i18n="stateIdle">自然语言 → 可编辑 Strudel · 不是导出 MP3</div>
       <div class="starter-hint" data-i18n="starterHint">不会写提示词？直接点下面的音乐灵感，一键生成。</div>
       <div class="chips chips-under-prompt above-scribble" id="chips"></div>
@@ -824,11 +826,22 @@
       if(internal) sessionStorage.setItem('jamflow-internal-test', '1');
     } catch {}
     const production = ['jamflow-gray.vercel.app', 'vibe-web-gray.vercel.app'].includes(location.hostname);
+    let entryLanguage = params.get('lang');
+    let entryState = 'storage_unavailable';
+    try {
+      if(entryLanguage !== 'en' && entryLanguage !== 'zh') entryLanguage = localStorage.getItem('jamflow-lang');
+      entryState = localStorage.getItem('jamflow-first-demo-seen') === '1' ? 'demo_seen' : 'demo_unseen';
+    } catch {}
     window.__jamflowTraffic = Object.freeze({
       traffic_class: internal ? 'internal_test' : navigator.webdriver ? 'automation_declared' : 'unknown',
       environment: local ? 'local' : production ? 'production' : 'preview',
-      schema_version: 2,
+      schema_version: 3,
       release: 'funnel-reliability-v2',
+      activation_version: 'activation-entry-v3-20261111',
+      page_instance_id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2),
+      viewport_bucket: innerWidth <= 520 ? 'mobile' : 'desktop',
+      entry_language: entryLanguage === 'en' ? 'en' : 'zh',
+      entry_state: entryState,
     });
     window.va = window.va || function(){ (window.vaq = window.vaq || []).push(arguments); };
     window.va('beforeSend', event => window.__jamflowTraffic.traffic_class === 'internal_test' ? null : event);
@@ -869,6 +882,8 @@
       ask: '卡在语法？说一句，或粘贴已有代码',
       intentPh: '例如：把太吵的 hihat 收成四拍底鼓…',
       send: '生成',
+      cancelGenerate: '取消生成',
+      generateTimeout: '生成超过 60 秒。提示词已保留，请点生成重试。',
       stateIdle: '自然语言 → 可编辑 Strudel · 不是导出 MP3',
       intentRequired: '先写一句你想听的音乐，再点生成。',
       demoNext: '<b>试听已启动</b> · 现在写一句，把它改成你的音乐。',
@@ -931,6 +946,8 @@
       ask: 'Stuck on syntax? Describe it, or paste code',
       intentPh: 'e.g. tame noisy hats into four-on-floor…',
       send: 'Go',
+      cancelGenerate: 'Cancel generation',
+      generateTimeout: 'Generation exceeded 60 seconds. Your prompt is saved. Choose Go to retry.',
       stateIdle: 'NL → editable Strudel · not an MP3 export',
       intentRequired: 'Describe the music you want, then choose Go.',
       demoNext: '<b>Demo started</b> · Type a line to make it your own.',
@@ -1047,10 +1064,14 @@
     if(typeof syncCodeHint === 'function') syncCodeHint();
     // refresh phase label
     if(typeof phase !== 'undefined'){
+      const busy = phase === 'composing' || phase === 'loading';
+      $('cancelGenerate').hidden = !busy || !activeGeneration;
+      $('demoCustomize').disabled = busy;
       if(phase==='playing') $('vtext').textContent = t('vPlaying');
       else if(phase==='idle') $('vtext').textContent = t('vIdle');
       else if(phase==='composing') $('vtext').textContent = t('vComposing');
       else if(phase==='loading') $('vtext').textContent = t('vLoading');
+      if(phase==='composing') setState(t('composing'));
     }
   }
   function setLang(next){
@@ -1193,12 +1214,18 @@
     show.forEach(tt=>{
       const c=document.createElement('button');
       c.type='button'; c.className='chip'; c.textContent=tt;
-      c.onclick=()=>{ jamTrack('chip_click', { intent_len: tt.length }); $('intent').value=tt; vibe({ source: 'chip' }); };
+      c.disabled = phase === 'composing' || phase === 'loading';
+      c.onclick=()=>{
+        if(phase === 'composing' || phase === 'loading') return;
+        jamTrack('chip_click', { intent_len: tt.length });
+        vibe({ intent: tt, source: 'chip', input_origin: 'chip', trigger: 'chip' });
+      };
       chips.appendChild(c);
     });
     if(list.length > previewSlots){
       const more=document.createElement('button');
       more.type='button'; more.className='chip chip-more';
+      more.disabled = phase === 'composing' || phase === 'loading';
       more.textContent = chipsExpanded ? t('chipsLess') : t('chipsMore');
       more.setAttribute('aria-expanded', chipsExpanded ? 'true' : 'false');
       more.onclick=()=>{ chipsExpanded = !chipsExpanded; renderChips(); bumpIdle('chips-more'); };
@@ -1390,7 +1417,9 @@
     $('play').disabled=busy; $('surprise').disabled=busy;
     $('apply').disabled=busy;
     $('code').readOnly=busy;
-    document.querySelectorAll('.chip-paste').forEach(el=>{ el.disabled=busy; });
+    document.querySelectorAll('.chip').forEach(el=>{ el.disabled=busy; });
+    $('demoCustomize').disabled=busy;
+    $('cancelGenerate').hidden=!busy || !activeGeneration;
     syncCodeHint();
     $('playLed').classList.toggle('on', p==='playing');
     if(p==='playing') $('vtext').textContent=t('vPlaying');
@@ -1494,6 +1523,8 @@
   let enginePromise=null;
   let repl=null;
   let activeAttempt=null;
+  let activeGeneration=null;
+  let inputOrigin='manual';
   let signalObservedAttempt=null;
   let attemptSequence=0;
   let lastTriggeredAttempt=null;
@@ -1519,6 +1550,7 @@
     setCodeHint($('code').value.trim() !== current.trim() ? 'codeDraft' : 'codeBridgeHint');
     const attempt = activeAttempt;
     activeAttempt = null;
+    if(activeGeneration && activeGeneration.attempt === attempt) activeGeneration.controller.abort();
     try{ hush(); }catch{}
     setPhase('idle');
     clearPads();
@@ -1657,10 +1689,25 @@
       jamTrack('generate_validation_failed', { source: (opts && opts.source) || 'manual', error_code: 'INTENT_REQUIRED' });
       return { error: 'intent required', code: 'INTENT_REQUIRED', retryable: false };
     }
-    if(opts && opts.intent != null) $('intent').value = intent;
     const signal = opts && opts.signal;
     if(signal && signal.aborted) return { error: 'cancelled', code: 'ABORTED', retryable: true };
-    const attempt = beginAttempt((opts && opts.source) || 'manual');
+    const source = (opts && opts.source) || 'manual';
+    if(opts && opts.intent != null) prefillIntent(intent, opts.input_origin || (source.startsWith('webmcp') ? 'webmcp' : source));
+    const attempt = beginAttempt(source);
+    attempt.input_origin = inputOrigin;
+    attempt.trigger = (opts && opts.trigger) || source;
+    const controller = new AbortController();
+    const generation = { attempt, controller, startedAt: performance.now(), timedOut: false };
+    activeGeneration = generation;
+    let onInterrupted;
+    const interrupted = new Promise((_, reject) => {
+      onInterrupted = () => reject(controller.signal.reason || Object.assign(new Error('cancelled'), { code: 'ABORTED' }));
+      controller.signal.addEventListener('abort', onInterrupted, { once: true });
+    });
+    const timeout = setTimeout(() => {
+      generation.timedOut = true;
+      controller.abort(Object.assign(new Error(t('generateTimeout')), { code: 'GENERATE_TIMEOUT' }));
+    }, 60000);
     const onAbort = () => { if(activeAttempt === attempt) stopPlayback(attempt.source); };
     if(signal) signal.addEventListener('abort', onAbort, { once: true });
     $('demoNextAction').hidden = true;
@@ -1670,40 +1717,52 @@
     $('vtext').textContent=t('vComposing');
     logLine('<span class="u">› '+intent.replace(/</g,'&lt;')+'</span>');
     try{
-      await Promise.all([resumeAudio(), ensureStarted()]);
+      await Promise.race([Promise.all([resumeAudio(), ensureStarted()]), interrupted]);
       assertActive(attempt);
-      const r=await fetch('/api/vibe',{method:'POST',headers:{'content-type':'application/json'},
-        body:JSON.stringify({intent, current}), signal});
+      jamTrack('vibe_generate_request_sent', { ...attempt, elapsed_ms: Math.round(performance.now() - generation.startedAt) });
+      const r=await Promise.race([fetch('/api/vibe',{method:'POST',headers:{'content-type':'application/json'},
+        body:JSON.stringify({intent, current}), signal: controller.signal}), interrupted]);
       assertActive(attempt);
-      const data=await r.json();
+      const data=await Promise.race([r.json(), interrupted]);
       assertActive(attempt);
+      clearTimeout(timeout);
       if(!r.ok || data.error || typeof data.code !== 'string' || !data.code.trim()){
         try{ hush(); }catch{}
         setPhase('idle');
         setState(t('err') + String(data.error || r.status).replace(/</g, '&lt;'));
-        jamTrack('vibe_generate_failed', { ...attempt, error_code: 'GENERATE_FAILED', status: r.status });
+        jamTrack('vibe_generate_failed', { ...attempt, error_code: 'GENERATE_FAILED', status: r.status, elapsed_ms: Math.round(performance.now() - generation.startedAt) });
         return { error: String(data.error || r.status), code: 'GENERATE_FAILED', retryable: r.status >= 500, attempt_id: attempt.attempt_id };
       }
-      jamTrack('vibe_generate_success', { ...attempt, code_len: data.code.length });
+      jamTrack('vibe_generate_success', { ...attempt, code_len: data.code.length, elapsed_ms: Math.round(performance.now() - generation.startedAt) });
       logLine('<span class="c">'+data.code.replace(/</g,'&lt;')+'</span>');
       const result = await playCode(data.code, attempt);
       if(result.error) return result;
-      if($('intent').value.trim() === intent) $('intent').value='';
+      if($('intent').value.trim() === intent){ $('intent').value=''; inputOrigin='manual'; }
       if(!firstDemoSeen()) dismissFirstDemo('generate');
       return result;
     }catch(e){
       const cancelled = (signal && signal.aborted) || e.code === 'ABORTED' || activeAttempt !== attempt;
+      const timedOut = !cancelled && generation.timedOut;
       if(activeAttempt === attempt){
         try{ hush(); }catch{}
         setPhase('idle');
-        setState(cancelled ? t('stopped') : t('reqFail') + String(e.message || e).replace(/</g, '&lt;'));
+        setState(cancelled ? t('stopped') : timedOut ? t('generateTimeout') : t('reqFail') + String(e.message || e).replace(/</g, '&lt;'));
       }
-      const result = { error: cancelled ? 'cancelled' : String(e.message || e), code: cancelled ? 'ABORTED' : 'GENERATE_FAILED', retryable: true, attempt_id: attempt.attempt_id };
-      jamTrack('vibe_generate_failed', { ...attempt, error_code: result.code });
+      const result = { error: cancelled ? 'cancelled' : String(e.message || e), code: cancelled ? 'ABORTED' : timedOut ? 'GENERATE_TIMEOUT' : 'GENERATE_FAILED', retryable: true, attempt_id: attempt.attempt_id };
+      jamTrack('vibe_generate_failed', { ...attempt, error_code: result.code, elapsed_ms: Math.round(performance.now() - generation.startedAt) });
       return result;
     } finally {
+      clearTimeout(timeout);
+      controller.signal.removeEventListener('abort', onInterrupted);
+      if(activeGeneration === generation) activeGeneration=null;
       if(signal) signal.removeEventListener('abort', onAbort);
     }
+  }
+
+  function prefillIntent(intent, origin){
+    $('intent').value = intent;
+    inputOrigin = origin;
+    jamTrack('intent_prefilled', { input_origin: origin, intent_len: intent.length });
   }
 
 
@@ -1799,9 +1858,8 @@
     if(banner){ banner.classList.remove('on'); banner.hidden = true; }
     try{
       const pick = IDLE_PROMPTS[Math.floor(Math.random() * IDLE_PROMPTS.length)];
-      $('intent').value = pick;
       setState(t('idleAuto')+'<b>'+pick.replace(/</g,'&lt;')+'</b>');
-      await vibe({ source: 'idle' });
+      await vibe({ intent:pick, source:'idle', input_origin:'idle', trigger:'idle' });
     } finally {
       idleFiring = false;
       armIdleTimer();
@@ -2171,8 +2229,7 @@
           suggestion: 'Call get_jam_status for examples.',
         };
       }
-      $('intent').value = pick;
-      const result = await vibe({ intent: pick, source: surprise ? 'webmcp-surprise' : 'webmcp-chip', signal });
+      const result = await vibe({ intent: pick, source: surprise ? 'webmcp-surprise' : 'webmcp-chip', input_origin: surprise ? 'random' : 'chip', trigger: 'webmcp', signal });
       if(result && result.error) return result;
       return { label: pick, code: result && result.code, phase: (result && result.phase) || phase };
     },
@@ -2185,19 +2242,30 @@
   window.__vibe = { phase:()=>phase, phaseSince:()=>phaseSince, audioState, started:()=>started, current:()=>current, repl:()=>repl, sync:'editPattern+onTrigger@deadline', idleAuto:()=>idleAutoOn, bumpIdle, armIdleTimer, IDLE_MS, scribble:()=>scribbleOn, setScribbleEnabled, firstDemoSeen, runFirstDemo, dismissFirstDemo, revealPads, syncPadsReadyUi, FIRST_DEMO_LS_KEY, openPasteBridge, applyEditor, webmcp:()=>window.__vibeWebMcp };
 
   let conversionIntentFocused=false, conversionIntentTyped=false;
-  $('intent').addEventListener('focus',()=>{if(!conversionIntentFocused){conversionIntentFocused=true;jamTrack('intent_first_focus',{source:'manual'});}});
-  $('intent').addEventListener('input',()=>{if(!conversionIntentTyped && $('intent').value.trim()){conversionIntentTyped=true;jamTrack('intent_first_input',{source:'manual',intent_len:$('intent').value.trim().length});}});
+  $('intent').addEventListener('focus',()=>{if(!conversionIntentFocused){conversionIntentFocused=true;jamTrack('intent_first_focus',{source:'manual',input_origin:inputOrigin});}});
+  $('intent').addEventListener('input',()=>{
+    if(!$('intent').value.trim()) inputOrigin='manual';
+    if(!conversionIntentTyped && $('intent').value.trim()){
+      conversionIntentTyped=true;
+      jamTrack('intent_first_input',{source:'manual',input_origin:inputOrigin,intent_len:$('intent').value.trim().length});
+    }
+  });
   $('demoCustomize').onclick=()=>{
     if(phase==='composing'||phase==='loading')return;
     const input=$('intent');
-    if(!input.value.trim())input.value=(lang==='en'?'A relaxed four-on-the-floor groove with a warm C minor bass':'轻快的四拍鼓点，搭配柔和的 C 小调贝斯');
+    if(!input.value.trim()) prefillIntent(lang==='en'?'A relaxed four-on-the-floor groove with a warm C minor bass':'轻快的四拍鼓点，搭配柔和的 C 小调贝斯', 'demo_customized');
     $('demoNextAction').hidden=true;
     input.focus();
-    jamTrack('demo_to_prompt',{source:'first_demo',intent_len:input.value.length});
+    jamTrack('demo_to_prompt',{source:'first_demo',input_origin:inputOrigin,intent_len:input.value.length});
     input.scrollIntoView({behavior:'smooth',block:'center'});
   };
-  $('send').onclick=vibe;
-  $('intent').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); vibe(); }});
+  $('send').onclick=()=>vibe({ trigger:'button' });
+  $('intent').addEventListener('keydown',e=>{
+    if(e.key==='Enter' && !e.isComposing && e.keyCode!==229){
+      e.preventDefault();
+      vibe({ trigger:'keyboard' });
+    }
+  });
   $('play').onclick=async()=>{ if($('code').value.trim()) return applyEditor(); if(current){ const result = await playCode(current); if(!result.error && !firstDemoSeen()) dismissFirstDemo('play'); } };
   $('apply').onclick=applyEditor;
   $('compatibleExample').onclick=()=>{
@@ -2209,7 +2277,8 @@
     revealCodeEditor();
   };
   $('stop').onclick=()=>stopPlayback('transport');
-  $('surprise').onclick=()=>{ $('intent').value = EXAMPLES[Math.floor(Math.random()*EXAMPLES.length)]; vibe({ source: 'surprise' }); };
+  $('cancelGenerate').onclick=()=>stopPlayback('cancel_generate');
+  $('surprise').onclick=()=>vibe({ intent: EXAMPLES[Math.floor(Math.random()*EXAMPLES.length)], source:'surprise', input_origin:'random', trigger:'random' });
 
 
   $('langZh').onclick = ()=> setLang('zh');
@@ -2254,6 +2323,38 @@
   }
   const firstDemoSkip = $('firstDemoSkip');
   if(firstDemoSkip) firstDemoSkip.onclick = ()=>{ dismissFirstDemo('skip'); bumpIdle('first-demo-skip'); };
+
+  jamTrack('activation_ready', { readiness:'controls_bound' });
+  if(typeof IntersectionObserver === 'function'){
+    let visible=false, recorded=false, timer=null;
+    const exposure = () => {
+      clearTimeout(timer);
+      if(recorded || !visible || document.visibilityState !== 'visible') return;
+      timer=setTimeout(() => {
+        recorded=true;
+        jamTrack('generate_entry_exposed', { evidence:'viewport_50pct_visible_1s' });
+        observer.disconnect();
+        document.removeEventListener('visibilitychange', exposure);
+      }, 1000);
+    };
+    const observer = new IntersectionObserver(entries => {
+      visible=entries.some(entry=>entry.isIntersecting && entry.intersectionRatio>=0.5);
+      exposure();
+    }, { threshold:0.5 });
+    observer.observe($('send'));
+    document.addEventListener('visibilitychange', exposure);
+    window.addEventListener('pagehide',()=>{clearTimeout(timer);observer.disconnect();},{once:true});
+  }
+  let firstActivationAction=false;
+  const observeActivationAction = event => {
+    if(firstActivationAction || !event.isTrusted || !event.target.closest?.('.machine')) return;
+    firstActivationAction=true;
+    jamTrack('activation_first_action', { action_type:event.type==='pointerdown'?'pointer':'keyboard' });
+    document.removeEventListener('pointerdown', observeActivationAction, true);
+    document.removeEventListener('keydown', observeActivationAction, true);
+  };
+  document.addEventListener('pointerdown', observeActivationAction, true);
+  document.addEventListener('keydown', observeActivationAction, true);
 
   fetch('/api/vibe',{method:'POST',headers:{'content-type':'application/json'},body:'{}'})
     .then(r=>r.json()).then(d=>{

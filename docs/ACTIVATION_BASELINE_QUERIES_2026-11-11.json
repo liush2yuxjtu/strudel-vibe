@@ -1,0 +1,350 @@
+{
+  "queryCutoffUTC": "2026-11-10T16:08:00Z",
+  "sourceProjectURL": "https://app.amplitude.com/analytics/cold-bar-959821/home/project/893642",
+  "definitions": {
+    "baseline7": {
+      "app": "893642",
+      "name": "JamFlow baseline 7d production unknown ordered 24h",
+      "type": "funnels",
+      "params": {
+        "start": "2026-11-04T00:00:00Z",
+        "end": "2026-11-10T16:08:00Z",
+        "events": [
+          {
+            "event_type": "[Amplitude] Page Viewed",
+            "filters": [
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "environment",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "production"
+                ]
+              },
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "traffic_class",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "unknown"
+                ]
+              }
+            ],
+            "group_by": []
+          },
+          {
+            "event_type": "vibe_generate_submit",
+            "filters": [
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "environment",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "production"
+                ]
+              },
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "traffic_class",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "unknown"
+                ]
+              }
+            ],
+            "group_by": []
+          }
+        ],
+        "mode": "ordered",
+        "metric": "CONVERSION",
+        "conversionSeconds": 86400,
+        "countGroup": "User",
+        "newOrActive": "active",
+        "eventAbstraction": "Event",
+        "nthTimeLookbackWindow": 365,
+        "segments": [
+          {
+            "name": "Production Unknown",
+            "conditions": []
+          }
+        ]
+      }
+    },
+    "baseline14": {
+      "app": "893642",
+      "name": "JamFlow baseline 14d production unknown ordered 24h",
+      "type": "funnels",
+      "params": {
+        "start": "2026-10-28T00:00:00Z",
+        "end": "2026-11-10T16:08:00Z",
+        "events": [
+          {
+            "event_type": "[Amplitude] Page Viewed",
+            "filters": [
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "environment",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "production"
+                ]
+              },
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "traffic_class",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "unknown"
+                ]
+              }
+            ],
+            "group_by": []
+          },
+          {
+            "event_type": "vibe_generate_submit",
+            "filters": [
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "environment",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "production"
+                ]
+              },
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "traffic_class",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "unknown"
+                ]
+              }
+            ],
+            "group_by": []
+          }
+        ],
+        "mode": "ordered",
+        "metric": "CONVERSION",
+        "conversionSeconds": 86400,
+        "countGroup": "User",
+        "newOrActive": "active",
+        "eventAbstraction": "Event",
+        "nthTimeLookbackWindow": 365,
+        "segments": [
+          {
+            "name": "Production Unknown",
+            "conditions": []
+          }
+        ]
+      }
+    },
+    "newUsers": {
+      "app": "893642",
+      "name": "JamFlow production unknown newly seen users main funnel 7d",
+      "type": "funnels",
+      "params": {
+        "start": "2026-11-04T00:00:00Z",
+        "end": "2026-11-10T16:08:00Z",
+        "events": [
+          {
+            "event_type": "[Amplitude] Page Viewed",
+            "filters": [
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "environment",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "production"
+                ]
+              },
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "traffic_class",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "unknown"
+                ]
+              }
+            ],
+            "group_by": []
+          },
+          {
+            "event_type": "vibe_generate_submit",
+            "filters": [
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "environment",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "production"
+                ]
+              },
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "traffic_class",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "unknown"
+                ]
+              }
+            ],
+            "group_by": []
+          }
+        ],
+        "mode": "ordered",
+        "metric": "CONVERSION",
+        "conversionSeconds": 86400,
+        "countGroup": "User",
+        "newOrActive": "new",
+        "eventAbstraction": "Event",
+        "nthTimeLookbackWindow": 365,
+        "segments": [
+          {
+            "name": "Production Unknown",
+            "conditions": []
+          }
+        ],
+        "funnelNewUserType": "SAME_TIME_RANGE"
+      }
+    },
+    "sameAttempt": {
+      "app": "893642",
+      "name": "JamFlow production unknown generated outcome same attempt 7d",
+      "type": "funnels",
+      "params": {
+        "start": "2026-11-04T00:00:00Z",
+        "end": "2026-11-10T16:08:00Z",
+        "events": [
+          {
+            "event_type": "vibe_generate_submit",
+            "filters": [
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "environment",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "production"
+                ]
+              },
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "traffic_class",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "unknown"
+                ]
+              }
+            ],
+            "group_by": []
+          },
+          {
+            "event_type": "vibe_generate_success",
+            "filters": [
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "environment",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "production"
+                ]
+              },
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "traffic_class",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "unknown"
+                ]
+              }
+            ],
+            "group_by": []
+          },
+          {
+            "event_type": "playback_started",
+            "filters": [
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "environment",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "production"
+                ]
+              },
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "traffic_class",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "unknown"
+                ]
+              }
+            ],
+            "group_by": []
+          },
+          {
+            "event_type": "playback_signal",
+            "filters": [
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "environment",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "production"
+                ]
+              },
+              {
+                "group_type": "User",
+                "subprop_type": "event",
+                "subprop_key": "traffic_class",
+                "subprop_op": "is",
+                "subprop_value": [
+                  "unknown"
+                ]
+              }
+            ],
+            "group_by": []
+          }
+        ],
+        "mode": "ordered",
+        "metric": "CONVERSION",
+        "conversionSeconds": 86400,
+        "countGroup": "User",
+        "newOrActive": "active",
+        "eventAbstraction": "Event",
+        "nthTimeLookbackWindow": 365,
+        "segments": [
+          {
+            "name": "Production unknown",
+            "conditions": []
+          }
+        ],
+        "constantProps": [
+          {
+            "type": "event",
+            "value": "attempt_id",
+            "group_type": "User"
+          }
+        ]
+      }
+    }
+  }
+}
