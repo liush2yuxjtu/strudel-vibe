@@ -3,8 +3,18 @@
 ## Execution
 
 - Continue the requested development and verification work without repeated permission checks for routine reversible actions.
-- Follow `.claude/skills/verify/SKILL.md` before commits, merges, and deployments. Verify the actual production domain when shipping is requested.
+- Follow `.claude/skills/verify/SKILL.md` before direct commits, pushes, and deployments. Verify the actual production domain when shipping is requested.
 - Distinguish an attempted action, API success, software playback, engine audio signal, and human hearing. Do not use event counts as proof of completion.
+
+## Delivery workflow
+
+The owner selected this workflow on 2026-11-10.
+
+- Use direct commits to `main` after the applicable `/verify` checks pass. Fetch current `main` before writing; preserve concurrent changes and use a non-force push or an expected-head lease. Never force-push shared history.
+- Do not create GitHub Issues or pull requests for routine project work. Track pending work and evidence in the project Page or scoped repository docs instead. Consolidate existing feature work into `main` after verification and close superseded Issues/PRs without discarding unresolved work.
+- Use `.claude/skills/verify/SKILL.md` as the quality gate instead of CI. Do not add GitHub Actions workflows or require PR checks/review bots. Keep executable tests and run the checks appropriate to the diff locally or in a bounded test runner.
+- CI removal does not remove Vercel builds or production acceptance. A direct commit does not prove deployment or user-path success.
+- Record the commit, checks, evidence, and any FAIL/BLOCKED/UNKNOWN result. Never turn an unresolved external gate, including the feedback CAPTCHA, into PASS because a ticket was closed or code was committed. Docs-only changes do not inherit unrelated product-path blockers.
 
 ## Standing development cost authorization
 

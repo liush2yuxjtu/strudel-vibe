@@ -1,7 +1,7 @@
 ---
 name: verify
 description: >-
-  Use before any JamFlow (strudel-vibe / vibe-web) git commit, merge, or Vercel deploy,
+  Use before any JamFlow (strudel-vibe / vibe-web) direct commit, push, or Vercel deploy,
   and when the user says /verify for this repo: run the checklist; FAIL or
   BLOCKED blocks commit/deploy until fixed and re-verified.
 ---
@@ -30,7 +30,7 @@ Each check: **PASS** | **FAIL** | **BLOCKED** | **SKIP** (with reason). No “pa
 | `vibe-web/index.html` UI/CSS/i18n only | A, B, C, D, E |
 | `vibe-web/api/**` or DeepSeek/Strudel generation | A, B, F (+ E if shipped) |
 | Deploy / aliases / branding | A, E, G |
-| Playback, generation client, analytics, or funnel changes | A–E, H before commit; I before merge; J after deploy |
+| Playback, generation client, analytics, or funnel changes | A–E, H before commit; I before push; J after deploy |
 | Docs only | all SKIP |
 | First-time / unclear scope | A–G |
 
@@ -89,7 +89,7 @@ Require these outcomes:
 - Label automatic Amplitude pageviews as well as custom events before SDK initialization. Keep known tests, declared automation, and unknown traffic separate. Never infer a crawler from country, Linux, or an empty referrer.
 - Treat submit, software start, engine signal, and human hearing as different evidence. See `vibe-web/FUNNEL.md` for event definitions.
 
-### I — Browser acceptance before merge
+### I — Browser acceptance before direct push
 
 Run `npm run test:browser` from `vibe-web` when Playwright and Chromium are available. `PLAYWRIGHT_MODULE_PATH` and `CHROMIUM_PATH` select existing installations. This suite uses real Strudel and samples, mocks API responses, and blocks external requests. Do not describe it as a real AI generation test.
 
@@ -109,7 +109,7 @@ Report I as PASS only for the named checks actually completed. List mocked gener
 ### Paste bridge acceptance
 
 For changes to import, editor ownership, sound maps, or code feedback, run
-`npm run test:paste` against the exact preview before merge and the production
+`npm run test:paste` against the exact verified checkout or preview before push and the production
 domain after release. Use `JAMFLOW_URL`, `JAMFLOW_EVIDENCE`,
 `PLAYWRIGHT_MODULE_PATH`, and `CHROMIUM_PATH` to select the target and runner.
 
@@ -133,14 +133,14 @@ Continue to label physical-device, Safari and human-listening coverage separatel
 
 ### J — Production deployment provenance and acceptance
 
-Use team `team_1VUYYia3RReNLUn2r8ciX2Nb`. Resolve the production domain before deploying. `jamflow-gray.vercel.app` belongs to project `jamflow` (`prj_Wkevgdev2NAkRjZmHJujgmQ40Rhj`). The Git-linked `vibe-web` project (`prj_w4TPAEtA5B3bbkzekIFMz61I9tMJ`) supplies PR previews; its successful build does not prove that the JamFlow production domain changed.
+Use team `team_1VUYYia3RReNLUn2r8ciX2Nb`. Resolve the production domain before deploying. `jamflow-gray.vercel.app` belongs to project `jamflow` (`prj_Wkevgdev2NAkRjZmHJujgmQ40Rhj`). The Git-linked `vibe-web` project (`prj_w4TPAEtA5B3bbkzekIFMz61I9tMJ`) supplies separate builds/previews; its successful build does not prove that the JamFlow production domain changed.
 
-1. Record the current production deployment as the rollback target. Read the PR head and required checks again before merging with an expected-head lease.
-2. Confirm the PR is merged into `main`. Deploy the merged commit to the production project with source root `vibe-web`, preserving its existing server-side environment. Do not copy secrets into source or promote a keyless preview as production.
+1. Record the current production deployment as the rollback target. Fetch current main, verify the intended checkout, and use a non-force push or expected-head lease to avoid overwriting concurrent changes.
+2. Confirm the verified direct commit is on `main`. Deploy that exact commit to the production project with source root `vibe-web`, preserving its existing server-side environment. Do not copy secrets into source or promote a keyless preview as production.
 3. Require a READY production deployment for the intended commit. Check the domain alias maps to that deployment. Check served HTML contains `funnel-reliability-v2`, `playback_evidence`, and `repl.state.evalError` for this release.
 4. Repeat I's local-demo, invalid-code, replay, Stop, and empty-input checks on `https://jamflow-gray.vercel.app/?audit=<run-id>`. Capture the actual returned status. A build badge or HTTP 200 is insufficient.
 5. Use the existing empty-body API health probe to check configuration without a model request. For real generation, read the standing development-cost authorization in root `AGENTS.md`; it is sufficient authorization for necessary task usage estimated below US$5. Do not ask again for the same approved small-cost category. Record the real response, playback evidence, and whether a model request ran. Never expose the key or count health probes as generated music.
-6. If production fails an applicable acceptance check, do not report deployment success. Restore the recorded deployment if safe, or fix and repeat the failed check. Keep a short evidence record on the PR.
+6. If production fails an applicable acceptance check, do not report deployment success. Restore the recorded deployment if safe, or fix and repeat the failed check. Keep a short evidence record in the project Page or scoped repository docs.
 
 ## Report format (required)
 
@@ -158,7 +158,7 @@ Verdict: PASS → applicable checks completed for the stated phase
 
 ## After PASS
 
-Follow the user's authorized delivery path. For a PR, update its branch, re-check the head, merge when authorized, and verify the actual production target when deployment is requested. Do not infer that a commit or a preview build has shipped.
+Follow the project AGENTS.md delivery policy. Commit directly to main after the applicable checks pass, refresh remote main, and push without overwriting concurrent work. Do not create an Issue or PR and do not add CI workflows. Run these checks directly; no CI badge or review bot replaces them. When shipping is requested, verify the exact production target after deployment. Store commit and runtime evidence in the project Page or scoped repository docs. A docs-only update uses SKIP with reasons for product checks and must not relabel existing product blockers.
 
 ### Feedback entry
 
