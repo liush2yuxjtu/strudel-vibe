@@ -110,3 +110,23 @@ mocks no API responses or engine calls. It blocks non-empty model requests by
 default. Set `JAMFLOW_REAL_GENERATION=1` to perform one real generation on the
 Chinese desktop case, including busy controls and correlated signal evidence.
 The original offline and mocked browser regressions remain separate checks.
+
+## Anonymous feedback
+
+The bilingual footer opens a local feedback dialog. The required message and
+optional contact are posted to the owner's Jotform inbox without a GitHub login.
+Diagnostics are limited to feedback release, language, traffic class, playback
+state and last error code/time. Prompt and editor code are disabled by default;
+the user can opt in and edit that attachment before sending. Do not send form
+content to Amplitude.
+
+Submission uses a native POST to the action observed on the hosted form. The
+provider opens a receipt or error in a new tab. JamFlow retains the draft and
+shows a standalone-form fallback. Handoff is not a delivery acknowledgement.
+Manage form and responses: https://www.jotform.com/build/263132663005044
+Public fallback: https://form.jotform.com/263132663005044
+
+Run `npm run test:feedback` for Chinese/English desktop and mobile. The default
+run aborts provider POSTs to test retained drafts. Set `FEEDBACK_REAL_SUBMIT=1`
+once to submit a labelled internal test, then read the actual inbox submission.
+Do not count that test as user feedback or conversion.

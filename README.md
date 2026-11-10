@@ -62,6 +62,8 @@ Compositions: `ViralVertical`, `ViralLandscape`, `ViralCNVertical` (小红书竖
 
 ## Share it
 
+Users can choose **Report a problem / 反馈问题** in the product footer without a GitHub account. The form keeps prompt and code private unless explicitly attached. [Standalone feedback form](https://form.jotform.com/263132663005044).
+
 Send someone the demo link. If a prompt comes back as bad Strudel, open an issue with the sentence you typed (not your API key) — that is the most useful bug report.
 
 ## Notes
