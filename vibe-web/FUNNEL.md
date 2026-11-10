@@ -74,3 +74,39 @@ Chromium mobile emulation at 390×844 and 360×844 also passed. There was no hor
 Reproduce this with `npm run test:mobile`. The script accepts `PLAYWRIGHT_MODULE_PATH`, `CHROMIUM_PATH`, and `JAMFLOW_URL`; it refuses non-empty generation requests so it cannot consume model quota.
 
 The complete `test:browser` suite also passed all 10 scenarios in a short-lived Vercel Sandbox with Playwright 1.62.1. Its API responses were mocked; Strudel and samples were real. The failure fixture installs its evaluation override after engine initialization because Strudel installs global functions during startup. Both temporary sandboxes were stopped after verification.
+
+## Strudel import contract
+
+The paste chip imports a draft. It does not evaluate clipboard contents. The
+user chooses Apply & play after reviewing the draft. Import while an existing
+pattern plays preserves that pattern and its attempt. Stop, a newer import,
+manual editing during a read, or a new operation invalidates a delayed clipboard
+result.
+
+`paste_bridge_open`, `paste_bridge_ready`, `paste_bridge_apply`, playback and
+signal events share `attempt_id` and `source=paste_bridge` for the first Apply of
+an imported draft. `paste_bridge_failed` records clipboard failures.
+`paste_bridge_cancelled` records invalidated imports. These events do not prove
+playback or human hearing. Stop preserves the operation source and records its
+physical control as `trigger`.
+
+Status returns `code_preview` for the last applied code, `editor_code_preview`
+for the draft, and `editor_dirty` when they differ. `import_stage` and
+`import_attempt_id` identify a pending import without replacing the playing
+attempt.
+
+The app loads `samples/tr909.json` beside its existing map. It references the
+original TR909 recordings from the upstream tidal-drum-machines commit
+`6577395a4d05031728ced2ec3e5637fa89d8be48`. `rolandtr909_*` aliases derive from
+registered `tr909_*` sounds. It does not substitute another instrument under the
+TR909 name. Other unavailable sounds found in the first queried cycle return
+`SOUND_UNAVAILABLE`, preserve the draft, and offer an explicit compatible-example
+action. That action fills the editor and still requires Apply.
+
+Run `npm run test:paste` for the actual clipboard, engine, sample URLs, local
+recovery and four language/viewport combinations. Set `JAMFLOW_URL` to select the
+verified deployment and `JAMFLOW_EVIDENCE` for screenshots and JSON. The script
+mocks no API responses or engine calls. It blocks non-empty model requests by
+default. Set `JAMFLOW_REAL_GENERATION=1` to perform one real generation on the
+Chinese desktop case, including busy controls and correlated signal evidence.
+The original offline and mocked browser regressions remain separate checks.

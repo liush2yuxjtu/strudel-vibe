@@ -1,0 +1,99 @@
+{
+  "_base": "https://raw.githubusercontent.com/geikha/tidal-drum-machines/6577395a4d05031728ced2ec3e5637fa89d8be48/machines/RolandTR909/",
+  "tr909_bd": [
+    "rolandtr909-bd/Bassdrum-01.wav",
+    "rolandtr909-bd/Bassdrum-02.wav",
+    "rolandtr909-bd/Bassdrum-03.wav",
+    "rolandtr909-bd/Bassdrum-04.wav"
+  ],
+  "tr909_cp": [
+    "rolandtr909-cp/Clap.wav",
+    "rolandtr909-cp/cp01.wav",
+    "rolandtr909-cp/cp02.wav",
+    "rolandtr909-cp/cp03.wav",
+    "rolandtr909-cp/cp04.wav"
+  ],
+  "tr909_cr": [
+    "rolandtr909-cr/Crash.wav",
+    "rolandtr909-cr/cr01.wav",
+    "rolandtr909-cr/cr02.wav",
+    "rolandtr909-cr/cr03.wav",
+    "rolandtr909-cr/cr04.wav"
+  ],
+  "tr909_hh": [
+    "rolandtr909-hh/hh01.wav",
+    "rolandtr909-hh/hh02.wav",
+    "rolandtr909-hh/hh03.wav",
+    "rolandtr909-hh/hh04.wav"
+  ],
+  "tr909_ht": [
+    "rolandtr909-ht/Tom H.wav",
+    "rolandtr909-ht/ht01.wav",
+    "rolandtr909-ht/ht02.wav",
+    "rolandtr909-ht/ht03.wav",
+    "rolandtr909-ht/ht04.wav",
+    "rolandtr909-ht/ht05.wav",
+    "rolandtr909-ht/ht06.wav",
+    "rolandtr909-ht/ht07.wav",
+    "rolandtr909-ht/ht08.wav"
+  ],
+  "tr909_lt": [
+    "rolandtr909-lt/Tom L.wav",
+    "rolandtr909-lt/lt01.wav",
+    "rolandtr909-lt/lt02.wav",
+    "rolandtr909-lt/lt03.wav",
+    "rolandtr909-lt/lt04.wav",
+    "rolandtr909-lt/lt05.wav",
+    "rolandtr909-lt/lt06.wav",
+    "rolandtr909-lt/lt07.wav",
+    "rolandtr909-lt/lt08.wav"
+  ],
+  "tr909_mt": [
+    "rolandtr909-mt/Tom M.wav",
+    "rolandtr909-mt/mt01.wav",
+    "rolandtr909-mt/mt02.wav",
+    "rolandtr909-mt/mt03.wav",
+    "rolandtr909-mt/mt04.wav",
+    "rolandtr909-mt/mt05.wav",
+    "rolandtr909-mt/mt06.wav",
+    "rolandtr909-mt/mt07.wav",
+    "rolandtr909-mt/mt08.wav"
+  ],
+  "tr909_oh": [
+    "rolandtr909-oh/Hat Open.wav",
+    "rolandtr909-oh/oh01.wav",
+    "rolandtr909-oh/oh02.wav",
+    "rolandtr909-oh/oh03.wav",
+    "rolandtr909-oh/oh04.wav"
+  ],
+  "tr909_rd": [
+    "rolandtr909-rd/Ride.wav",
+    "rolandtr909-rd/rd01.wav",
+    "rolandtr909-rd/rd02.wav",
+    "rolandtr909-rd/rd03.wav",
+    "rolandtr909-rd/rd04.wav"
+  ],
+  "tr909_rim": [
+    "rolandtr909-rim/Rimhot.wav",
+    "rolandtr909-rim/rs01.wav",
+    "rolandtr909-rim/rs02.wav"
+  ],
+  "tr909_sd": [
+    "rolandtr909-sd/naredrum.wav",
+    "rolandtr909-sd/sd01.wav",
+    "rolandtr909-sd/sd02.wav",
+    "rolandtr909-sd/sd03.wav",
+    "rolandtr909-sd/sd04.wav",
+    "rolandtr909-sd/sd05.wav",
+    "rolandtr909-sd/sd06.wav",
+    "rolandtr909-sd/sd07.wav",
+    "rolandtr909-sd/sd08.wav",
+    "rolandtr909-sd/sd09.wav",
+    "rolandtr909-sd/sd10.wav",
+    "rolandtr909-sd/sd11.wav",
+    "rolandtr909-sd/sd12.wav",
+    "rolandtr909-sd/sd13.wav",
+    "rolandtr909-sd/sd14.wav",
+    "rolandtr909-sd/sd15.wav"
+  ]
+}

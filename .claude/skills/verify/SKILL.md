@@ -106,6 +106,31 @@ Both browser scripts require Playwright and its browser. If the runner lacks the
 
 Report I as PASS only for the named checks actually completed. List mocked generation, real generation, and human listening separately. Do not invent evidence for an unavailable check.
 
+### Paste bridge acceptance
+
+For changes to import, editor ownership, sound maps, or code feedback, run
+`npm run test:paste` against the exact preview before merge and the production
+domain after release. Use `JAMFLOW_URL`, `JAMFLOW_EVIDENCE`,
+`PLAYWRIGHT_MODULE_PATH`, and `CHROMIUM_PATH` to select the target and runner.
+
+Require the official `tr909` fixture to reach `engine_signal` after explicit
+Apply. Paste alone must only stage a draft. Check both languages at desktop,
+390px and 360px touch emulation. Require at least a 44px paste target, editor
+focus, no overflow, invalid syntax recovery, missing-sound feedback and the
+compatible-example action. Keep actual played code distinct from unapplied
+editor text. Check paste, Apply, playback and signal share an attempt and source.
+
+Keep delayed-clipboard Stop, replacement, edit and generation races in the
+offline regressions. Do not call their deferred clipboard doubles real browser
+acceptance. For the final generation check, set `JAMFLOW_REAL_GENERATION=1` once
+within the standing task budget. Require the same generation attempt across
+submit, response, software start and engine signal. Busy paste and Apply must
+preserve the editor and composing status. No response mock may satisfy this run.
+
+Download and validate the evidence files before stopping temporary test compute.
+A failed download is an evidence gap. Stop the compute after saving evidence.
+Continue to label physical-device, Safari and human-listening coverage separately.
+
 ### J — Production deployment provenance and acceptance
 
 Use team `team_1VUYYia3RReNLUn2r8ciX2Nb`. Resolve the production domain before deploying. `jamflow-gray.vercel.app` belongs to project `jamflow` (`prj_Wkevgdev2NAkRjZmHJujgmQ40Rhj`). The Git-linked `vibe-web` project (`prj_w4TPAEtA5B3bbkzekIFMz61I9tMJ`) supplies PR previews; its successful build does not prove that the JamFlow production domain changed.
