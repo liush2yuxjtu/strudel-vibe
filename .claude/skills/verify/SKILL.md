@@ -159,3 +159,12 @@ Verdict: PASS → applicable checks completed for the stated phase
 ## After PASS
 
 Follow the user's authorized delivery path. For a PR, update its branch, re-check the head, merge when authorized, and verify the actual production target when deployment is requested. Do not infer that a commit or a preview build has shipped.
+
+### Feedback entry
+
+For feedback UI changes, run offline privacy checks and `npm run test:feedback`.
+Require Chinese/English desktop and mobile, default exclusion of prompt/code,
+explicit editable opt-in, cancellation and blocked-submission draft retention.
+Use `FEEDBACK_REAL_SUBMIT=1` once on production and read the resulting labelled
+submission from the Jotform inbox. A new tab or client event is not delivery.
+Keep the standalone form usable if the popup or native POST fails.

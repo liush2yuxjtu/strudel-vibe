@@ -584,6 +584,12 @@
     .first-demo-go{ flex:1; width:100%; text-align:center; }
     .first-demo-skip{ margin-left:auto; margin-right:auto; }
   }
+
+.feedback-dialog{color:#eee;background:#211e18;border:1px solid #62533a;border-radius:18px;width:min(540px,calc(100vw - 32px));max-height:85dvh;overflow:auto;padding:22px;box-sizing:border-box}
+.feedback-dialog::backdrop{background:#000b}.feedback-dialog label{display:block;margin-top:16px;font-size:14px}
+.feedback-dialog textarea,.feedback-dialog input[type=text]{box-sizing:border-box;width:100%;padding:10px;color:#eee;background:#100e0b;border:1px solid #62533a;border-radius:8px;font:inherit}.feedback-dialog textarea{min-height:90px;resize:vertical}
+.feedback-dialog summary,.feedback-dialog a{color:#ffba12}.feedback-dialog button,.feedback-dialog a{min-height:44px}.feedback-dialog p{font-size:13px;color:#c4bcac}.feedback-dialog input[type=checkbox]{width:20px;height:20px;vertical-align:middle;margin-right:8px}
+#feedbackOpen{background:none;border:0;color:#c4bcac;text-decoration:underline;padding:10px;min-height:44px}
 </style>
 </head>
 <body>
@@ -696,7 +702,28 @@
     <a href="https://strudel.cc" target="_blank" rel="noopener">Strudel</a>
     · DeepSeek
     · <a class="pill" href="https://jamflow-gray.vercel.app/" rel="noopener">JamFlow</a>
+    · <button id="feedbackOpen" type="button">反馈问题</button>
   </footer>
+  <dialog id="feedbackDialog" class="feedback-dialog" aria-labelledby="feedbackTitle">
+    <h2 id="feedbackTitle">反馈问题</h2>
+    <p id="feedbackIntro">写一句话即可，无需账号。提交后将在新标签页显示 Jotform 的接收结果。</p>
+    <form id="feedbackForm" action="https://submit.jotform.com/submit/263132663005044" method="post" target="_blank" rel="noopener noreferrer">
+      <input type="hidden" name="formID" value="263132663005044">
+      <input type="hidden" name="simple_spc" value="263132663005044">
+      <label for="feedbackMessage" id="feedbackMessageLabel">遇到了什么？</label>
+      <textarea id="feedbackMessage" name="q2_q2_textarea0" required maxlength="2000"></textarea>
+      <label for="feedbackContact" id="feedbackContactLabel">联系方式（可选）</label>
+      <input id="feedbackContact" name="q3_q3_textbox1" type="text" maxlength="200" autocomplete="off">
+      <details><summary id="feedbackDiagnosticsLabel">附上的诊断信息</summary><textarea id="feedbackDiagnostics" name="q4_q4_textarea2" readonly aria-label="Diagnostics"></textarea></details>
+      <label><input id="feedbackInclude" type="checkbox"><span id="feedbackIncludeLabel">附上提示词和编辑框代码（可选）</span></label>
+      <textarea id="feedbackContext" name="q5_q5_textarea3" disabled hidden maxlength="2000" aria-label="Optional prompt and code"></textarea>
+      <p id="feedbackPrivacy">默认仅附版本、语言、播放状态和最近错误码。请勿填写密码或 API key。反馈由 Jotform 保存。</p>
+      <div class="row"><button id="feedbackSend" type="submit">发送反馈</button><button id="feedbackClose" type="button">关闭</button></div>
+      <p id="feedbackHandoff" role="status" hidden></p>
+      <p><a id="feedbackFallback" href="https://form.jotform.com/263132663005044" target="_blank" rel="noopener noreferrer">无法提交？打开独立表单</a></p>
+    </form>
+  </dialog>
+  <script type="module" src="/feedback.mjs"></script>
 
   <script type="application/ld+json" id="ldjson">
   {
@@ -1047,6 +1074,7 @@
     return Object.assign(base, extra || {});
   }
   function jamTrack(name, props){
+    if(props && props.error_code) window.__jamflowLastError = { code: props.error_code, at: new Date().toISOString() };
     try{
       if(window.amplitude && typeof window.amplitude.track === 'function'){
         window.amplitude.track(name, jamCtx(props));
