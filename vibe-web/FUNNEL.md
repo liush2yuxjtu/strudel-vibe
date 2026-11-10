@@ -130,3 +130,15 @@ Run `npm run test:feedback` for Chinese/English desktop and mobile. The default
 run aborts provider POSTs to test retained drafts. Set `FEEDBACK_REAL_SUBMIT=1`
 once to submit a labelled internal test, then read the actual inbox submission.
 Do not count that test as user feedback or conversion.
+
+### Feedback acceptance, 2026-11-10
+
+PASS by owner-reported manual acceptance: the owner explicitly confirmed testing
+the feedback path successfully. A subsequent Jotform metadata read returned
+submission_count=1. The connector did not expose a submission ID or answer body
+in this read, so that counter is supporting evidence, not an independently
+matched receipt. Earlier automated POSTs stopped at CAPTCHA and remain recorded
+as blocked automation; they are not retroactively successful automated E2E runs.
+The manual acceptance resolves the outstanding user-path acceptance item. No
+CAPTCHA protection was disabled. Physical-device/Safari coverage and conversion
+improvement are not established by this confirmation.

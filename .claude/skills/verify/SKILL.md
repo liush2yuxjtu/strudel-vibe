@@ -168,3 +168,9 @@ explicit editable opt-in, cancellation and blocked-submission draft retention.
 Use `FEEDBACK_REAL_SUBMIT=1` once on production and read the resulting labelled
 submission from the Jotform inbox. A new tab or client event is not delivery.
 Keep the standalone form usable if the popup or native POST fails.
+
+When provider CAPTCHA requires a human, retain the automated result as BLOCKED.
+Explicit owner confirmation of a successful manual user-path test may complete
+that path's acceptance. Record who confirmed, the date, and separately any
+provider receipt/count actually read. Do not label this an automated E2E PASS
+or claim submission contents were inspected when only a count was available.
