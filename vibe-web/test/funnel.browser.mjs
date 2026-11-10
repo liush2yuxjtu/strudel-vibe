@@ -105,6 +105,31 @@ try {
     await page.locator('#send').click();
     assert.match(await page.locator('#state').innerText(), /type|describe|enter/i);
   });
+  await scenario('activation bridge keeps Generate prominent and guides demo into prompt', async (page, calls) => {
+    const primary = await page.locator('#send').evaluate(el => getComputedStyle(el).backgroundColor);
+    assert.notEqual(primary, 'rgba(0, 0, 0, 0)');
+    assert.equal(await page.locator('#demoNextAction').isVisible(), false);
+    await page.locator('#firstDemoGo').click(); await settle(page);
+    assert.equal(await page.locator('#demoNextAction').isVisible(), true);
+    await page.locator('#demoCustomize').click();
+    assert.match(await page.locator('#intent').inputValue(), /四拍|bass/i);
+    assert.equal(await page.locator('#intent').evaluate(el => document.activeElement === el), true);
+    assert.equal(calls(), 0);
+    assert.equal((await events(page)).filter(e => e.event_type === 'demo_to_prompt').length, 1);
+    assert.equal((await events(page)).filter(e => e.event_type === 'vibe_generate_submit').length, 0);
+    await page.locator('#send').click(); await settle(page);
+    assert.equal(calls(), 1);
+    assert.equal(await page.locator('#demoNextAction').isVisible(), false);
+    assert.equal((await events(page)).filter(e => e.event_type === 'vibe_generate_submit').length, 1);
+  });
+  await scenario('English starter and mobile direct generation stay accessible', async (page, calls) => {
+    await page.getByRole('button', { name: 'EN', exact: true }).click();
+    assert.match(await page.locator('.starter-hint').innerText(), /idea|preset/i);
+    await page.locator('#firstDemoSkip').click();
+    await page.locator('#intent').fill('gentle ambient piano and minimal drums');
+    await page.locator('#send').click(); await settle(page);
+    assert.equal(calls(), 1);
+  }, { mobile: true });
   await scenario('local demo reaches running audio and retains no API dependency', async (page, calls) => {
     await page.locator('#firstDemoGo').click(); await settle(page);
     assert.equal(await phase(page), 'playing');

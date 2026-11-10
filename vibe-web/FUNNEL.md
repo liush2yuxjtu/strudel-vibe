@@ -142,3 +142,13 @@ as blocked automation; they are not retroactively successful automated E2E runs.
 The manual acceptance resolves the outstanding user-path acceptance item. No
 CAPTCHA protection was disabled. Physical-device/Safari coverage and conversion
 improvement are not established by this confirmation.
+
+## First-generation activation iteration — 2026-11-10
+
+See [competitor research and experiment definition](../docs/COMPETITOR_ACTIVATION_2026-11-10.md).
+
+The first-visit local demo no longer visually suppresses the Generate button. Starter chips keep their one-click generation. A completed local demo displays a bilingual **Make it mine** action, which prefills an editable prompt and focuses the input without spending model tokens or submitting. No changes to `/api/vibe`, prompt generation, or the audio engine.
+
+New event names: `intent_first_focus`, `intent_first_input`, `demo_next_shown`, and `demo_to_prompt`. Properties exclude actual prompt text. Treat their first post-deploy cohort separately from history. The new assisted conversion flow is **optional**, not a mandatory step of the main Page→generate funnel.
+
+Validation: `npm test` 49/49 PASS; `npm run test:browser` 12/12 PASS using real Chromium / Strudel and mocked model responses (the two new cases cover the demo bridge and mobile English). A real DeepSeek request, physical device, and production conversion uplift are not established by these checks.

@@ -73,3 +73,7 @@ Send someone the demo link. If a prompt comes back as bad Strudel, use the feedb
 - Mainland China cannot reliably open `*.vercel.app`. Deploy with [`vibe-web/DEPLOY-CN.md`](vibe-web/DEPLOY-CN.md) (ICP + Aliyun/Tencent + HTTPS).
 - Each web request spends DeepSeek tokens. Keep `DEEPSEEK_API_KEY` in the host environment only.
 - The terminal `translate` command is a separate path and still calls MiniMax. See [`strudel-cli/README.md`](strudel-cli/README.md). The browser app does not.
+
+## First-generation onboarding audit
+
+We track the path from landing to an actual first generate, separately from generated-code playback and the audio engine signal. Our [competitor activation audit](docs/COMPETITOR_ACTIVATION_2026-11-10.md) compares Suno, Udio, Stable Audio, Riffusion and Lyria, then documents the JamFlow UX hypotheses, test coverage and instrumentation. The production `unknown` cohort is **not** equivalent to confirmed human visitors. [Event definitions and verification](vibe-web/FUNNEL.md).

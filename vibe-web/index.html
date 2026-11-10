@@ -500,6 +500,11 @@
 
   /* chips sit under generate/state so they clear the fold on ~390 phones */
   .chips-under-prompt{ margin:10px 0 2px; }
+  .demo-next-action{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 0;padding:11px 13px;background:rgba(111,207,151,.08);border:1px solid rgba(111,207,151,.32);border-radius:12px}
+  .demo-next-action[hidden]{display:none}
+  .demo-next-action button{background:var(--led);color:#1A1200;border-color:var(--led);min-height:44px}
+  .demo-next-action span{font-size:12px;color:var(--mute);flex:1}
+  .starter-hint{font-size:12px;color:var(--mute);margin:8px 0 0}
 
   /* cold start: pads quiet until first generate / play / demo hear */
   .pad-section:not(.pads-ready) .pads{
@@ -559,22 +564,8 @@
     text-decoration:underline; text-underline-offset:3px;
   }
   .first-demo-skip:hover{ color:var(--ink); border:none; background:transparent; }
-  /* while must-hear is on: one amber primary only; demote generate path */
-  .face.first-demo-active .ask,
-  .face.first-demo-active .promptbox,
-  .face.first-demo-active .state,
-  .face.first-demo-active .chips{
-    opacity:.55;
-    transition:opacity .25s ease;
-  }
-  .face.first-demo-active .promptbox input{ pointer-events:auto; }
-  .face.first-demo-active #send.primary{
-    background:transparent; color:var(--ink); border-color:var(--line2);
-    box-shadow:none; font-weight:600;
-  }
-  .face.first-demo-active #send.primary:hover{
-    border-color:var(--mute); filter:none; background:rgba(255,255,255,.03);
-  }
+  /* Optional demo never weakens the generate route. */
+  .face.first-demo-active .promptbox input{pointer-events:auto}
   @media(max-width:520px){
     .promptbox{flex-direction:column}
     .pads{gap:8px; padding:10px}
@@ -628,7 +619,12 @@
       </div>
       <div class="prog" id="prog" aria-hidden="true"><i></i></div>
       <div class="state" id="state" role="status" aria-live="polite" data-i18n="stateIdle">自然语言 → 可编辑 Strudel · 不是导出 MP3</div>
+      <div class="starter-hint" data-i18n="starterHint">不会写提示词？直接点下面的音乐灵感，一键生成。</div>
       <div class="chips chips-under-prompt above-scribble" id="chips"></div>
+      <div class="demo-next-action above-scribble" id="demoNextAction" hidden>
+        <span data-i18n="demoNextActionHint">听到了？用一句话改成你的节奏。</span>
+        <button type="button" id="demoCustomize" data-i18n="demoCustomize">改成我的版本</button>
+      </div>
 
       <div class="pad-layout pad-section" id="padSection">
         <div>
@@ -876,6 +872,9 @@
       stateIdle: '自然语言 → 可编辑 Strudel · 不是导出 MP3',
       intentRequired: '先写一句你想听的音乐，再点生成。',
       demoNext: '<b>试听已启动</b> · 现在写一句，把它改成你的音乐。',
+      starterHint: '不会写提示词？直接点下面的音乐灵感，一键生成。',
+      demoNextActionHint: '听到了？用一句话改成你的节奏。',
+      demoCustomize: '改成我的版本',
       audioUnavailable: '音频尚未启动，请再点一次播放。',
       patternUnavailable: '引擎没有返回可播放的音乐，请重试。',
       signalUnconfirmed: '尚未检测到引擎音频信号。请检查代码中的声音、采样加载或浏览器音频输出，再点播放重试。',
@@ -935,6 +934,9 @@
       stateIdle: 'NL → editable Strudel · not an MP3 export',
       intentRequired: 'Describe the music you want, then choose Go.',
       demoNext: '<b>Demo started</b> · Type a line to make it your own.',
+      starterHint: 'Need an idea? Tap a preset below to generate in one step.',
+      demoNextActionHint: 'Heard it? Change the groove with one sentence.',
+      demoCustomize: 'Make it mine',
       audioUnavailable: 'Audio has not started. Tap Play to retry.',
       patternUnavailable: 'The engine did not return a playable pattern. Try again.',
       signalUnconfirmed: 'No engine audio signal detected yet. Check the sounds in the code, sample loading, or browser audio output, then retry Play.',
@@ -1483,6 +1485,8 @@
       syncFirstDemoUi();
       jamTrack('first_demo_play', { ...attempt, evidence: 'evaluated_context_running' });
       setState(t('demoNext'));
+      $('demoNextAction').hidden = false;
+      jamTrack('demo_next_shown', {source:'first_demo'});
     }
     return result;
   }
@@ -1659,6 +1663,7 @@
     const attempt = beginAttempt((opts && opts.source) || 'manual');
     const onAbort = () => { if(activeAttempt === attempt) stopPlayback(attempt.source); };
     if(signal) signal.addEventListener('abort', onAbort, { once: true });
+    $('demoNextAction').hidden = true;
     jamTrack('vibe_generate_submit', { ...attempt, intent_len: intent.length });
     setPhase('composing');
     setState(t('composing'));
@@ -2179,6 +2184,18 @@
 
   window.__vibe = { phase:()=>phase, phaseSince:()=>phaseSince, audioState, started:()=>started, current:()=>current, repl:()=>repl, sync:'editPattern+onTrigger@deadline', idleAuto:()=>idleAutoOn, bumpIdle, armIdleTimer, IDLE_MS, scribble:()=>scribbleOn, setScribbleEnabled, firstDemoSeen, runFirstDemo, dismissFirstDemo, revealPads, syncPadsReadyUi, FIRST_DEMO_LS_KEY, openPasteBridge, applyEditor, webmcp:()=>window.__vibeWebMcp };
 
+  let conversionIntentFocused=false, conversionIntentTyped=false;
+  $('intent').addEventListener('focus',()=>{if(!conversionIntentFocused){conversionIntentFocused=true;jamTrack('intent_first_focus',{source:'manual'});}});
+  $('intent').addEventListener('input',()=>{if(!conversionIntentTyped && $('intent').value.trim()){conversionIntentTyped=true;jamTrack('intent_first_input',{source:'manual',intent_len:$('intent').value.trim().length});}});
+  $('demoCustomize').onclick=()=>{
+    if(phase==='composing'||phase==='loading')return;
+    const input=$('intent');
+    if(!input.value.trim())input.value=(lang==='en'?'A relaxed four-on-the-floor groove with a warm C minor bass':'轻快的四拍鼓点，搭配柔和的 C 小调贝斯');
+    $('demoNextAction').hidden=true;
+    input.focus();
+    jamTrack('demo_to_prompt',{source:'first_demo',intent_len:input.value.length});
+    input.scrollIntoView({behavior:'smooth',block:'center'});
+  };
   $('send').onclick=vibe;
   $('intent').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); vibe(); }});
   $('play').onclick=async()=>{ if($('code').value.trim()) return applyEditor(); if(current){ const result = await playCode(current); if(!result.error && !firstDemoSeen()) dismissFirstDemo('play'); } };

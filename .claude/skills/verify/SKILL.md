@@ -174,3 +174,7 @@ Explicit owner confirmation of a successful manual user-path test may complete
 that path's acceptance. Record who confirmed, the date, and separately any
 provider receipt/count actually read. Do not label this an automated E2E PASS
 or claim submission contents were inspected when only a count was available.
+
+### First-generation onboarding regression
+
+When changing the hero, starter chips or first-demo flow, run `npm test` and the actual Chromium `npm run test:browser` suite from `vibe-web`. Verify that Generate remains a visible primary action before demo, a completed first demo shows Make it mine, its click prefills/focuses without an API request, submission is explicit, and English mobile remains usable. Separate mocked API tests from real API verification, and do not claim that traffic conversion improved without eligible post-release Amplitude data. See `docs/COMPETITOR_ACTIVATION_2026-11-10.md`.
