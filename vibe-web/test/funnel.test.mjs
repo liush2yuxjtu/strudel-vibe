@@ -16,7 +16,7 @@ const audio = between('  async function resumeAudio(){', '  /** Play stays secon
 function app(overrides = {}) {
   const elements = new Map();
   const c = {
-    started: false, current: '', phase: 'idle', lastTriggeredAttempt: null, seen: false, state: '', events: [], hushCount: 0,
+    started: false, current: '', phase: 'idle', editorImport: null, editorRevision: 0, lastTriggeredAttempt: null, seen: false, state: '', events: [], hushCount: 0,
     crypto: { randomUUID }, performance, setTimeout, clearTimeout, Promise,
     FIRST_DEMO_CODE: 's("bd*4")',
     $(id) {
@@ -26,6 +26,7 @@ function app(overrides = {}) {
     t: key => key,
     setPhase: p => { c.phase = p; }, setState: s => { c.state = s; },
     jamTrack: (name, props) => c.events.push({ name, props }),
+    cancelEditorImport() {}, setCodeHint() {},
     markFirstDemoSeen: () => { c.seen = true; }, firstDemoSeen: () => c.seen,
     dismissFirstDemo: () => { c.seen = true; }, syncFirstDemoUi() {}, revealPads() {}, syncPlayButton() {}, bumpIdle() {}, clearPads() {}, logLine() {}, onHapHit() {}, samples() {},
     getAudioContext: () => ({ state: 'running' }),

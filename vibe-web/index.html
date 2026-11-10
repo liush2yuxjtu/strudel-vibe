@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <title>JamFlow · 说一句 → 可改的 Strudel</title>
 <meta name="description" content="JamFlow：自然语言 → 可编辑 Strudel（不是导出 MP3）。卡在 strudel.cc 语法、或想像 Tidal/Estuary 却不想装环境时，浏览器里先出声再改代码。" />
@@ -322,6 +322,7 @@
   .code-bridge-hint{ margin:0 0 8px; font-size:11.5px; line-height:1.4; color:var(--faint); }
   .chip{
     font-family:var(--sans); font-size:12.5px; font-weight:500;
+    min-height:44px;
     color:var(--mute); background:var(--recess);
     border:1px solid var(--line); border-radius:999px; padding:7px 12px; cursor:pointer;
     transition:color .15s, border-color .15s;
@@ -671,14 +672,15 @@
 
     <section class="lcd above-scribble" aria-label="Strudel" data-i18n-aria-section="code">
       <div class="lcd-head">
-        <h2 class="lcd-title" data-i18n="codeTitle">Strudel 代码</h2>
+        <h2 class="lcd-title" id="codeTitle" data-i18n="codeTitle">Strudel 代码</h2>
         <span class="lcd-hint" id="vtext" data-i18n="vIdle">待机</span>
       </div>
-      <p class="code-bridge-hint" data-i18n="codeBridgeHint">可从 strudel.cc 粘贴后点应用并播放</p>
-      <textarea class="code" id="code" spellcheck="false"
+      <p class="code-bridge-hint" id="codeFeedback" role="status" aria-live="polite">可从 strudel.cc 粘贴后点应用并播放</p>
+      <textarea class="code" id="code" spellcheck="false" aria-labelledby="codeTitle" aria-describedby="codeFeedback"
         data-i18n-placeholder="codePh" placeholder="// paste Strudel from strudel.cc, then Apply"></textarea>
       <div class="row">
         <button id="apply" type="button" data-i18n="apply">应用并播放</button>
+        <button id="compatibleExample" type="button" hidden data-i18n="compatibleExample">使用兼容示例</button>
       </div>
     </section>
   </main>
@@ -849,7 +851,7 @@
       demoNext: '<b>试听已启动</b> · 现在写一句，把它改成你的音乐。',
       audioUnavailable: '音频尚未启动，请再点一次播放。',
       patternUnavailable: '引擎没有返回可播放的音乐，请重试。',
-      signalUnconfirmed: '尚未检测到音频信号。请检查音量，或再点播放。',
+      signalUnconfirmed: '尚未检测到引擎音频信号。请检查代码中的声音、采样加载或浏览器音频输出，再点播放重试。',
       firstDemoTitle: '先听一下就懂',
       firstDemoHint: '本地鼓点贝斯 · 一点就响 · 不用等 AI',
       firstDemoGo: '立刻出声',
@@ -866,8 +868,15 @@
       chipsMore: '更多', chipsLess: '收起',
       pasteChip: '粘贴我的 Strudel',
       pasteHint: '在下方代码框粘贴 strudel.cc 代码，再点「应用并播放」',
-      pasteReady: '<b>已粘贴</b> · 正在应用并播放',
-      pasteEmpty: '剪贴板里没有像 Strudel 的代码，已打开编辑框供粘贴',
+      pasteReading: '正在读取剪贴板…',
+      pasteReady: '已粘贴，尚未应用。点「应用并播放」开始。',
+      pasteEmpty: '剪贴板为空。请在代码框粘贴代码。',
+      pasteUnavailable: '无法读取剪贴板。请在代码框手动粘贴，再点「应用并播放」。',
+      pasteTooLong: '代码太长。请缩短到20,000字符以内后再粘贴。',
+      codeDraft: '代码尚未应用。点「应用并播放」更新音乐。',
+      codeBusy: '正在作曲或加载。完成后可粘贴或编辑代码；也可点停止。',
+      soundUnavailable: '声音不可用：{sounds}。请加载对应音色库，或使用兼容示例。',
+      compatibleExample: '使用兼容示例',
       codeBridgeHint: '可从 strudel.cc 粘贴后点应用并播放',
       codeTitle: 'Strudel 代码', codePh: '// 从 strudel.cc 粘贴，再点应用并播放',
       vIdle: '待机', vPlaying: '演奏中', vComposing: '作曲中', vLoading: '加载中',
@@ -901,7 +910,7 @@
       demoNext: '<b>Demo started</b> · Type a line to make it your own.',
       audioUnavailable: 'Audio has not started. Tap Play to retry.',
       patternUnavailable: 'The engine did not return a playable pattern. Try again.',
-      signalUnconfirmed: 'No audio signal detected yet. Check the volume or tap Play to retry.',
+      signalUnconfirmed: 'No engine audio signal detected yet. Check the sounds in the code, sample loading, or browser audio output, then retry Play.',
       firstDemoTitle: 'Hear it first',
       firstDemoHint: 'Local drums + bass · one tap · no AI wait',
       firstDemoGo: 'Play a beat',
@@ -918,8 +927,15 @@
       chipsMore: 'More', chipsLess: 'Less',
       pasteChip: 'Paste my Strudel',
       pasteHint: 'Paste strudel.cc code in the panel below, then Apply & play',
-      pasteReady: '<b>Pasted</b> · applying and playing',
-      pasteEmpty: 'No Strudel-like code on the clipboard — editor focused for paste',
+      pasteReading: 'Reading clipboard…',
+      pasteReady: 'Pasted, not applied. Choose Apply & play to start.',
+      pasteEmpty: 'The clipboard is empty. Paste code into the editor.',
+      pasteUnavailable: 'Clipboard access is unavailable. Paste into the editor, then choose Apply & play.',
+      pasteTooLong: 'The code is too long. Shorten it to 20,000 characters before pasting.',
+      codeDraft: 'Code has not been applied. Choose Apply & play to update the music.',
+      codeBusy: 'Writing or loading. Paste and edit after it finishes, or choose Stop.',
+      soundUnavailable: 'Unavailable sound: {sounds}. Load its sample bank, or use the compatible example.',
+      compatibleExample: 'Use compatible example',
       codeBridgeHint: 'Paste from strudel.cc, then Apply & play',
       codeTitle: 'Strudel code', codePh: '// paste Strudel from strudel.cc, then Apply',
       vIdle: 'Idle', vPlaying: 'Playing', vComposing: 'Writing', vLoading: 'Loading',
@@ -999,6 +1015,7 @@
     // refresh chips for language
     const chips = document.getElementById('chips');
     if(chips && typeof renderChips === 'function') renderChips();
+    if(typeof syncCodeHint === 'function') syncCodeHint();
     // refresh phase label
     if(typeof phase !== 'undefined'){
       if(phase==='playing') $('vtext').textContent = t('vPlaying');
@@ -1043,42 +1060,90 @@
   let EXAMPLES = currentExamples();
   const CHIP_PREVIEW = 4;
   let chipsExpanded = false;
-  function looksLikeStrudel(src){
-    const s = String(src || '');
-    if(s.length < 6 || s.length > 20000) return false;
-    return /(?:^|[^A-Za-z])(?:stack|sound|note|n|chord|scale|fast|slow|rev|every|sometimes|jux|off|room|lpf|hpf|gain|delay|pan|speed|chop|striate|euclid|cat|seq|s)\s*\(/.test(s)
-      || /\$[\"']/.test(s)
-      || /s\s*\(\s*[`"']/.test(s);
+  let editorImport = null;
+  let editorRevision = 0;
+  let codeHintKey = 'codeBridgeHint';
+  let codeHintDetail = '';
+  const MAX_PASTE_LENGTH = 20000;
+  const COMPATIBLE_CODE = 'note("c4 e4 g4 e4").s("sine").gain(0.2)';
+  function syncCodeHint(){
+    const el = $('codeFeedback');
+    if(!el) return;
+    const key = (phase === 'composing' || phase === 'loading') ? 'codeBusy' : codeHintKey;
+    el.textContent = t(key).replace('{sounds}', codeHintDetail);
+    const example = $('compatibleExample');
+    if(example) example.hidden = key !== 'soundUnavailable';
   }
-  async function openPasteBridge(){
-    jamTrack('paste_bridge_open', { source: 'chip' });
-    bumpIdle('paste-bridge');
+  function setCodeHint(key, detail){
+    codeHintKey = key || 'codeBridgeHint';
+    codeHintDetail = detail || '';
+    syncCodeHint();
+  }
+  function cancelEditorImport(reason){
+    const pending = editorImport;
+    editorImport = null;
+    if(pending) jamTrack('paste_bridge_cancelled', { ...pending.attempt, reason });
+  }
+  function editorChanged(){
+    editorRevision++;
+    if(editorImport && editorImport.stage === 'reading') cancelEditorImport('edit');
+    setCodeHint(editorImport ? 'pasteReady' : $('code').value.trim() ? 'codeDraft' : 'codeBridgeHint');
+  }
+  function revealCodeEditor(){
     const codeEl = $('code');
     const lcd = document.querySelector('.lcd');
     if(lcd && typeof lcd.scrollIntoView === 'function'){
-      try{ lcd.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }catch{ lcd.scrollIntoView(); }
+      try{ lcd.scrollIntoView({ behavior: 'smooth', block: 'center' }); }catch{ lcd.scrollIntoView(); }
     }
-    if(!codeEl) return;
-    codeEl.focus();
-    let pasted = false;
+    if(codeEl) codeEl.focus({ preventScroll: true });
+  }
+  async function openPasteBridge(){
+    if(phase === 'composing' || phase === 'loading') return busyResult();
+    cancelEditorImport('replaced');
+    const pending = { attempt: createAttempt('paste_bridge'), stage: 'reading', revision: editorRevision };
+    editorImport = pending;
+    jamTrack('paste_bridge_open', pending.attempt);
+    bumpIdle('paste-bridge');
+    setCodeHint('pasteReading');
+    revealCodeEditor();
+    let text;
+    let failure;
     try{
-      if(navigator.clipboard && typeof navigator.clipboard.readText === 'function'){
-        const txt = String(await navigator.clipboard.readText() || '').trim();
-        if(txt && looksLikeStrudel(txt)){
-          codeEl.value = txt;
-          pasted = true;
-          syncPadsReadyUi();
-        }
-      }
-    }catch(_){}
-    if(pasted){
-      setState(t('pasteReady'));
-      const result = await playCode(codeEl.value.trim(), { source: 'paste_bridge' });
-      if(!result.error && !firstDemoSeen()) dismissFirstDemo('play');
-      jamTrack('paste_bridge_apply', { source: 'chip', code_len: codeEl.value.trim().length, ok: !result.error });
-    } else {
-      setState(t('pasteEmpty'));
+      if(!navigator.clipboard || typeof navigator.clipboard.readText !== 'function') throw new Error('clipboard unavailable');
+      text = String(await navigator.clipboard.readText() || '').trim();
+    }catch(_){ failure = 'pasteUnavailable'; }
+    if(editorImport !== pending || editorRevision !== pending.revision || phase === 'composing' || phase === 'loading'){
+      return { code: 'ABORTED', error: 'Paste cancelled.', retryable: true, attempt_id: pending.attempt.attempt_id };
     }
+    if(!failure && !text) failure = 'pasteEmpty';
+    if(!failure && text.length > MAX_PASTE_LENGTH) failure = 'pasteTooLong';
+    if(failure){
+      editorImport = null;
+      setCodeHint(failure);
+      jamTrack('paste_bridge_failed', { ...pending.attempt, error_code: failure });
+      return { code: failure, error: t(failure), retryable: true, attempt_id: pending.attempt.attempt_id };
+    }
+    $('code').value = text;
+    editorRevision++;
+    pending.stage = 'ready';
+    setCodeHint('pasteReady');
+    syncPadsReadyUi();
+    jamTrack('paste_bridge_ready', { ...pending.attempt, code_len: text.length });
+    return { phase: 'ready', attempt_id: pending.attempt.attempt_id, source: pending.attempt.source };
+  }
+  async function applyEditor(){
+    if(phase === 'composing' || phase === 'loading') return busyResult();
+    const code = $('code').value.trim();
+    if(!code){ setCodeHint('pasteHint'); revealCodeEditor(); return { code: 'NO_PATTERN', error: t('pasteHint'), retryable: false }; }
+    const imported = editorImport && editorImport.stage === 'ready' ? editorImport.attempt : null;
+    if(imported) editorImport = null;
+    else cancelEditorImport('apply');
+    const attempt = imported || createAttempt('apply');
+    activeAttempt = attempt;
+    if(imported) jamTrack('paste_bridge_apply', { ...attempt, code_len: code.length });
+    const result = await playCode(code, attempt);
+    if(!result.error && !firstDemoSeen()) dismissFirstDemo('play');
+    return result;
   }
   function renderChips(){
     EXAMPLES = currentExamples();
@@ -1088,6 +1153,7 @@
     paste.className = 'chip chip-paste';
     paste.textContent = t('pasteChip');
     paste.setAttribute('aria-label', t('pasteChip'));
+    paste.disabled = phase === 'composing' || phase === 'loading';
     paste.onclick = ()=>{ openPasteBridge(); };
     chips.appendChild(paste);
     const list = EXAMPLES;
@@ -1292,6 +1358,10 @@
     const send=$('send');
     send.disabled=busy; send.classList.toggle('busy', busy);
     $('play').disabled=busy; $('surprise').disabled=busy;
+    $('apply').disabled=busy;
+    $('code').readOnly=busy;
+    document.querySelectorAll('.chip-paste').forEach(el=>{ el.disabled=busy; });
+    syncCodeHint();
     $('playLed').classList.toggle('on', p==='playing');
     if(p==='playing') $('vtext').textContent=t('vPlaying');
     else if(p==='idle') $('vtext').textContent=t('vIdle');
@@ -1397,8 +1467,12 @@
   let lastTriggeredAttempt=null;
   let playbackQueue=Promise.resolve();
   const SIGNAL_ANALYSER = 9001;
+  function createAttempt(source){
+    return { attempt_id: (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + (++attemptSequence)), source };
+  }
   function beginAttempt(source){
-    const attempt = { attempt_id: (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + (++attemptSequence)), source };
+    cancelEditorImport('operation');
+    const attempt = createAttempt(source);
     activeAttempt = attempt;
     return attempt;
   }
@@ -1409,13 +1483,15 @@
     if(activeAttempt !== attempt) throw Object.assign(new Error('cancelled'), { code: 'ABORTED' });
   }
   function stopPlayback(source){
+    cancelEditorImport('stop');
+    setCodeHint($('code').value.trim() !== current.trim() ? 'codeDraft' : 'codeBridgeHint');
     const attempt = activeAttempt;
     activeAttempt = null;
     try{ hush(); }catch{}
     setPhase('idle');
     clearPads();
     setState(t('stopped'));
-    jamTrack('vibe_stop', { ...(attempt || {}), source });
+    jamTrack('vibe_stop', { ...(attempt || {}), source: attempt ? attempt.source : source, trigger: source });
     return { phase: 'idle' };
   }
   function ensureStarted(){
@@ -1424,7 +1500,14 @@
     let initialization;
     try {
       initialization = initStrudel({
-        prebake: () => samples('/samples/strudel.json'),
+        prebake: async () => {
+          await Promise.all([samples('/samples/strudel.json'), samples('/samples/tr909.json')]);
+          const engine = typeof strudel !== 'undefined' ? strudel : globalThis;
+          const sounds = engine.soundMap && engine.soundMap.get ? engine.soundMap.get() : {};
+          if(typeof engine.soundAlias === 'function'){
+            Object.keys(sounds).filter(name=>name.startsWith('tr909_')).forEach(name=>engine.soundAlias(name, 'roland' + name));
+          }
+        },
         editPattern: (pat) => pat.analyze(SIGNAL_ANALYSER).onTrigger(onHapHit, false),
       });
     } catch(error) { return Promise.reject(error); }
@@ -1433,6 +1516,26 @@
       throw error;
     });
     return enginePromise;
+  }
+  function validatePatternSounds(pattern){
+    const engine = typeof strudel !== 'undefined' ? strudel : globalThis;
+    const registry = engine.soundMap && typeof engine.soundMap.get === 'function' ? engine.soundMap.get() : null;
+    if(!registry || typeof pattern.queryArc !== 'function') return;
+    const missing = new Set();
+    const haps = pattern.queryArc(0, 1);
+    if(!Array.isArray(haps)) return;
+    haps.forEach(hap=>{
+      const value = hap && hap.value;
+      const name = value && typeof value === 'object' ? value.s ?? value.sound : null;
+      if(typeof name !== 'string' || typeof value.source === 'function' || ['-', '~', '_'].includes(name) || /^(?:https?:|data:)/i.test(name)) return;
+      const bank = typeof value.bank === 'string' && value.bank ? value.bank + '_' : '';
+      const key = (bank + name).toLowerCase().split(':')[0];
+      if(key && !Object.prototype.hasOwnProperty.call(registry, key)) missing.add(bank + name);
+    });
+    if(missing.size){
+      const names = [...missing].slice(0, 8).join(', ');
+      throw Object.assign(new Error(t('soundUnavailable').replace('{sounds}', names)), { code: 'SOUND_UNAVAILABLE', sounds: names });
+    }
   }
   async function evaluateActive(code, attempt){
     const pending = playbackQueue.then(async () => {
@@ -1444,6 +1547,7 @@
       }
       if(repl && repl.state && repl.state.evalError) throw repl.state.evalError;
       if(!pattern) throw new Error(t('patternUnavailable'));
+      validatePatternSounds(pattern);
     });
     playbackQueue = pending.catch(() => {});
     return pending;
@@ -1486,6 +1590,8 @@
       await resumeAudio();
       assertActive(attempt);
       current=code; $('code').value=code;
+      editorRevision++;
+      setCodeHint('codeBridgeHint');
       setPhase('playing');
       setState(attempt.source === 'first_demo' ? t('firstDemoPlaying') : t('playing'));
       revealPads();
@@ -1501,14 +1607,17 @@
         try{ hush(); }catch{}
         setPhase('idle');
         setState(t('playFail') + String(e.message || e).replace(/</g, '&lt;'));
+        if(e.code === 'SOUND_UNAVAILABLE') setCodeHint('soundUnavailable', e.sounds);
+        else setCodeHint('codeDraft');
       }
-      const result = { error: String(e.message || e), code: cancelled ? 'ABORTED' : 'PLAYBACK_FAILED', retryable: true, attempt_id: attempt.attempt_id };
+      const result = { error: String(e.message || e), code: cancelled ? 'ABORTED' : e.code === 'SOUND_UNAVAILABLE' ? 'SOUND_UNAVAILABLE' : 'PLAYBACK_FAILED', retryable: true, attempt_id: attempt.attempt_id };
       jamTrack('playback_failed', { ...attempt, error_code: result.code });
       return result;
     }
   }
 
   async function vibe(opts){
+    if(phase === 'composing' || phase === 'loading') return busyResult();
     const intent=(opts && opts.intent != null ? String(opts.intent) : $('intent').value).trim();
     if(!intent){
       setState(t('intentRequired'));
@@ -1516,7 +1625,6 @@
       jamTrack('generate_validation_failed', { source: (opts && opts.source) || 'manual', error_code: 'INTENT_REQUIRED' });
       return { error: 'intent required', code: 'INTENT_REQUIRED', retryable: false };
     }
-    if(phase === 'composing' || phase === 'loading') return busyResult();
     if(opts && opts.intent != null) $('intent').value = intent;
     const signal = opts && opts.signal;
     if(signal && signal.aborted) return { error: 'cancelled', code: 'ABORTED', retryable: true };
@@ -1687,7 +1795,7 @@
   $('intent').addEventListener('keydown', ()=>bumpIdle('key'));
   $('intent').addEventListener('focus', ()=>updateIdleCountdownUi());
   $('intent').addEventListener('blur', ()=>{ if(idleAutoOn) bumpIdle('intent-blur'); });
-  $('code').addEventListener('input', ()=>bumpIdle('code'));
+  $('code').addEventListener('input', ()=>{ editorChanged(); bumpIdle('code'); });
   pads.forEach(p=>{
     p.addEventListener('pointerdown', ()=>bumpIdle('pad'), {passive:true});
     p.addEventListener('keydown', ()=>bumpIdle('pad-key'));
@@ -1979,7 +2087,7 @@
   window.__vibeWebMcp = {
     async getStatus(){
       const codeEl = $('code');
-      const codeVal = (codeEl && codeEl.value ? codeEl.value.trim() : '') || current || '';
+      const codeVal = codeEl && codeEl.value ? codeEl.value.trim() : '';
       return {
         lang,
         phase,
@@ -1988,7 +2096,11 @@
         attempt_id: activeAttempt && activeAttempt.attempt_id,
         playback_evidence: phase !== 'playing' ? 'none'
           : activeAttempt && signalObservedAttempt === activeAttempt.attempt_id ? 'engine_signal' : 'software_started',
-        code_preview: codeVal.slice(0, 120),
+        code_preview: current.slice(0, 120),
+        editor_code_preview: codeVal.slice(0, 120),
+        editor_dirty: codeVal !== current.trim(),
+        import_stage: editorImport ? editorImport.stage : null,
+        import_attempt_id: editorImport ? editorImport.attempt.attempt_id : null,
         examples: currentExamples().slice(),
         scribble_on: !!scribbleOn,
         idle_on: !!idleAutoOn,
@@ -2013,6 +2125,7 @@
       return result;
     },
     async runExample({ label, surprise, signal } = {}){
+      if(phase === 'composing' || phase === 'loading') return busyResult();
       const list = currentExamples();
       let pick = label;
       if(surprise){
@@ -2036,12 +2149,20 @@
     },
   };
 
-  window.__vibe = { phase:()=>phase, phaseSince:()=>phaseSince, audioState, started:()=>started, current:()=>current, repl:()=>repl, sync:'editPattern+onTrigger@deadline', idleAuto:()=>idleAutoOn, bumpIdle, armIdleTimer, IDLE_MS, scribble:()=>scribbleOn, setScribbleEnabled, firstDemoSeen, runFirstDemo, dismissFirstDemo, revealPads, syncPadsReadyUi, FIRST_DEMO_LS_KEY, webmcp:()=>window.__vibeWebMcp };
+  window.__vibe = { phase:()=>phase, phaseSince:()=>phaseSince, audioState, started:()=>started, current:()=>current, repl:()=>repl, sync:'editPattern+onTrigger@deadline', idleAuto:()=>idleAutoOn, bumpIdle, armIdleTimer, IDLE_MS, scribble:()=>scribbleOn, setScribbleEnabled, firstDemoSeen, runFirstDemo, dismissFirstDemo, revealPads, syncPadsReadyUi, FIRST_DEMO_LS_KEY, openPasteBridge, applyEditor, webmcp:()=>window.__vibeWebMcp };
 
   $('send').onclick=vibe;
   $('intent').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); vibe(); }});
-  $('play').onclick=async()=>{ const c=$('code').value.trim()||current; if(c){ const result = await playCode(c); if(!result.error && !firstDemoSeen()) dismissFirstDemo('play'); } };
-  $('apply').onclick=async()=>{ const c=$('code').value.trim(); if(!c){ setState(t('pasteHint')); const el=$('code'); if(el) el.focus(); return; } const result = await playCode(c, { source: 'apply' }); if(!result.error && !firstDemoSeen()) dismissFirstDemo('play'); };
+  $('play').onclick=async()=>{ if($('code').value.trim()) return applyEditor(); if(current){ const result = await playCode(current); if(!result.error && !firstDemoSeen()) dismissFirstDemo('play'); } };
+  $('apply').onclick=applyEditor;
+  $('compatibleExample').onclick=()=>{
+    if(phase === 'composing' || phase === 'loading') return;
+    cancelEditorImport('example');
+    $('code').value = COMPATIBLE_CODE;
+    editorChanged();
+    syncPadsReadyUi();
+    revealCodeEditor();
+  };
   $('stop').onclick=()=>stopPlayback('transport');
   $('surprise').onclick=()=>{ $('intent').value = EXAMPLES[Math.floor(Math.random()*EXAMPLES.length)]; vibe({ source: 'surprise' }); };
 
